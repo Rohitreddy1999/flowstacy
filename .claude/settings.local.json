@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pkill -f \"vite\")",
+      "Bash(npm run *)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 5173,5174,5175 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }; Write-Output \"Ports cleared\")"
+    ]
+  }
+}
