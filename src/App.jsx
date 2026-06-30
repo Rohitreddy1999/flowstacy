@@ -9,6 +9,7 @@ import Graduation from './pages/Graduation'
 import Experts from './pages/Experts'
 import Progress from './pages/Progress'
 import Profile from './pages/Profile'
+import SubTrackSelect from './pages/SubTrackSelect'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
       <Route path="/experts" element={<Experts />} />
       <Route path="/progress" element={<Progress />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/sub-track-select" element={<SubTrackSelect />} />
     </Routes>
   )
 }

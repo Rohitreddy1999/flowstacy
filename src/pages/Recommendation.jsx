@@ -77,7 +77,7 @@ export default function Recommendation() {
 
   function handleStart() {
     localStorage.setItem('flowstate_selected_track', trackKey)
-    navigate('/home')
+    navigate('/sub-track-select')
   }
 
   function handleExplore() {
