@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Routes, Route, useNavigate } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
+import RootRedirect from './components/RootRedirect'
 import Onboarding from './pages/Onboarding'
 import Discovery from './pages/Discovery'
 import Recommendation from './pages/Recommendation'
@@ -11,41 +11,32 @@ import Experts from './pages/Experts'
 import Progress from './pages/Progress'
 import Profile from './pages/Profile'
 import SubTrackSelect from './pages/SubTrackSelect'
-import LoadingScreen from './components/LoadingScreen'
-
-function Root() {
-  const navigate = useNavigate()
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (localStorage.getItem('flowstate_selected_subtrack')) {
-        navigate('/home', { replace: true })
-      } else {
-        setLoading(false)
-      }
-    }, 1000)
-    return () => clearTimeout(timer)
-  }, [navigate])
-
-  if (loading) return <LoadingScreen />
-  return <Onboarding />
-}
+import Login from './pages/Login'
+import Signup from './pages/Signup'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Root />} />
-      <Route path="/discovery" element={<Discovery />} />
-      <Route path="/recommendation" element={<Recommendation />} />
-      <Route path="/sub-track-select" element={<SubTrackSelect />} />
-      <Route path="/home" element={<Home />} />
-      <Route path="/track/:trackId" element={<TrackDetail />} />
-      <Route path="/community" element={<Community />} />
-      <Route path="/graduation" element={<Graduation />} />
-      <Route path="/experts" element={<Experts />} />
-      <Route path="/progress" element={<Progress />} />
-      <Route path="/profile" element={<Profile />} />
+      {/* Root — smart redirect based on auth + localStorage state */}
+      <Route path="/"            element={<RootRedirect />} />
+
+      {/* Public / onboarding routes */}
+      <Route path="/onboarding"        element={<Onboarding />} />
+      <Route path="/login"             element={<Login />} />
+      <Route path="/signup"            element={<Signup />} />
+      <Route path="/discovery"         element={<Discovery />} />
+      <Route path="/recommendation"    element={<Recommendation />} />
+      <Route path="/sub-track-select"  element={<SubTrackSelect />} />
+      <Route path="/track/:trackId"    element={<TrackDetail />} />
+
+      {/* Protected routes */}
+      <Route path="/home"       element={<ProtectedRoute><Home /></ProtectedRoute>} />
+      <Route path="/community"  element={<ProtectedRoute><Community /></ProtectedRoute>} />
+      <Route path="/progress"   element={<ProtectedRoute><Progress /></ProtectedRoute>} />
+      <Route path="/profile"    element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/graduation" element={<ProtectedRoute><Graduation /></ProtectedRoute>} />
+      <Route path="/experts"    element={<ProtectedRoute><Experts /></ProtectedRoute>} />
     </Routes>
   )
 }

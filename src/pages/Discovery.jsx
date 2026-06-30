@@ -148,7 +148,7 @@ export default function Discovery() {
           </button>
         ) : (
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/onboarding')}
             className="text-sm font-medium flex items-center gap-1"
             style={{ color: '#534AB7' }}
           >
