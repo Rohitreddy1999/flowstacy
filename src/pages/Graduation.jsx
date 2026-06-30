@@ -266,7 +266,11 @@ function Stage3() {
           Meet the experts →
         </button>
         <button
-          onClick={() => navigate('/recommendation')}
+          onClick={() => {
+            localStorage.removeItem('flowstate_selected_track')
+            localStorage.removeItem('flowstate_selected_subtrack')
+            navigate('/')
+          }}
           className="w-full py-3 rounded-xl font-semibold text-base border-2 bg-white transition-colors hover:bg-gray-50"
           style={{ borderColor: '#534AB7', color: '#534AB7' }}
         >

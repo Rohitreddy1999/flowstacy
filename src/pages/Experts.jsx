@@ -246,6 +246,7 @@ function ExpertProfile({ expert, onBack }) {
       {/* Book button */}
       <div>
         <button
+          onClick={() => console.log(`Booking initiated for ${expert.name}`)}
           className="w-full py-3 rounded-xl text-white font-semibold text-base transition-opacity hover:opacity-90"
           style={{ backgroundColor: '#534AB7' }}
         >

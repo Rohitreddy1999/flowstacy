@@ -81,7 +81,7 @@ export default function Recommendation() {
   }
 
   function handleExplore() {
-    console.log('explore all tracks clicked')
+    navigate('/sub-track-select?mode=explore')
   }
 
   return (

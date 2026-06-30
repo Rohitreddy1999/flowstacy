@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 
 const DAY = 1
@@ -12,6 +13,12 @@ const COMMUNITY = [
 
 export default function Home() {
   const [completed, setCompleted] = useState(false)
+  const navigate = useNavigate()
+
+  function resetApp() {
+    localStorage.clear()
+    navigate('/')
+  }
 
   return (
     <div className="min-h-screen bg-white pb-20">
@@ -155,6 +162,16 @@ export default function Home() {
           </div>
         </div>
 
+      </div>
+
+      {/* Reset link — remove before launch */}
+      <div className="text-center pb-24">
+        <button
+          onClick={resetApp}
+          className="text-xs text-gray-300 hover:text-gray-400 transition-colors"
+        >
+          Reset app (testing only)
+        </button>
       </div>
 
       <BottomNav />
