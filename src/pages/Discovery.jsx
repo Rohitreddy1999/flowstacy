@@ -141,20 +141,23 @@ export default function Discovery() {
         {step > 0 ? (
           <button
             onClick={handleBack}
-            className="text-sm text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1"
+            className="text-sm font-medium flex items-center gap-1"
+            style={{ color: '#534AB7' }}
           >
             ← Back
           </button>
         ) : (
-          <span className="text-lg font-semibold tracking-tight" style={{ color: '#534AB7' }}>
-            flowstate
-          </span>
+          <button
+            onClick={() => navigate('/')}
+            className="text-sm font-medium flex items-center gap-1"
+            style={{ color: '#534AB7' }}
+          >
+            ← Back
+          </button>
         )}
-        {step > 0 && (
-          <span className="text-lg font-semibold tracking-tight" style={{ color: '#534AB7' }}>
-            flowstate
-          </span>
-        )}
+        <span className="text-lg font-semibold tracking-tight" style={{ color: '#534AB7' }}>
+          flowstate
+        </span>
       </div>
 
       {/* Progress bar */}

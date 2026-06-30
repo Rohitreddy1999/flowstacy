@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
@@ -264,6 +265,7 @@ function ExpertProfile({ expert, onBack }) {
 export default function Experts() {
   const [activeFilter, setActiveFilter] = useState('all')
   const [selectedId, setSelectedId] = useState(null)
+  const navigate = useNavigate()
 
   const selectedExpert = EXPERTS.find(e => e.id === selectedId)
 
@@ -276,9 +278,13 @@ export default function Experts() {
 
       {/* Nav */}
       <nav className="border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 bg-white z-10">
-        <span className="text-lg font-semibold tracking-tight" style={{ color: '#534AB7' }}>
-          flowstate
-        </span>
+        <button
+          onClick={() => navigate('/home')}
+          className="text-sm font-medium flex items-center gap-1"
+          style={{ color: '#534AB7' }}
+        >
+          ← Back
+        </button>
         <span className="text-sm font-semibold" style={{ color: '#1D9E75' }}>
           Graduated 🏆
         </span>

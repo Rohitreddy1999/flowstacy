@@ -88,8 +88,15 @@ export default function Recommendation() {
     <div className="min-h-screen bg-white flex flex-col px-6 py-10">
       <div className="max-w-[480px] mx-auto w-full flex flex-col flex-1">
 
-        {/* Logo */}
-        <div className="mb-10">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-10">
+          <button
+            onClick={() => navigate('/discovery')}
+            className="text-sm font-medium flex items-center gap-1"
+            style={{ color: '#534AB7' }}
+          >
+            ← Back
+          </button>
           <span className="text-lg font-semibold tracking-tight" style={{ color: '#534AB7' }}>
             flowstate
           </span>

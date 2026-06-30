@@ -7,6 +7,8 @@ import TrackDetail from './pages/TrackDetail'
 import Community from './pages/Community'
 import Graduation from './pages/Graduation'
 import Experts from './pages/Experts'
+import Progress from './pages/Progress'
+import Profile from './pages/Profile'
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
       <Route path="/community" element={<Community />} />
       <Route path="/graduation" element={<Graduation />} />
       <Route path="/experts" element={<Experts />} />
+      <Route path="/progress" element={<Progress />} />
+      <Route path="/profile" element={<Profile />} />
     </Routes>
   )
 }

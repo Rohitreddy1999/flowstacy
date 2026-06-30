@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import BottomNav from '../components/BottomNav'
 
 const DAY = 1
 const TOTAL_DAYS = 21
@@ -13,7 +14,7 @@ export default function Home() {
   const [completed, setCompleted] = useState(false)
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white pb-20">
 
       {/* ── Top nav ─────────────────────────────────────────── */}
       <nav className="border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 bg-white z-10">
@@ -155,6 +156,8 @@ export default function Home() {
         </div>
 
       </div>
+
+      <BottomNav />
     </div>
   )
 }
