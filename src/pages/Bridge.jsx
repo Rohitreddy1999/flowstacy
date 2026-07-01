@@ -1,11 +1,17 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 
 export default function Bridge() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const isRestart = searchParams.get('restart') === 'true'
 
   return (
     <div className="min-h-screen bg-white flex flex-col px-6 py-10">
       <div className="max-w-[480px] mx-auto w-full flex flex-col flex-1">
+
+        {/* Back button */}
+        <BackButton onClick={() => navigate('/onboarding')} className="self-start -ml-4 mb-2" />
 
         {/* Logo */}
         <div className="text-center mb-10">
@@ -20,11 +26,12 @@ export default function Bridge() {
             Almost there
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3 leading-tight">
-            Before you begin
+            {isRestart ? 'Ready for your next 21 days?' : 'Before you begin'}
           </h1>
           <p className="text-sm text-gray-400 leading-relaxed mb-3">
-            We'd love to ask you a few quick questions to understand what you're
-            really looking for. The more honest you are, the better we can help.
+            {isRestart
+              ? "You've proven you can do this. What do you want to work on next?"
+              : "We'd love to ask you a few quick questions to understand what you're really looking for. The more honest you are, the better we can help."}
           </p>
           <p className="text-xs text-gray-400">Takes less than 2 minutes.</p>
         </div>

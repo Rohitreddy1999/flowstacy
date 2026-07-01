@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 
 const TRACKS = [
   {
@@ -113,7 +114,7 @@ export default function Recommendation() {
   function handleStart() {
     if (!selected) return
     localStorage.setItem('flowstate_selected_track', selected)
-    navigate('/sub-track-select')
+    navigate('/sub-track-select', { state: { from: 'recommendation' } })
   }
 
   return (
@@ -122,13 +123,7 @@ export default function Recommendation() {
 
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={() => navigate('/discovery')}
-            className="text-sm font-medium flex items-center gap-1"
-            style={{ color: '#534AB7' }}
-          >
-            ← Back
-          </button>
+          <BackButton onClick={() => navigate('/discovery')} />
           <span className="text-lg font-semibold tracking-tight" style={{ color: '#534AB7' }}>
             flowstate
           </span>

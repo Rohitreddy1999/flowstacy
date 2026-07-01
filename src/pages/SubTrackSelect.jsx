@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
@@ -87,8 +88,10 @@ function SelectCard({ isSelected, onClick, children }) {
 
 export default function SubTrackSelect() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams] = useSearchParams()
   const isExplore = searchParams.get('mode') === 'explore'
+  const backTarget = location.state?.from === 'track-select' ? '/track-select' : '/recommendation'
 
   const recommendedTrack = localStorage.getItem('flowstate_selected_track') || 'fitness'
 
@@ -115,13 +118,7 @@ export default function SubTrackSelect() {
       <div className="max-w-[480px] mx-auto w-full flex flex-col flex-1">
 
         {/* Back button */}
-        <button
-          onClick={() => navigate('/recommendation')}
-          className="self-start text-sm font-medium flex items-center gap-1 mb-8"
-          style={{ color: '#534AB7' }}
-        >
-          ← Back
-        </button>
+        <BackButton onClick={() => navigate(backTarget)} className="self-start mb-6" />
 
         {/* Heading */}
         <div className="mb-8">

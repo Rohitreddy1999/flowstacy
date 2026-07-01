@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
@@ -279,13 +280,7 @@ export default function Experts() {
 
       {/* Nav */}
       <nav className="border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 bg-white z-10">
-        <button
-          onClick={() => navigate('/home')}
-          className="text-sm font-medium flex items-center gap-1"
-          style={{ color: '#534AB7' }}
-        >
-          ← Back
-        </button>
+        <BackButton onClick={() => navigate('/home')} />
         <span className="text-sm font-semibold" style={{ color: '#1D9E75' }}>
           Graduated 🏆
         </span>

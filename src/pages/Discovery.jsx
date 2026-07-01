@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 
 const QUESTIONS = [
   {
@@ -142,23 +143,7 @@ export default function Discovery() {
 
       {/* Header row */}
       <div className="flex items-center justify-between mb-8 max-w-xl mx-auto w-full">
-        {step > 0 ? (
-          <button
-            onClick={handleBack}
-            className="text-sm font-medium flex items-center gap-1"
-            style={{ color: '#534AB7' }}
-          >
-            ← Back
-          </button>
-        ) : (
-          <button
-            onClick={() => navigate('/bridge')}
-            className="text-sm font-medium flex items-center gap-1"
-            style={{ color: '#534AB7' }}
-          >
-            ← Back
-          </button>
-        )}
+        <BackButton onClick={step > 0 ? handleBack : () => navigate('/bridge')} />
         <span className="text-lg font-semibold tracking-tight" style={{ color: '#534AB7' }}>
           flowstate
         </span>

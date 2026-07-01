@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 export default function Login() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const isReturning = searchParams.get('returning') === 'true'
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
   const [error,    setError]    = useState('')
@@ -46,6 +48,15 @@ export default function Login() {
           <h1 className="text-3xl font-bold text-gray-900 mb-1">Welcome back</h1>
           <p className="text-sm text-gray-400">Sign in to continue your journey</p>
         </div>
+
+        {/* Returning-session banner */}
+        {isReturning && (
+          <div className="rounded-xl px-4 py-3 mb-6" style={{ backgroundColor: '#EEEDFE' }}>
+            <p className="text-sm font-medium" style={{ color: '#534AB7' }}>
+              Welcome back — just sign in to continue your journey
+            </p>
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSignIn} className="space-y-4 mb-4">

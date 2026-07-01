@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import BackButton from '../components/BackButton'
 
 const TRACKS = [
   {
@@ -89,7 +90,7 @@ export default function TrackSelect() {
   function handleContinue() {
     if (!selected) return
     localStorage.setItem('flowstate_selected_track', selected)
-    navigate('/sub-track-select')
+    navigate('/sub-track-select', { state: { from: 'track-select' } })
   }
 
   return (
@@ -97,13 +98,7 @@ export default function TrackSelect() {
       <div className="max-w-[480px] mx-auto w-full flex flex-col flex-1">
 
         {/* Back button */}
-        <button
-          onClick={() => navigate('/bridge')}
-          className="self-start text-sm font-medium flex items-center gap-1 mb-8"
-          style={{ color: '#534AB7' }}
-        >
-          ← Back
-        </button>
+        <BackButton onClick={() => navigate('/bridge')} className="self-start mb-6" />
 
         {/* Heading */}
         <div className="mb-8">
