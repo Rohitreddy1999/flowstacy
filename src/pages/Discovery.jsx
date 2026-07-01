@@ -3,54 +3,58 @@ import { useNavigate } from 'react-router-dom'
 
 const QUESTIONS = [
   {
-    text: "When you picture the best version of yourself — what are they doing differently?",
-    subtext: "No wrong answers. This is just between you and us.",
+    text: "When you realize another week passed and you still didn't do the thing — what does that feel like?",
+    subtext: "Select all that you feel.",
     type: 'multi',
     options: [
-      { id: 'q1_fitness', emoji: '💪', label: 'Moving their body every day — strong, energetic, unstoppable', tracks: ['fitness'] },
-      { id: 'q1_discipline', emoji: '☀️', label: 'Following a morning routine that actually sticks', tracks: ['discipline'] },
-      { id: 'q1_instrument', emoji: '🎵', label: 'Playing an instrument they always wished they could', tracks: ['instrument'] },
-      { id: 'q1_journal', emoji: '📓', label: 'Journaling and actually knowing what they want from life', tracks: ['journal'] },
-      { id: 'q1_drawing', emoji: '✏️', label: 'Creating things — sketching, drawing, making something', tracks: ['drawing'] },
+      { id: 'q1_guilt', emoji: '😔', label: "Guilt. I knew what I needed to do. I just didn't do it.", tracks: ['discipline', 'journal'] },
+      { id: 'q1_frustration', emoji: '😤', label: 'Frustration. I keep starting things and never following through.', tracks: ['fitness', 'discipline'] },
+      { id: 'q1_emptiness', emoji: '😶', label: 'Emptiness. I was busy but none of it actually mattered.', tracks: ['journal', 'drawing'] },
+      { id: 'q1_fear', emoji: '😰', label: "Fear. Time is passing and I'm not becoming who I wanted to be.", tracks: ['journal', 'instrument'] },
+      { id: 'q1_numbness', emoji: '😴', label: "Numbness. I've honestly stopped expecting things to change.", tracks: ['discipline', 'journal'] },
     ],
   },
   {
-    text: "What does your typical morning look like right now?",
-    subtext: "Be real. We're not judging.",
+    text: "The person you pictured yourself becoming — what does their daily life look like?",
+    subtext: "Select all that you feel.",
     type: 'multi',
     options: [
-      { id: 'q2_phone', emoji: '📱', label: 'Phone first, scroll for 20 minutes, regret it', tracks: ['discipline', 'journal'] },
-      { id: 'q2_coffee', emoji: '☕', label: 'Coffee, rush, out the door — survival mode', tracks: ['fitness', 'discipline'] },
-      { id: 'q2_move', emoji: '🏃', label: 'I already move but want more structure', tracks: ['fitness'] },
-      { id: 'q2_quiet', emoji: '🌅', label: "Quiet time — I like mornings but don't use them well", tracks: ['journal', 'drawing', 'instrument'] },
+      { id: 'q2_fitness', emoji: '💪', label: 'They move their body every day. No excuses, no negotiating.', tracks: ['fitness'] },
+      { id: 'q2_discipline', emoji: '☀️', label: "Their mornings belong to them. Not their phone. Not their stress.", tracks: ['discipline'] },
+      { id: 'q2_instrument', emoji: '🎵', label: 'They play an instrument. They create music that is purely theirs.', tracks: ['instrument'] },
+      { id: 'q2_journal', emoji: '📓', label: "They know themselves. They've done the work to understand what they want.", tracks: ['journal'] },
+      { id: 'q2_drawing', emoji: '✏️', label: 'They make things. They draw, sketch, create something from nothing.', tracks: ['drawing'] },
     ],
   },
   {
-    text: "When you tried to build a habit before and quit — what actually killed it?",
-    subtext: "This one matters. Your answer helps us protect you from that this time.",
+    text: "Before the world gets to you — what does your morning honestly look like?",
+    subtext: "Select all that you feel.",
     type: 'multi',
     options: [
-      { id: 'q3_time', emoji: '⏰', label: "It took too long — I couldn't find the time", tracks: ['discipline', 'journal'] },
-      { id: 'q3_results', emoji: '😔', label: "I didn't see results fast enough", tracks: ['fitness', 'drawing'] },
-      { id: 'q3_alone', emoji: '👥', label: "I was doing it alone — no one around me cared", tracks: ['fitness', 'discipline'] },
-      { id: 'q3_goal', emoji: '❓', label: "I never really knew what I was working toward", tracks: ['journal', 'instrument', 'drawing'] },
+      { id: 'q3_phone', emoji: '📱', label: "Phone first. Scrolling before I've had a single thought of my own.", tracks: ['discipline', 'journal'] },
+      { id: 'q3_rush', emoji: '☕', label: "Rush and survive. The day owns me before it's even started.", tracks: ['fitness', 'discipline'] },
+      { id: 'q3_tired', emoji: '😴', label: "I wake up already tired. Like sleep didn't actually rest me.", tracks: ['fitness', 'discipline'] },
+      { id: 'q3_waste', emoji: '🌅', label: 'I have quiet time but I waste it. I could be using it better.', tracks: ['journal', 'drawing', 'instrument'] },
+      { id: 'q3_move', emoji: '🏃', label: 'I already move or do something — but I want more structure.', tracks: ['fitness'] },
     ],
   },
   {
-    text: "If money, time, and judgment didn't exist — what would fill your evenings?",
-    subtext: "The thing that crosses your mind but you always push aside.",
+    text: "You've tried before. Something stopped you. What was it really?",
+    subtext: "Select all that you feel.",
     type: 'multi',
     options: [
-      { id: 'q4_physical', emoji: '🏋️', label: 'Training, playing sport, moving — anything physical', tracks: ['fitness'] },
-      { id: 'q4_music', emoji: '🎸', label: 'Playing music or creating sounds that mean something', tracks: ['instrument'] },
-      { id: 'q4_visual', emoji: '🎨', label: 'Drawing, sketching, making visual things', tracks: ['drawing'] },
-      { id: 'q4_reading', emoji: '📚', label: 'Reading, writing, thinking — going deep on myself', tracks: ['journal', 'discipline'] },
+      { id: 'q4_time', emoji: '⏰', label: "I told myself I didn't have time. Even though I did.", tracks: ['discipline', 'journal'] },
+      { id: 'q4_results', emoji: '😔', label: "I didn't see results fast enough and convinced myself it wasn't working.", tracks: ['fitness', 'drawing'] },
+      { id: 'q4_identity', emoji: '🧠', label: "I decided I just wasn't the kind of person who was good at that.", tracks: ['instrument', 'drawing', 'journal'] },
+      { id: 'q4_alone', emoji: '👥', label: 'I was doing it completely alone. Nobody around me cared.', tracks: ['fitness', 'discipline'] },
+      { id: 'q4_swallowed', emoji: '🌀', label: "Honestly? Life just swallowed it. I don't even know when I stopped.", tracks: ['discipline', 'journal'] },
     ],
   },
   {
-    text: "Last one — and this is the important one.",
-    subtext: "In your own words: what's the one thing you keep saying you'll start, but never do?",
+    text: "What's the one thing you keep saying you'll start — when life calms down, when you're ready, when the time is right?",
+    subtext: "Write it here. Nobody else sees this.",
     type: 'text',
+    placeholder: 'Write it here. Nobody else sees this.',
   },
 ]
 
@@ -148,7 +152,7 @@ export default function Discovery() {
           </button>
         ) : (
           <button
-            onClick={() => navigate('/onboarding')}
+            onClick={() => navigate('/bridge')}
             className="text-sm font-medium flex items-center gap-1"
             style={{ color: '#534AB7' }}
           >
@@ -235,7 +239,7 @@ export default function Discovery() {
                 borderColor: typeof currentAnswer === 'string' && currentAnswer.trim().length >= 3 ? '#534AB7' : '#e5e5e5',
                 minHeight: '160px',
               }}
-              placeholder="Type anything. There's no right answer. Just be honest with yourself..."
+              placeholder={q.placeholder || "Type anything. There's no right answer. Just be honest with yourself..."}
               value={typeof currentAnswer === 'string' ? currentAnswer : ''}
               onChange={handleTextChange}
             />

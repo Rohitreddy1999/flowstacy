@@ -1,6 +1,8 @@
 import { Routes, Route } from 'react-router-dom'
 import RootRedirect from './components/RootRedirect'
 import Onboarding from './pages/Onboarding'
+import Bridge from './pages/Bridge'
+import TrackSelect from './pages/TrackSelect'
 import Discovery from './pages/Discovery'
 import Recommendation from './pages/Recommendation'
 import Home from './pages/Home'
@@ -23,6 +25,8 @@ function App() {
 
       {/* Public / onboarding routes */}
       <Route path="/onboarding"        element={<Onboarding />} />
+      <Route path="/bridge"            element={<Bridge />} />
+      <Route path="/track-select"      element={<TrackSelect />} />
       <Route path="/login"             element={<Login />} />
       <Route path="/signup"            element={<Signup />} />
       <Route path="/discovery"         element={<Discovery />} />

@@ -51,7 +51,8 @@ export default function Signup() {
     if (error) {
       setError(error.message)
     } else {
-      navigate('/discovery')
+      const hasSubtrack = localStorage.getItem('flowstate_selected_subtrack')
+      navigate(hasSubtrack ? '/home' : '/discovery')
     }
   }
 

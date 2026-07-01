@@ -16,19 +16,7 @@ export default function RootRedirect() {
       }
 
       const subtrack = localStorage.getItem('flowstate_selected_subtrack')
-      if (subtrack) {
-        navigate('/home', { replace: true })
-        return
-      }
-
-      const track = localStorage.getItem('flowstate_selected_track')
-      if (track) {
-        navigate('/sub-track-select', { replace: true })
-        return
-      }
-
-      const scores = localStorage.getItem('flowstate_scores')
-      navigate(scores ? '/recommendation' : '/discovery', { replace: true })
+      navigate(subtrack ? '/home' : '/bridge', { replace: true })
     }
 
     checkUserState()

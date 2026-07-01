@@ -35,7 +35,7 @@ export default function Onboarding() {
   function handleContinue() {
     if (!selected) return
     localStorage.setItem('flowstate_life_stage', selected)
-    navigate('/signup')
+    navigate('/bridge')
   }
 
   return (

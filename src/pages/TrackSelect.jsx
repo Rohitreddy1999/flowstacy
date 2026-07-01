@@ -39,18 +39,7 @@ const TRACKS = [
   },
 ]
 
-function getRecommendedIds(scores) {
-  if (!scores) return []
-  const sorted = Object.keys(scores)
-    .sort((a, b) => {
-      const diff = scores[b] - scores[a]
-      return diff !== 0 ? diff : a.localeCompare(b)
-    })
-    .filter(id => scores[id] > 0)
-  return sorted.slice(0, 2)
-}
-
-function TrackCard({ track, isSelected, isRecommended, onClick }) {
+function TrackCard({ track, isSelected, onClick }) {
   return (
     <button
       onClick={onClick}
@@ -74,14 +63,6 @@ function TrackCard({ track, isSelected, isRecommended, onClick }) {
         }
       }}
     >
-      {isRecommended && !isSelected && (
-        <span
-          className="absolute top-4 right-4 px-2.5 py-0.5 rounded-full text-xs font-semibold"
-          style={{ backgroundColor: '#EEEDFE', color: '#534AB7' }}
-        >
-          ✨ Recommended
-        </span>
-      )}
       {isSelected && (
         <span
           className="absolute top-4 right-4 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs"
@@ -101,16 +82,11 @@ function TrackCard({ track, isSelected, isRecommended, onClick }) {
   )
 }
 
-export default function Recommendation() {
+export default function TrackSelect() {
   const navigate = useNavigate()
-
-  const raw = localStorage.getItem('flowstate_scores')
-  const scores = raw ? JSON.parse(raw) : null
-  const recommendedIds = getRecommendedIds(scores)
-
   const [selected, setSelected] = useState(null)
 
-  function handleStart() {
+  function handleContinue() {
     if (!selected) return
     localStorage.setItem('flowstate_selected_track', selected)
     navigate('/sub-track-select')
@@ -120,28 +96,25 @@ export default function Recommendation() {
     <div className="min-h-screen bg-white flex flex-col px-6 py-10">
       <div className="max-w-[480px] mx-auto w-full flex flex-col flex-1">
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={() => navigate('/discovery')}
-            className="text-sm font-medium flex items-center gap-1"
-            style={{ color: '#534AB7' }}
-          >
-            ← Back
-          </button>
-          <span className="text-lg font-semibold tracking-tight" style={{ color: '#534AB7' }}>
-            flowstate
-          </span>
-        </div>
+        {/* Back button */}
+        <button
+          onClick={() => navigate('/bridge')}
+          className="self-start text-sm font-medium flex items-center gap-1 mb-8"
+          style={{ color: '#534AB7' }}
+        >
+          ← Back
+        </button>
 
         {/* Heading */}
         <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 leading-snug">
-            Here's what we think — but you know yourself best.
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">
+            Choose your path
+          </p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            What do you want to work on?
           </h1>
           <p className="text-sm text-gray-400 leading-relaxed">
-            We've highlighted what resonated most from your answers. But choose
-            whatever calls to you.
+            Pick the track that calls to you. You can always try others after you graduate.
           </p>
         </div>
 
@@ -152,7 +125,6 @@ export default function Recommendation() {
               key={track.id}
               track={track}
               isSelected={selected === track.id}
-              isRecommended={recommendedIds.includes(track.id)}
               onClick={() => setSelected(track.id)}
             />
           ))}
@@ -160,7 +132,7 @@ export default function Recommendation() {
 
         {/* CTA */}
         <button
-          onClick={handleStart}
+          onClick={handleContinue}
           disabled={!selected}
           className="w-full py-3 rounded-xl text-white font-semibold text-base transition-opacity"
           style={{
@@ -168,7 +140,7 @@ export default function Recommendation() {
             cursor: selected ? 'pointer' : 'not-allowed',
           }}
         >
-          Start this track →
+          Let's go →
         </button>
       </div>
     </div>
