@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import AuroraBackground from '../components/AuroraBackground'
+import { getDayContent, getSubtrackByName } from '../lib/curriculum'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -16,32 +17,6 @@ const SUBTRACK_NAMES = {
   self: 'Self-Discovery', gratitude: 'Gratitude Practice', stream: 'Stream of Consciousness', goals: 'Goal Setting & Vision',
   fundamentals: 'Sketching Fundamentals', portrait: 'Portrait Drawing', urban: 'Urban Sketching', nature: 'Nature & Animals',
 }
-
-const FITNESS_TASKS = {
-  1:  { text: 'Learn the 5 fundamental movement patterns — push, pull, hinge, squat, carry. Watch one short explainer video. No gym needed. Just 15 minutes.', duration: '15 min', difficulty: 'Easy' },
-  2:  { text: 'Bodyweight only — 3 sets of 10 squats, 10 push-ups, 10 rows using a table edge. Rest 60 seconds between sets. Focus on form.', duration: '25 min', difficulty: 'Easy' },
-  3:  { text: '15-minute walk + 5 minutes stretching. Log how your body feels — energy, soreness, mood.', duration: '20 min', difficulty: 'Easy' },
-  4:  { text: 'Repeat Day 2 movements. Focus on form over speed. Try to feel the muscle working.', duration: '25 min', difficulty: 'Easy' },
-  5:  { text: 'Core day — 3 sets of plank 20 seconds, dead bug 10 reps, glute bridge 15 reps.', duration: '20 min', difficulty: 'Easy' },
-  6:  { text: 'Active rest — 20 minute walk, 10 minute full body stretch. No intensity today.', duration: '30 min', difficulty: 'Rest' },
-  7:  { text: 'Week 1 check-in — repeat Day 2 workout and notice what feels easier than Day 1.', duration: '25 min', difficulty: 'Medium' },
-  8:  { text: 'Add resistance — 3x10 goblet squats, 3x10 dumbbell rows, 3x10 overhead press.', duration: '30 min', difficulty: 'Medium' },
-  9:  { text: 'Push focus — push-ups, dips on a chair. 3 sets each. Go to failure on last set.', duration: '25 min', difficulty: 'Medium' },
-  10: { text: '20 minute run/walk intervals — 1 min run, 2 min walk, repeat 6 times.', duration: '20 min', difficulty: 'Medium' },
-  11: { text: 'Pull focus — rows, face pulls or Superman holds. 4 sets each.', duration: '30 min', difficulty: 'Medium' },
-  12: { text: 'Leg day — squats, lunges, calf raises, glute bridges. 3x12 each.', duration: '30 min', difficulty: 'Medium' },
-  13: { text: 'Active rest + mobility — hip flexor stretch, thoracic rotation, hamstring flow. 20 min.', duration: '20 min', difficulty: 'Rest' },
-  14: { text: 'Milestone day — repeat your Day 2 workout. Compare. Feel the difference.', duration: '25 min', difficulty: 'Medium' },
-  15: { text: 'Design your own push/pull/legs split for the week. Write it out today.', duration: '15 min', difficulty: 'Easy' },
-  16: { text: 'Execute Day 1 of your own split. Track weights, reps, sets.', duration: '45 min', difficulty: 'Hard' },
-  17: { text: 'Run or cardio — push your Day 10 time or distance by 10%.', duration: '25 min', difficulty: 'Hard' },
-  18: { text: 'Execute Day 2 of your split. Add one set or one rep to each exercise.', duration: '45 min', difficulty: 'Hard' },
-  19: { text: 'Active recovery — yoga flow or full body stretch. 30 minutes intentional movement.', duration: '30 min', difficulty: 'Rest' },
-  20: { text: 'Execute Day 3 of your split. Go heavier or harder than Day 16.', duration: '45 min', difficulty: 'Hard' },
-  21: { text: 'Final day — film your best movement. Compare to Day 1. You earned this.', duration: '30 min', difficulty: 'Final' },
-}
-
-const FITNESS_SUBTRACKS = new Set(['gym', 'calisthenics', 'running', 'sport', 'yoga'])
 
 const FEELINGS = [
   { id: 'crushed',   label: '🔥 Crushed it' },
@@ -79,12 +54,22 @@ function getCelebration(day) {
   return { emoji: '✓', line: `Day ${day} complete!` }
 }
 
+// ── Skeleton ──────────────────────────────────────────────────────────────────
+
+function Skeleton({ height = 16, style = {} }) {
+  return (
+    <div
+      className="fs-skeleton"
+      style={{ height, marginBottom: 10, ...style }}
+    />
+  )
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function Home() {
   const navigate = useNavigate()
 
-  const trackKey     = localStorage.getItem('flowstate_selected_track')    || 'fitness'
   const subtrackKey  = localStorage.getItem('flowstate_selected_subtrack') || 'gym'
   const subtrackName = SUBTRACK_NAMES[subtrackKey] || subtrackKey
 
@@ -109,11 +94,43 @@ export default function Home() {
   const [reflectionSaved, setReflectionSaved] = useState(false)
   const [showDevMenu,     setShowDevMenu]     = useState(false)
 
-  const isFitness = FITNESS_SUBTRACKS.has(subtrackKey) || trackKey === 'fitness'
-  const task      = isFitness ? FITNESS_TASKS[currentDay] : null
-  const taskText  = task?.text ?? `Day ${currentDay} of your ${subtrackName} journey. Show up today. That's all that's required.`
+  // Curriculum state
+  const [dayContent,      setDayContent]      = useState(null)
+  const [contentLoading,  setContentLoading]  = useState(true)
+  const [subtracksId,     setSubtracksId]     = useState(null)
 
   const celebration = getCelebration(currentDay)
+
+  // ── Fetch curriculum data ──────────────────────────────────────────────────
+
+  useEffect(() => {
+    async function fetchCurriculumData() {
+      setContentLoading(true)
+
+      const subtracks_name = localStorage.getItem('flowstate_selected_subtrack')
+      if (!subtracks_name) {
+        setContentLoading(false)
+        return
+      }
+
+      // Map short key → full display name for Supabase lookup
+      const displayName = SUBTRACK_NAMES[subtracks_name] || subtracks_name
+
+      const subtrackData = await getSubtrackByName(displayName)
+
+      if (subtrackData) {
+        setSubtracksId(subtrackData.id)
+        const content = await getDayContent(subtrackData.id, currentDay)
+        setDayContent(content)
+      }
+
+      setContentLoading(false)
+    }
+
+    fetchCurriculumData()
+  }, [currentDay])
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
 
   function handleMarkComplete() {
     if (completed) return
@@ -170,16 +187,18 @@ export default function Home() {
   }
 
   function jumpToDay(day) {
-    const completed = Array.from({ length: day - 1 }, (_, i) => i + 1)
+    const done = Array.from({ length: day - 1 }, (_, i) => i + 1)
     localStorage.setItem('flowstate_current_day', String(day))
     localStorage.setItem('flowstate_streak', String(day))
-    localStorage.setItem('flowstate_completed_days', JSON.stringify(completed))
+    localStorage.setItem('flowstate_completed_days', JSON.stringify(done))
     setCurrentDay(day)
     setStreak(day)
-    setCompletedDays(completed)
+    setCompletedDays(done)
     setCompleted(false)
     setShowDevMenu(false)
   }
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <>
@@ -189,9 +208,7 @@ export default function Home() {
       {showCelebration && (
         <div
           className="fixed inset-0 z-50 flex flex-col items-center justify-center text-center px-6"
-          style={{
-            background: 'radial-gradient(circle at center, rgba(83,74,183,0.95) 0%, #0A0812 100%)',
-          }}
+          style={{ background: 'radial-gradient(circle at center, rgba(83,74,183,0.95) 0%, #0A0812 100%)' }}
         >
           <p style={{ fontSize: 72, marginBottom: 16 }}>{celebration.emoji}</p>
           <p style={{ fontSize: 32, fontWeight: 300, color: 'white', marginBottom: 8, letterSpacing: '-0.02em' }}>
@@ -203,7 +220,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* ── Reflection modal (bottom sheet) ──────────────────── */}
+      {/* ── Reflection modal ─────────────────────────────────── */}
       {showLogModal && (
         <div
           className="fixed inset-0 z-50 flex items-end"
@@ -220,7 +237,6 @@ export default function Home() {
             onClick={e => e.stopPropagation()}
           >
             <p className="fs-heading-sm" style={{ marginBottom: 16 }}>How did today feel?</p>
-
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {FEELINGS.map(f => (
                 <button
@@ -233,7 +249,6 @@ export default function Home() {
                 </button>
               ))}
             </div>
-
             <textarea
               className="fs-input"
               style={{ marginTop: 12, height: 80, resize: 'none' }}
@@ -241,19 +256,13 @@ export default function Home() {
               value={logNote}
               onChange={e => setLogNote(e.target.value)}
             />
-
             {reflectionSaved ? (
               <p style={{ textAlign: 'center', fontSize: 'var(--fs-text-sm)', fontWeight: 500, padding: '12px 0', color: 'var(--fs-teal-300)' }}>
                 Reflection saved ✓
               </p>
             ) : (
               <>
-                <button
-                  onClick={handleSaveReflection}
-                  disabled={!feeling}
-                  className="fs-btn-primary"
-                  style={{ width: '100%', marginTop: 12 }}
-                >
+                <button onClick={handleSaveReflection} disabled={!feeling} className="fs-btn-primary" style={{ width: '100%', marginTop: 12 }}>
                   Save reflection
                 </button>
                 <button onClick={closeLogModal} className="fs-btn-ghost" style={{ width: '100%', marginTop: 4 }}>
@@ -278,11 +287,11 @@ export default function Home() {
             onClick={e => e.stopPropagation()}
           >
             {[
-              { label: '🗑 Reset everything',  action: resetApp },
-              { label: '⏩ Jump to Day 7',      action: () => jumpToDay(7) },
-              { label: '⏩ Jump to Day 14',     action: () => jumpToDay(14) },
-              { label: '⏩ Jump to Day 21',     action: () => jumpToDay(21) },
-              { label: '🏆 Go to Graduation',   action: () => navigate('/graduation') },
+              { label: '🗑 Reset everything', action: resetApp },
+              { label: '⏩ Jump to Day 7',     action: () => jumpToDay(7) },
+              { label: '⏩ Jump to Day 14',    action: () => jumpToDay(14) },
+              { label: '⏩ Jump to Day 21',    action: () => jumpToDay(21) },
+              { label: '🏆 Go to Graduation',  action: () => navigate('/graduation') },
             ].map(({ label, action }) => (
               <button
                 key={label}
@@ -321,12 +330,8 @@ export default function Home() {
           <span className="fs-logo">flowstate</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span>🔥</span>
-            <span style={{ color: 'var(--fs-teal-300)', fontSize: 'var(--fs-text-sm)', fontWeight: 500 }}>
-              {streak}
-            </span>
-            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 'var(--fs-text-sm)' }}>
-              day streak
-            </span>
+            <span style={{ color: 'var(--fs-teal-300)', fontSize: 'var(--fs-text-sm)', fontWeight: 500 }}>{streak}</span>
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 'var(--fs-text-sm)' }}>day streak</span>
           </div>
         </nav>
 
@@ -353,15 +358,11 @@ export default function Home() {
           <p className="fs-label fs-label-purple" style={{ marginBottom: 8 }}>
             {subtrackName} — Day {currentDay} of {TOTAL}
           </p>
-          <h1 className="fs-heading-md" style={{ marginBottom: 6 }}>
-            {getHeading(currentDay)}
-          </h1>
-          <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-sm)' }}>
-            {getSubtext(currentDay)}
-          </p>
+          <h1 className="fs-heading-md" style={{ marginBottom: 6 }}>{getHeading(currentDay)}</h1>
+          <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-sm)' }}>{getSubtext(currentDay)}</p>
         </div>
 
-        {/* Progress */}
+        {/* Progress bar + dots */}
         <div style={{ padding: '0 20px 20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <span className="fs-label">Your journey</span>
@@ -379,14 +380,11 @@ export default function Home() {
           </div>
           <div className="fs-dots-container">
             {Array.from({ length: TOTAL }, (_, i) => {
-              const day  = i + 1
+              const day   = i + 1
               const done  = completedDays.includes(day)
               const today = day === currentDay && !done
               return (
-                <div
-                  key={i}
-                  className={`fs-dot ${done ? 'fs-dot-completed' : today ? 'fs-dot-today' : 'fs-dot-future'}`}
-                />
+                <div key={i} className={`fs-dot ${done ? 'fs-dot-completed' : today ? 'fs-dot-today' : 'fs-dot-future'}`} />
               )
             })}
           </div>
@@ -394,31 +392,139 @@ export default function Home() {
 
         {/* Today's task card */}
         <div className="fs-card fs-card-purple" style={{ margin: '0 16px 16px', padding: 16 }}>
-          <p className="fs-label fs-label-purple" style={{ marginBottom: 10 }}>TODAY'S TASK</p>
-          <p style={{ color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)', lineHeight: 1.6, marginBottom: 14 }}>
-            {taskText}
-          </p>
-          {task && (
-            <div style={{ display: 'flex', gap: 8 }}>
-              <span className="fs-badge fs-badge-purple">⏱ {task.duration}</span>
-              <span className="fs-badge fs-badge-purple">{task.difficulty}</span>
-            </div>
+          {contentLoading ? (
+            <>
+              <Skeleton height={12} style={{ width: '40%', marginBottom: 10 }} />
+              <Skeleton height={14} style={{ marginBottom: 6 }} />
+              <Skeleton height={14} style={{ width: '85%', marginBottom: 14 }} />
+              <div style={{ display: 'flex', gap: 8 }}>
+                <Skeleton height={22} style={{ width: 80, borderRadius: 999, margin: 0 }} />
+                <Skeleton height={22} style={{ width: 60, borderRadius: 999, margin: 0 }} />
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="fs-label fs-label-purple" style={{ marginBottom: 10 }}>
+                {dayContent?.task_title || "TODAY'S TASK"}
+              </p>
+              <p style={{ color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)', lineHeight: 1.6, marginBottom: 14 }}>
+                {dayContent?.task_description || `Day ${currentDay} of your ${subtrackName} journey. Show up today. That's all that's required.`}
+              </p>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {dayContent?.duration_minutes && (
+                  <span className="fs-badge fs-badge-purple">⏱ {dayContent.duration_minutes} min</span>
+                )}
+                {dayContent?.difficulty && (
+                  <span className="fs-badge fs-badge-purple">{dayContent.difficulty}</span>
+                )}
+              </div>
+            </>
           )}
         </div>
 
+        {/* No content fallback */}
+        {!contentLoading && !dayContent && (
+          <div className="fs-card" style={{ margin: '0 16px 16px', padding: 20, textAlign: 'center' }}>
+            <p style={{ fontSize: 24, marginBottom: 8 }}>🚧</p>
+            <p style={{ color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)', fontWeight: 500, marginBottom: 6 }}>
+              Content coming soon
+            </p>
+            <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-xs)', lineHeight: 1.5 }}>
+              We are still building the curriculum for this track. Check back soon.
+            </p>
+          </div>
+        )}
+
+        {/* Watch & Learn */}
+        {!contentLoading && dayContent?.youtube_url && (
+          <div className="fs-card" style={{ margin: '0 16px 16px', padding: '14px 16px' }}>
+            <p className="fs-label fs-label-purple" style={{ marginBottom: 10 }}>WATCH &amp; LEARN</p>
+
+            <a
+              href={dayContent.youtube_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '10px 12px',
+                background: 'rgba(255,255,255,0.05)',
+                borderRadius: 'var(--fs-radius-md)',
+                textDecoration: 'none',
+                marginBottom: 8,
+                border: '1px solid rgba(255,255,255,0.08)',
+                transition: 'var(--fs-transition)',
+              }}
+            >
+              <span style={{ fontSize: 20 }}>▶️</span>
+              <div>
+                <p style={{ color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)', fontWeight: 500 }}>
+                  {dayContent.must_watch_label || "Watch today's guide"}
+                </p>
+                <p style={{ color: 'var(--fs-text-tertiary)', fontSize: 'var(--fs-text-xs)' }}>Must watch</p>
+              </div>
+            </a>
+
+            {[
+              { url: dayContent.reference_url_1, label: dayContent.ref_label_1 },
+              { url: dayContent.reference_url_2, label: dayContent.ref_label_2 },
+              { url: dayContent.reference_url_3, label: dayContent.ref_label_3 },
+            ].filter(ref => ref.url && ref.label).map((ref, i) => (
+              <a
+                key={i}
+                href={ref.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '8px 12px',
+                  borderRadius: 'var(--fs-radius-md)',
+                  textDecoration: 'none',
+                  marginBottom: 4,
+                  transition: 'var(--fs-transition)',
+                }}
+              >
+                <span style={{ fontSize: 14, color: 'var(--fs-text-tertiary)' }}>↗</span>
+                <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-xs)' }}>{ref.label}</p>
+              </a>
+            ))}
+          </div>
+        )}
+
         {/* Daily quote */}
-        <div style={{
-          margin: '0 16px 16px',
-          padding: '14px 16px',
-          borderLeft: '2px solid var(--fs-purple-500)',
-          background: 'rgba(83, 74, 183, 0.08)',
-          borderRadius: '0 var(--fs-radius-md) var(--fs-radius-md) 0',
-        }}>
-          <p style={{ color: 'var(--fs-text-secondary)', fontStyle: 'italic', fontSize: 'var(--fs-text-sm)', lineHeight: 1.6, marginBottom: 6 }}>
-            "The secret of getting ahead is getting started."
-          </p>
-          <p style={{ color: 'var(--fs-purple-300)', fontSize: 'var(--fs-text-xs)' }}>— Mark Twain</p>
-        </div>
+        {(dayContent?.quote_text || !contentLoading) && (
+          <div style={{
+            margin: '0 16px 16px', padding: '14px 16px',
+            borderLeft: '2px solid var(--fs-purple-500)',
+            background: 'rgba(83, 74, 183, 0.08)',
+            borderRadius: '0 var(--fs-radius-md) var(--fs-radius-md) 0',
+          }}>
+            {contentLoading ? (
+              <>
+                <Skeleton height={13} style={{ marginBottom: 6 }} />
+                <Skeleton height={13} style={{ width: '60%', marginBottom: 6 }} />
+                <Skeleton height={11} style={{ width: '30%', margin: 0 }} />
+              </>
+            ) : (
+              <>
+                <p style={{ color: 'var(--fs-text-secondary)', fontStyle: 'italic', fontSize: 'var(--fs-text-sm)', lineHeight: 1.6, marginBottom: 6 }}>
+                  "{dayContent?.quote_text || 'The secret of getting ahead is getting started.'}"
+                </p>
+                <p style={{ color: 'var(--fs-purple-300)', fontSize: 'var(--fs-text-xs)' }}>
+                  {dayContent?.quote_author ? `— ${dayContent.quote_author}` : '— Mark Twain'}
+                </p>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Source credits */}
+        {!contentLoading && dayContent?.source_credits && (
+          <div style={{ margin: '0 16px 16px', padding: '10px 14px' }}>
+            <p style={{ color: 'var(--fs-text-tertiary)', fontSize: 11, lineHeight: 1.5 }}>
+              📚 Sources: {dayContent.source_credits}
+            </p>
+          </div>
+        )}
 
         {/* Action buttons */}
         <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -428,19 +534,12 @@ export default function Home() {
             className="fs-btn-primary"
             style={{
               width: '100%',
-              ...(completed ? {
-                background: 'var(--fs-teal-500)',
-                boxShadow: 'var(--fs-glow-teal)',
-              } : {}),
+              ...(completed ? { background: 'var(--fs-teal-500)', boxShadow: 'var(--fs-glow-teal)' } : {}),
             }}
           >
             {completed ? `Day ${currentDay} Complete! ✓` : `Mark Day ${currentDay} Complete ✓`}
           </button>
-          <button
-            onClick={() => setShowLogModal(true)}
-            className="fs-btn-secondary"
-            style={{ width: '100%' }}
-          >
+          <button onClick={() => setShowLogModal(true)} className="fs-btn-secondary" style={{ width: '100%' }}>
             Add to my log
           </button>
         </div>
@@ -462,17 +561,13 @@ export default function Home() {
               }}>
                 {user.initials}
               </div>
-              <span style={{ color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)', flex: 1 }}>
-                {user.name}
-              </span>
-              <span style={{ color: 'var(--fs-teal-300)', fontSize: 'var(--fs-text-xs)' }}>
-                {streak} day streak 🔥
-              </span>
+              <span style={{ color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)', flex: 1 }}>{user.name}</span>
+              <span style={{ color: 'var(--fs-teal-300)', fontSize: 'var(--fs-text-xs)' }}>{streak} day streak 🔥</span>
             </div>
           ))}
         </div>
 
-        {/* Testing tools trigger */}
+        {/* Testing tools */}
         <div style={{ textAlign: 'center', paddingBottom: 16 }}>
           <button
             onClick={() => setShowDevMenu(true)}
