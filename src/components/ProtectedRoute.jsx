@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import AuroraBackground from './AuroraBackground'
 
 export default function ProtectedRoute({ children }) {
   const [loading, setLoading] = useState(true)
@@ -17,9 +18,12 @@ export default function ProtectedRoute({ children }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen font-medium" style={{ color: '#534AB7' }}>
-        Loading...
-      </div>
+      <>
+        <AuroraBackground />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+          <p style={{ color: 'var(--fs-purple-300)', fontSize: 'var(--fs-text-base)', fontWeight: 500 }}>Loading...</p>
+        </div>
+      </>
     )
   }
 

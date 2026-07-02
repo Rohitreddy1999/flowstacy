@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import AuroraBackground from '../components/AuroraBackground'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -33,41 +34,36 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col px-6 py-10">
-      <div className="max-w-[420px] mx-auto w-full flex flex-col flex-1">
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '40px 24px' }}>
+      <AuroraBackground />
 
-        {/* Logo */}
-        <div className="text-center mb-10">
-          <span className="text-2xl font-semibold tracking-tight" style={{ color: '#534AB7' }}>
-            flowstate
-          </span>
+      <div style={{ maxWidth: 420, margin: '0 auto', width: '100%', flex: 1, display: 'flex', flexDirection: 'column' }}>
+
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <span className="fs-logo" style={{ fontSize: 22 }}>flowstate</span>
         </div>
 
-        {/* Heading */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">Welcome back</h1>
-          <p className="text-sm text-gray-400">Sign in to continue your journey</p>
+        <div style={{ marginBottom: 28 }}>
+          <h1 className="fs-heading-md" style={{ marginBottom: 6 }}>Welcome back</h1>
+          <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-sm)' }}>Sign in to continue your journey</p>
         </div>
 
-        {/* Returning-session banner */}
         {isReturning && (
-          <div className="rounded-xl px-4 py-3 mb-6" style={{ backgroundColor: '#EEEDFE' }}>
-            <p className="text-sm font-medium" style={{ color: '#534AB7' }}>
+          <div className="fs-card fs-card-purple" style={{ padding: '12px 16px', marginBottom: 20 }}>
+            <p style={{ color: 'var(--fs-purple-300)', fontSize: 'var(--fs-text-sm)' }}>
               Welcome back — just sign in to continue your journey
             </p>
           </div>
         )}
 
-        {/* Form */}
-        <form onSubmit={handleSignIn} className="space-y-4 mb-4">
+        <form onSubmit={handleSignIn} style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 12 }}>
           <input
             type="email"
             required
             placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            className="w-full text-sm text-gray-800 focus:outline-none"
-            style={{ border: '1px solid #e5e5e5', borderRadius: '12px', padding: '12px 16px' }}
+            className="fs-input"
           />
           <input
             type="password"
@@ -75,51 +71,46 @@ export default function Login() {
             placeholder="Password"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            className="w-full text-sm text-gray-800 focus:outline-none"
-            style={{ border: '1px solid #e5e5e5', borderRadius: '12px', padding: '12px 16px' }}
+            className="fs-input"
           />
 
           {error && (
-            <p className="text-xs text-red-500 px-1">{error}</p>
+            <p style={{ color: '#F87171', fontSize: 'var(--fs-text-xs)', paddingLeft: 4 }}>{error}</p>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl text-white font-semibold text-base transition-opacity hover:opacity-90"
-            style={{ backgroundColor: '#534AB7', opacity: loading ? 0.7 : 1 }}
+            className="fs-btn-primary"
+            style={{ width: '100%', opacity: loading ? 0.7 : 1 }}
           >
             {loading ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
 
-        {/* Forgot password */}
-        <div className="text-right mb-6">
-          <button className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+        <div style={{ textAlign: 'right', marginBottom: 24 }}>
+          <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fs-text-tertiary)', fontSize: 'var(--fs-text-xs)' }}>
             Forgot password?
           </button>
         </div>
 
-        {/* Divider */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="flex-1 h-px bg-gray-100" />
-          <span className="text-xs text-gray-400">or</span>
-          <div className="flex-1 h-px bg-gray-100" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
+          <div style={{ flex: 1, height: 1, background: 'var(--fs-border)' }} />
+          <span style={{ color: 'var(--fs-text-tertiary)', fontSize: 'var(--fs-text-xs)' }}>or</span>
+          <div style={{ flex: 1, height: 1, background: 'var(--fs-border)' }} />
         </div>
 
-        {/* Google */}
         <button
           onClick={handleGoogle}
-          className="w-full py-3 rounded-xl text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-          style={{ border: '1px solid #e5e5e5' }}
+          className="fs-btn-secondary"
+          style={{ width: '100%' }}
         >
           🅖 Continue with Google
         </button>
 
-        {/* Sign up link */}
-        <p className="text-center text-sm text-gray-400 mt-auto pt-10">
+        <p style={{ textAlign: 'center', fontSize: 'var(--fs-text-sm)', color: 'var(--fs-text-tertiary)', marginTop: 'auto', paddingTop: 40 }}>
           Don't have an account?{' '}
-          <Link to="/signup" className="font-semibold" style={{ color: '#534AB7' }}>
+          <Link to="/signup" style={{ color: 'var(--fs-purple-300)', fontWeight: 500 }}>
             Sign up
           </Link>
         </p>

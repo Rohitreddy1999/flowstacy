@@ -1,40 +1,44 @@
 import { Link, useParams } from 'react-router-dom'
+import AuroraBackground from '../components/AuroraBackground'
 
 export default function TrackDetail() {
   const { trackId } = useParams()
 
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-10">
-      <div className="max-w-md mx-auto space-y-6">
-        <Link to="/home" className="text-sm font-medium hover:underline" style={{ color: '#534AB7' }}>
-          ← Back to Today
-        </Link>
-        <h1 className="text-3xl font-bold text-gray-800">Track Detail</h1>
-        <p className="text-sm font-mono bg-gray-100 px-3 py-1 rounded inline-block text-gray-500">
-          trackId: {trackId}
-        </p>
-        <p className="text-gray-500 text-lg">
-          The full 21-day curriculum for your selected track. Browse daily lessons, habit stacks, video content, and expert guidance — all in one place.
-        </p>
-        <div className="space-y-3">
-          {[1, 2, 3].map((day) => (
-            <div key={day} className="bg-white rounded-xl p-4 shadow-sm flex items-center justify-between">
-              <div>
-                <p className="font-semibold text-gray-700">Day {day}</p>
-                <p className="text-gray-400 text-sm">— Content coming soon —</p>
+    <>
+      <AuroraBackground />
+      <div style={{ minHeight: '100vh', padding: '40px 24px' }}>
+        <div style={{ maxWidth: 480, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <Link to="/home" style={{ color: 'var(--fs-purple-300)', fontSize: 'var(--fs-text-sm)', textDecoration: 'none' }}>
+            ← Back to Today
+          </Link>
+          <h1 className="fs-heading-md">Track Detail</h1>
+          <span className="fs-badge fs-badge-purple" style={{ alignSelf: 'flex-start' }}>
+            trackId: {trackId}
+          </span>
+          <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-base)', lineHeight: 1.6 }}>
+            The full 21-day curriculum for your selected track. Browse daily lessons, habit stacks, video content, and expert guidance — all in one place.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {[1, 2, 3].map(day => (
+              <div key={day} className="fs-card" style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <p style={{ fontWeight: 500, color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)' }}>Day {day}</p>
+                  <p style={{ color: 'var(--fs-text-tertiary)', fontSize: 'var(--fs-text-xs)' }}>— Content coming soon —</p>
+                </div>
+                <span style={{ color: 'var(--fs-text-tertiary)', fontSize: 20 }}>›</span>
               </div>
-              <span className="text-gray-300 text-xl">›</span>
-            </div>
-          ))}
+            ))}
+          </div>
+          <Link
+            to="/community"
+            className="fs-btn-primary"
+            style={{ display: 'block', textAlign: 'center', textDecoration: 'none', padding: '14px 24px' }}
+          >
+            Next: Community →
+          </Link>
         </div>
-        <Link
-          to="/community"
-          className="block w-full py-3 px-6 rounded-xl text-white font-semibold text-lg text-center transition-opacity hover:opacity-90"
-          style={{ backgroundColor: '#534AB7' }}
-        >
-          Next: Community →
-        </Link>
       </div>
-    </div>
+    </>
   )
 }

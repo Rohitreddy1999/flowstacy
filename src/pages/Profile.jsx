@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import AuroraBackground from '../components/AuroraBackground'
 import BottomNav from '../components/BottomNav'
 
 export default function Profile() {
@@ -12,31 +13,29 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-20">
-      <nav className="border-b border-gray-100 px-6 py-4 sticky top-0 bg-white z-10">
-        <span className="text-lg font-semibold tracking-tight" style={{ color: '#534AB7' }}>
-          flowstate
-        </span>
-      </nav>
-
-      <div className="max-w-[480px] mx-auto px-6 py-8 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile</h1>
-          <p className="text-sm text-gray-400">
-            Coming soon — your profile and settings will live here.
-          </p>
+    <>
+      <AuroraBackground />
+      <div className="fs-page">
+        <nav className="fs-topbar">
+          <span className="fs-logo">flowstate</span>
+        </nav>
+        <div style={{ padding: '32px 20px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div>
+            <h1 className="fs-heading-md" style={{ marginBottom: 8 }}>Profile</h1>
+            <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-sm)' }}>
+              Coming soon — your profile and settings will live here.
+            </p>
+          </div>
+          <button
+            onClick={handleSignOut}
+            className="fs-btn-secondary"
+            style={{ width: '100%', borderColor: '#EF4444', color: '#F87171' }}
+          >
+            Sign out
+          </button>
         </div>
-
-        <button
-          onClick={handleSignOut}
-          className="w-full py-3 rounded-xl font-semibold text-base bg-white transition-colors hover:bg-red-50"
-          style={{ border: '1px solid #EF4444', color: '#EF4444' }}
-        >
-          Sign out
-        </button>
       </div>
-
       <BottomNav />
-    </div>
+    </>
   )
 }

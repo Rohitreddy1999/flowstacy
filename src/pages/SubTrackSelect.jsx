@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
+import AuroraBackground from '../components/AuroraBackground'
 import BackButton from '../components/BackButton'
-
-// ── Data ──────────────────────────────────────────────────────────────────────
 
 const MAIN_TRACKS = [
   { id: 'fitness',    emoji: '💪', title: 'Body & Fitness' },
@@ -21,11 +20,11 @@ const SUB_TRACKS = {
     { id: 'yoga',         emoji: '🧘', title: 'Yoga & Flexibility',     desc: 'Move better, feel better, recover faster' },
   ],
   discipline: [
-    { id: 'morning',    emoji: '☀️', title: 'Morning Routine',          desc: 'Design and stick to a powerful morning ritual' },
-    { id: 'reading',    emoji: '📚', title: 'Daily Reading',            desc: 'Read 10 pages every single day without fail' },
-    { id: 'steps',      emoji: '🚶', title: '10,000 Steps',             desc: 'Walk your way to a healthier body and clearer mind' },
-    { id: 'meditation', emoji: '🧘', title: 'Meditation',               desc: '5 minutes a day of stillness that compounds over time' },
-    { id: 'detox',      emoji: '📵', title: 'Digital Detox',            desc: 'Take back control from your phone and social media' },
+    { id: 'morning',    emoji: '☀️', title: 'Morning Routine',  desc: 'Design and stick to a powerful morning ritual' },
+    { id: 'reading',    emoji: '📚', title: 'Daily Reading',    desc: 'Read 10 pages every single day without fail' },
+    { id: 'steps',      emoji: '🚶', title: '10,000 Steps',     desc: 'Walk your way to a healthier body and clearer mind' },
+    { id: 'meditation', emoji: '🧘', title: 'Meditation',       desc: '5 minutes a day of stillness that compounds over time' },
+    { id: 'detox',      emoji: '📵', title: 'Digital Detox',    desc: 'Take back control from your phone and social media' },
   ],
   instrument: [
     { id: 'guitar',  emoji: '🎸', title: 'Guitar',           desc: 'From your first chord to your first full song' },
@@ -47,44 +46,20 @@ const SUB_TRACKS = {
   ],
 }
 
-// ── Shared card component ─────────────────────────────────────────────────────
-
 function SelectCard({ isSelected, onClick, children }) {
   return (
     <button
       onClick={onClick}
-      className="relative w-full text-left rounded-xl p-4 border transition-all duration-150 focus:outline-none"
-      style={{
-        borderColor:     isSelected ? '#534AB7' : '#e5e5e5',
-        backgroundColor: isSelected ? '#EEEDFE' : '#ffffff',
-      }}
-      onMouseEnter={e => {
-        if (!isSelected) {
-          e.currentTarget.style.borderColor = '#534AB7'
-          e.currentTarget.style.backgroundColor = '#EEEDFE'
-        }
-      }}
-      onMouseLeave={e => {
-        if (!isSelected) {
-          e.currentTarget.style.borderColor = '#e5e5e5'
-          e.currentTarget.style.backgroundColor = '#ffffff'
-        }
-      }}
+      className={isSelected ? 'fs-card fs-card-purple' : 'fs-card'}
+      style={{ padding: '14px 16px', textAlign: 'left', cursor: 'pointer', width: '100%', position: 'relative', border: 'none' }}
     >
       {isSelected && (
-        <span
-          className="absolute top-3 right-3 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs"
-          style={{ backgroundColor: '#534AB7' }}
-        >
-          ✓
-        </span>
+        <span style={{ position: 'absolute', top: 10, right: 10, width: 16, height: 16, borderRadius: '50%', background: 'var(--fs-purple-500)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: 'white' }}>✓</span>
       )}
       {children}
     </button>
   )
 }
-
-// ── Main export ───────────────────────────────────────────────────────────────
 
 export default function SubTrackSelect() {
   const navigate = useNavigate()
@@ -94,7 +69,6 @@ export default function SubTrackSelect() {
   const backTarget = location.state?.from === 'track-select' ? '/track-select' : '/recommendation'
 
   const recommendedTrack = localStorage.getItem('flowstate_selected_track') || 'fitness'
-
   const [exploreTrack, setExploreTrack] = useState(null)
   const [selected, setSelected] = useState(null)
 
@@ -114,65 +88,53 @@ export default function SubTrackSelect() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col px-6 py-10">
-      <div className="max-w-[480px] mx-auto w-full flex flex-col flex-1">
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '40px 24px' }}>
+      <AuroraBackground />
 
-        {/* Back button */}
-        <BackButton onClick={() => navigate(backTarget)} className="self-start mb-6" />
+      <div style={{ maxWidth: 480, margin: '0 auto', width: '100%', flex: 1, display: 'flex', flexDirection: 'column' }}>
 
-        {/* Heading */}
-        <div className="mb-8">
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">
-            You're on your way
-          </p>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <BackButton onClick={() => navigate(backTarget)} />
+
+        <div style={{ margin: '16px 0 28px' }}>
+          <p className="fs-label fs-label-purple" style={{ marginBottom: 8 }}>You're on your way</p>
+          <h1 className="fs-heading-md" style={{ marginBottom: 8 }}>
             {isExplore ? 'Explore all tracks' : 'Pick your focus'}
           </h1>
-          <p className="text-sm text-gray-400 leading-relaxed">
-            Choose what you want to work on for the next 21 days. You can always try
-            others after you graduate.
+          <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-sm)', lineHeight: 1.6 }}>
+            Choose what you want to work on for the next 21 days. You can always try others after you graduate.
           </p>
         </div>
 
-        <div className="space-y-3 mb-8 flex-1">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1, marginBottom: 20 }}>
 
-          {/* Explore mode — main track selector */}
           {isExplore && (
-            <div className="space-y-3 mb-6">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
               {MAIN_TRACKS.map(track => (
-                <SelectCard
-                  key={track.id}
-                  isSelected={exploreTrack === track.id}
-                  onClick={() => handleSelectMainTrack(track.id)}
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="text-2xl leading-none shrink-0">{track.emoji}</span>
-                    <p className="text-sm font-semibold text-gray-900">{track.title}</p>
+                <SelectCard key={track.id} isSelected={exploreTrack === track.id} onClick={() => handleSelectMainTrack(track.id)}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <span style={{ fontSize: 22 }}>{track.emoji}</span>
+                    <p style={{ fontWeight: 500, color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)' }}>{track.title}</p>
                   </div>
                 </SelectCard>
               ))}
             </div>
           )}
 
-          {/* Sub-track list — shown when a track is active */}
           {subOptions && (
             <>
               {isExplore && (
-                <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 pt-2 border-t border-gray-100">
-                  Now pick your focus
-                </p>
+                <div style={{ height: 1, background: 'var(--fs-border)', margin: '4px 0 12px' }} />
               )}
+              <p className="fs-label" style={{ marginBottom: 10 }}>
+                {isExplore ? 'NOW PICK YOUR FOCUS' : 'PICK YOUR FOCUS'}
+              </p>
               {subOptions.map(opt => (
-                <SelectCard
-                  key={opt.id}
-                  isSelected={selected === opt.id}
-                  onClick={() => setSelected(opt.id)}
-                >
-                  <div className="flex items-start gap-4">
-                    <span className="text-2xl leading-none mt-0.5 shrink-0">{opt.emoji}</span>
+                <SelectCard key={opt.id} isSelected={selected === opt.id} onClick={() => setSelected(opt.id)}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                    <span style={{ fontSize: 22, flexShrink: 0, marginTop: 2 }}>{opt.emoji}</span>
                     <div>
-                      <p className="text-sm font-semibold text-gray-900 mb-0.5">{opt.title}</p>
-                      <p className="text-xs text-gray-400 leading-relaxed">{opt.desc}</p>
+                      <p style={{ fontWeight: 500, color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)', marginBottom: 3 }}>{opt.title}</p>
+                      <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-xs)', lineHeight: 1.5 }}>{opt.desc}</p>
                     </div>
                   </div>
                 </SelectCard>
@@ -181,19 +143,9 @@ export default function SubTrackSelect() {
           )}
         </div>
 
-        {/* CTA */}
-        <button
-          onClick={handleBegin}
-          disabled={!selected}
-          className="w-full py-3 rounded-xl text-white font-semibold text-base transition-opacity"
-          style={{
-            backgroundColor: selected ? '#534AB7' : '#c4c4c4',
-            cursor: selected ? 'pointer' : 'not-allowed',
-          }}
-        >
+        <button onClick={handleBegin} disabled={!selected} className="fs-btn-primary" style={{ width: '100%' }}>
           Let's begin →
         </button>
-
       </div>
     </div>
   )

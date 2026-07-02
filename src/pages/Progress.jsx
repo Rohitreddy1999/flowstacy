@@ -1,22 +1,22 @@
+import AuroraBackground from '../components/AuroraBackground'
 import BottomNav from '../components/BottomNav'
 
 export default function Progress() {
   return (
-    <div className="min-h-screen bg-white pb-20">
-      <nav className="border-b border-gray-100 px-6 py-4 sticky top-0 bg-white z-10">
-        <span className="text-lg font-semibold tracking-tight" style={{ color: '#534AB7' }}>
-          flowstate
-        </span>
-      </nav>
-
-      <div className="max-w-[480px] mx-auto px-6 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Progress</h1>
-        <p className="text-sm text-gray-400">
-          Coming soon — your full 21-day journey will live here.
-        </p>
+    <>
+      <AuroraBackground />
+      <div className="fs-page">
+        <nav className="fs-topbar">
+          <span className="fs-logo">flowstate</span>
+        </nav>
+        <div style={{ padding: '32px 20px' }}>
+          <h1 className="fs-heading-md" style={{ marginBottom: 8 }}>Your Progress</h1>
+          <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-sm)' }}>
+            Coming soon — your full 21-day journey will live here.
+          </p>
+        </div>
       </div>
-
       <BottomNav />
-    </div>
+    </>
   )
 }

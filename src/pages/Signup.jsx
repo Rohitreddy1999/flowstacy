@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import AuroraBackground from '../components/AuroraBackground'
 
 function getStrength(pwd) {
   if (!pwd) return null
@@ -11,10 +12,8 @@ function getStrength(pwd) {
   if (/[^A-Za-z0-9]/.test(pwd)) score++
   if (score <= 1) return { label: 'Weak',   color: '#EF4444', width: '33%' }
   if (score <= 3) return { label: 'Medium', color: '#F59E0B', width: '66%' }
-  return              { label: 'Strong', color: '#10B981', width: '100%' }
+  return              { label: 'Strong', color: 'var(--fs-teal-300)', width: '100%' }
 }
-
-const INPUT_STYLE = { border: '1px solid #e5e5e5', borderRadius: '12px', padding: '12px 16px' }
 
 export default function Signup() {
   const navigate = useNavigate()
@@ -30,16 +29,8 @@ export default function Signup() {
   async function handleSignUp(e) {
     e.preventDefault()
     setError('')
-
-    if (password !== confirmPassword) {
-      setError("Passwords don't match.")
-      return
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.')
-      return
-    }
-
+    if (password !== confirmPassword) { setError("Passwords don't match."); return }
+    if (password.length < 6) { setError('Password must be at least 6 characters.'); return }
     setLoading(true)
     const { error } = await supabase.auth.signUp({
       email,
@@ -47,7 +38,6 @@ export default function Signup() {
       options: { data: { full_name: fullName } },
     })
     setLoading(false)
-
     if (error) {
       setError(error.message)
     } else {
@@ -57,32 +47,28 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col px-6 py-10">
-      <div className="max-w-[420px] mx-auto w-full flex flex-col flex-1">
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '40px 24px' }}>
+      <AuroraBackground />
 
-        {/* Logo */}
-        <div className="text-center mb-10">
-          <span className="text-2xl font-semibold tracking-tight" style={{ color: '#534AB7' }}>
-            flowstate
-          </span>
+      <div style={{ maxWidth: 420, margin: '0 auto', width: '100%', flex: 1, display: 'flex', flexDirection: 'column' }}>
+
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <span className="fs-logo" style={{ fontSize: 22 }}>flowstate</span>
         </div>
 
-        {/* Heading */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">Start your journey</h1>
-          <p className="text-sm text-gray-400">Create your account — it's free</p>
+        <div style={{ marginBottom: 28 }}>
+          <h1 className="fs-heading-md" style={{ marginBottom: 6 }}>Start your journey</h1>
+          <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-sm)' }}>Create your account — it's free</p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSignUp} className="space-y-4 mb-4">
+        <form onSubmit={handleSignUp} style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 12 }}>
           <input
             type="text"
             required
             placeholder="Full name"
             value={fullName}
             onChange={e => setFullName(e.target.value)}
-            className="w-full text-sm text-gray-800 focus:outline-none"
-            style={INPUT_STYLE}
+            className="fs-input"
           />
           <input
             type="email"
@@ -90,11 +76,9 @@ export default function Signup() {
             placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            className="w-full text-sm text-gray-800 focus:outline-none"
-            style={INPUT_STYLE}
+            className="fs-input"
           />
 
-          {/* Password + strength */}
           <div>
             <input
               type="password"
@@ -102,18 +86,14 @@ export default function Signup() {
               placeholder="Password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full text-sm text-gray-800 focus:outline-none"
-              style={INPUT_STYLE}
+              className="fs-input"
             />
             {strength && (
-              <div className="mt-2 px-1">
-                <div className="w-full bg-gray-100 rounded-full h-1 overflow-hidden">
-                  <div
-                    className="h-1 rounded-full transition-all duration-300"
-                    style={{ width: strength.width, backgroundColor: strength.color }}
-                  />
+              <div style={{ marginTop: 8, paddingLeft: 4 }}>
+                <div style={{ height: 2, background: 'var(--fs-border)', borderRadius: 1, overflow: 'hidden' }}>
+                  <div style={{ height: 2, width: strength.width, backgroundColor: strength.color, transition: 'width 0.3s' }} />
                 </div>
-                <p className="text-xs mt-1" style={{ color: strength.color }}>{strength.label}</p>
+                <p style={{ fontSize: 'var(--fs-text-xs)', marginTop: 4, color: strength.color }}>{strength.label}</p>
               </div>
             )}
           </div>
@@ -124,33 +104,30 @@ export default function Signup() {
             placeholder="Confirm password"
             value={confirmPassword}
             onChange={e => setConfirmPassword(e.target.value)}
-            className="w-full text-sm text-gray-800 focus:outline-none"
-            style={INPUT_STYLE}
+            className="fs-input"
           />
 
           {error && (
-            <p className="text-xs text-red-500 px-1">{error}</p>
+            <p style={{ color: '#F87171', fontSize: 'var(--fs-text-xs)', paddingLeft: 4 }}>{error}</p>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl text-white font-semibold text-base transition-opacity hover:opacity-90"
-            style={{ backgroundColor: '#534AB7', opacity: loading ? 0.7 : 1 }}
+            className="fs-btn-primary"
+            style={{ width: '100%', opacity: loading ? 0.7 : 1 }}
           >
             {loading ? 'Creating account…' : 'Create account'}
           </button>
         </form>
 
-        {/* Terms */}
-        <p className="text-xs text-gray-400 text-center px-4 leading-relaxed mb-6">
+        <p style={{ fontSize: 'var(--fs-text-xs)', color: 'var(--fs-text-tertiary)', textAlign: 'center', padding: '0 16px 20px', lineHeight: 1.6 }}>
           By creating an account you agree to our Terms of Service and Privacy Policy
         </p>
 
-        {/* Sign in link */}
-        <p className="text-center text-sm text-gray-400 mt-auto pt-4">
+        <p style={{ textAlign: 'center', fontSize: 'var(--fs-text-sm)', color: 'var(--fs-text-tertiary)', marginTop: 'auto', paddingTop: 16 }}>
           Already have an account?{' '}
-          <Link to="/login" className="font-semibold" style={{ color: '#534AB7' }}>
+          <Link to="/login" style={{ color: 'var(--fs-purple-300)', fontWeight: 500 }}>
             Sign in
           </Link>
         </p>
