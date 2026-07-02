@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
+import AuroraBackground from '../components/AuroraBackground'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -181,7 +182,8 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-20">
+    <div className="min-h-screen pb-20" style={{ background: 'transparent' }}>
+      <AuroraBackground />
 
       {/* ── Celebration overlay ──────────────────────────────── */}
       {showCelebration && (

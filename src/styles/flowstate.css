@@ -1,0 +1,540 @@
+/* ================================
+   FLOWSTATE DESIGN SYSTEM
+   The visual language of flow state
+   ================================ */
+
+/* Core color palette */
+:root {
+  /* Backgrounds */
+  --fs-bg-primary: #0A0812;
+  --fs-bg-secondary: #0F0C1A;
+  --fs-bg-card: rgba(255, 255, 255, 0.05);
+  --fs-bg-card-hover: rgba(255, 255, 255, 0.08);
+
+  /* Purple — primary brand */
+  --fs-purple-100: #EEEDFE;
+  --fs-purple-300: #9D92F8;
+  --fs-purple-500: #534AB7;
+  --fs-purple-700: #3C3489;
+  --fs-purple-glow: rgba(83, 74, 183, 0.4);
+
+  /* Teal — achievement and completion */
+  --fs-teal-300: #5DCAA5;
+  --fs-teal-500: #1D9E75;
+  --fs-teal-glow: rgba(29, 158, 117, 0.3);
+
+  /* Text */
+  --fs-text-primary: #FFFFFF;
+  --fs-text-secondary: rgba(255, 255, 255, 0.6);
+  --fs-text-tertiary: rgba(255, 255, 255, 0.35);
+
+  /* Borders */
+  --fs-border: rgba(255, 255, 255, 0.08);
+  --fs-border-purple: rgba(83, 74, 183, 0.5);
+  --fs-border-teal: rgba(29, 158, 117, 0.4);
+
+  /* Shadows and glows */
+  --fs-glow-purple: 0 0 20px rgba(83, 74, 183, 0.4);
+  --fs-glow-teal: 0 0 20px rgba(29, 158, 117, 0.3);
+  --fs-glow-white: 0 0 10px rgba(255, 255, 255, 0.1);
+
+  /* Typography scale */
+  --fs-text-xs: 11px;
+  --fs-text-sm: 13px;
+  --fs-text-base: 15px;
+  --fs-text-lg: 18px;
+  --fs-text-xl: 22px;
+  --fs-text-2xl: 28px;
+  --fs-text-3xl: 36px;
+  --fs-text-4xl: 48px;
+
+  /* Spacing */
+  --fs-space-1: 4px;
+  --fs-space-2: 8px;
+  --fs-space-3: 12px;
+  --fs-space-4: 16px;
+  --fs-space-5: 20px;
+  --fs-space-6: 24px;
+  --fs-space-8: 32px;
+  --fs-space-10: 40px;
+
+  /* Border radius */
+  --fs-radius-sm: 8px;
+  --fs-radius-md: 12px;
+  --fs-radius-lg: 16px;
+  --fs-radius-xl: 24px;
+  --fs-radius-full: 9999px;
+
+  /* Transitions */
+  --fs-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --fs-transition-slow: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ================================
+   AURORA BACKGROUND
+   The breathing background effect
+   ================================ */
+
+.fs-aurora {
+  position: fixed;
+  inset: 0;
+  background: var(--fs-bg-primary);
+  overflow: hidden;
+  z-index: -1;
+}
+
+.fs-aurora::before {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(83, 74, 183, 0.35) 0%,
+    transparent 70%);
+  top: -100px;
+  left: -100px;
+  animation: aurora-pulse-1 8s ease-in-out infinite;
+}
+
+.fs-aurora::after {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(29, 158, 117, 0.25) 0%,
+    transparent 70%);
+  bottom: -100px;
+  right: -100px;
+  animation: aurora-pulse-2 10s ease-in-out infinite;
+}
+
+@keyframes aurora-pulse-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.35; }
+  33% { transform: translate(60px, 40px) scale(1.1); opacity: 0.45; }
+  66% { transform: translate(-30px, 60px) scale(0.95); opacity: 0.3; }
+}
+
+@keyframes aurora-pulse-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.25; }
+  33% { transform: translate(-40px, -30px) scale(1.05); opacity: 0.35; }
+  66% { transform: translate(50px, -20px) scale(0.9); opacity: 0.2; }
+}
+
+/* ================================
+   GLASSMORPHISM CARDS
+   The frosted glass effect
+   ================================ */
+
+.fs-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--fs-radius-lg);
+  transition: var(--fs-transition);
+}
+
+.fs-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.fs-card-purple {
+  background: rgba(83, 74, 183, 0.15);
+  border-color: rgba(83, 74, 183, 0.3);
+}
+
+.fs-card-purple:hover {
+  background: rgba(83, 74, 183, 0.22);
+  border-color: rgba(83, 74, 183, 0.5);
+  box-shadow: var(--fs-glow-purple);
+}
+
+.fs-card-teal {
+  background: rgba(29, 158, 117, 0.12);
+  border-color: rgba(29, 158, 117, 0.25);
+}
+
+/* ================================
+   BUTTONS
+   Primary, secondary, ghost
+   ================================ */
+
+.fs-btn-primary {
+  background: var(--fs-purple-500);
+  color: white;
+  border: none;
+  border-radius: var(--fs-radius-md);
+  padding: 14px 24px;
+  font-size: var(--fs-text-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--fs-transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.fs-btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.1) 0%,
+    transparent 50%
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.fs-btn-primary:hover {
+  background: var(--fs-purple-700);
+  box-shadow: var(--fs-glow-purple);
+  transform: translateY(-1px);
+}
+
+.fs-btn-primary:hover::after {
+  opacity: 1;
+}
+
+.fs-btn-primary:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.3);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.fs-btn-secondary {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--fs-radius-md);
+  padding: 14px 24px;
+  font-size: var(--fs-text-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--fs-transition);
+}
+
+.fs-btn-secondary:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+.fs-btn-ghost {
+  background: transparent;
+  color: var(--fs-purple-300);
+  border: none;
+  padding: 8px 16px;
+  font-size: var(--fs-text-sm);
+  cursor: pointer;
+  transition: var(--fs-transition);
+}
+
+.fs-btn-ghost:hover {
+  color: white;
+}
+
+/* ================================
+   TYPOGRAPHY
+   ================================ */
+
+.fs-heading-hero {
+  font-size: var(--fs-text-4xl);
+  font-weight: 300;
+  color: var(--fs-text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.fs-heading-lg {
+  font-size: var(--fs-text-3xl);
+  font-weight: 400;
+  color: var(--fs-text-primary);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.fs-heading-md {
+  font-size: var(--fs-text-2xl);
+  font-weight: 500;
+  color: var(--fs-text-primary);
+  line-height: 1.3;
+}
+
+.fs-heading-sm {
+  font-size: var(--fs-text-xl);
+  font-weight: 500;
+  color: var(--fs-text-primary);
+}
+
+.fs-label {
+  font-size: var(--fs-text-xs);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fs-text-tertiary);
+}
+
+.fs-label-purple {
+  color: var(--fs-purple-300);
+}
+
+.fs-label-teal {
+  color: var(--fs-teal-300);
+}
+
+/* ================================
+   PROGRESS DOTS
+   The 21-day journey visualized
+   ================================ */
+
+.fs-dots-container {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.fs-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transition: var(--fs-transition);
+}
+
+.fs-dot-completed {
+  background: var(--fs-teal-500);
+  box-shadow: 0 0 8px var(--fs-teal-glow);
+}
+
+.fs-dot-today {
+  background: var(--fs-purple-500);
+  box-shadow: 0 0 12px var(--fs-purple-glow);
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+
+.fs-dot-future {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+@keyframes dot-pulse {
+  0%, 100% { box-shadow: 0 0 8px var(--fs-purple-glow); }
+  50% { box-shadow: 0 0 20px rgba(83, 74, 183, 0.7); }
+}
+
+/* ================================
+   NAVIGATION
+   Top bar and bottom nav
+   ================================ */
+
+.fs-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10, 8, 18, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fs-logo {
+  font-size: var(--fs-text-lg);
+  font-weight: 500;
+  color: var(--fs-purple-300);
+  letter-spacing: 0.02em;
+}
+
+.fs-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(10, 8, 18, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 8px 0 20px;
+  display: flex;
+  z-index: 100;
+}
+
+.fs-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  cursor: pointer;
+  transition: var(--fs-transition);
+}
+
+.fs-nav-item-icon {
+  font-size: 20px;
+  transition: var(--fs-transition);
+}
+
+.fs-nav-item-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+  transition: var(--fs-transition);
+}
+
+.fs-nav-item.active .fs-nav-item-icon {
+  filter: drop-shadow(0 0 6px var(--fs-purple-glow));
+}
+
+.fs-nav-item.active .fs-nav-item-label {
+  color: var(--fs-purple-300);
+}
+
+/* ================================
+   INPUT FIELDS
+   ================================ */
+
+.fs-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--fs-radius-md);
+  padding: 14px 16px;
+  font-size: var(--fs-text-base);
+  color: white;
+  transition: var(--fs-transition);
+  outline: none;
+}
+
+.fs-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.fs-input:focus {
+  border-color: rgba(83, 74, 183, 0.6);
+  background: rgba(83, 74, 183, 0.08);
+  box-shadow: 0 0 0 3px rgba(83, 74, 183, 0.15);
+}
+
+/* ================================
+   REACTION BUTTONS
+   Community feed reactions
+   ================================ */
+
+.fs-reaction {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: var(--fs-radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  cursor: pointer;
+  transition: var(--fs-transition);
+  font-size: var(--fs-text-sm);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.fs-reaction:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.fs-reaction.active {
+  background: rgba(83, 74, 183, 0.2);
+  border-color: rgba(83, 74, 183, 0.4);
+  color: var(--fs-purple-300);
+}
+
+/* ================================
+   UTILITY CLASSES
+   ================================ */
+
+.fs-page {
+  min-height: 100vh;
+  background: var(--fs-bg-primary);
+  color: var(--fs-text-primary);
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+  padding-bottom: 80px;
+}
+
+.fs-page-full {
+  min-height: 100vh;
+  background: var(--fs-bg-primary);
+  color: var(--fs-text-primary);
+  position: relative;
+}
+
+.fs-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 16px 0;
+}
+
+.fs-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--fs-radius-full);
+  font-size: var(--fs-text-xs);
+  font-weight: 500;
+}
+
+.fs-badge-purple {
+  background: rgba(83, 74, 183, 0.2);
+  color: var(--fs-purple-300);
+  border: 1px solid rgba(83, 74, 183, 0.3);
+}
+
+.fs-badge-teal {
+  background: rgba(29, 158, 117, 0.15);
+  color: var(--fs-teal-300);
+  border: 1px solid rgba(29, 158, 117, 0.25);
+}
+
+.fs-glow-text {
+  color: var(--fs-purple-300);
+  text-shadow: 0 0 20px rgba(83, 74, 183, 0.5);
+}
+
+/* ================================
+   ANIMATIONS
+   ================================ */
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: var(--fs-glow-purple); }
+  50% { box-shadow: 0 0 40px rgba(83, 74, 183, 0.6); }
+}
+
+.fs-animate-up {
+  animation: fade-in-up 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.fs-animate-in {
+  animation: fade-in 0.4s ease forwards;
+}
+
+.fs-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
