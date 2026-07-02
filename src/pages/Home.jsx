@@ -182,43 +182,52 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen pb-20" style={{ background: 'transparent' }}>
+    <>
       <AuroraBackground />
 
       {/* ── Celebration overlay ──────────────────────────────── */}
       {showCelebration && (
         <div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center text-white text-center px-6"
-          style={{ backgroundColor: '#534AB7' }}
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center text-center px-6"
+          style={{
+            background: 'radial-gradient(circle at center, rgba(83,74,183,0.95) 0%, #0A0812 100%)',
+          }}
         >
-          <p className="text-7xl mb-4">{celebration.emoji}</p>
-          <p className="text-3xl font-bold mb-2">{celebration.line}</p>
+          <p style={{ fontSize: 72, marginBottom: 16 }}>{celebration.emoji}</p>
+          <p style={{ fontSize: 32, fontWeight: 300, color: 'white', marginBottom: 8, letterSpacing: '-0.02em' }}>
+            {celebration.line}
+          </p>
           {currentDay !== 21 && (
-            <p className="text-lg" style={{ opacity: 0.8 }}>See you tomorrow</p>
+            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.6)' }}>See you tomorrow</p>
           )}
         </div>
       )}
 
-      {/* ── Log modal ────────────────────────────────────────── */}
+      {/* ── Reflection modal (bottom sheet) ──────────────────── */}
       {showLogModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center px-6"
-          style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+          className="fixed inset-0 z-50 flex items-end"
+          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+          onClick={closeLogModal}
         >
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-[440px]">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">How did today feel?</h2>
+          <div
+            className="fs-card"
+            style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0,
+              borderRadius: 'var(--fs-radius-xl) var(--fs-radius-xl) 0 0',
+              padding: '24px 20px 40px',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <p className="fs-heading-sm" style={{ marginBottom: 16 }}>How did today feel?</p>
 
-            <div className="grid grid-cols-2 gap-3 mb-4">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {FEELINGS.map(f => (
                 <button
                   key={f.id}
                   onClick={() => setFeeling(f.id)}
-                  className="py-3 px-3 rounded-xl text-sm font-medium border text-left transition-all"
-                  style={{
-                    borderColor:     feeling === f.id ? '#534AB7' : '#e5e5e5',
-                    backgroundColor: feeling === f.id ? '#EEEDFE' : 'white',
-                    color:           feeling === f.id ? '#534AB7' : '#374151',
-                  }}
+                  className={feeling === f.id ? 'fs-card fs-card-purple' : 'fs-card'}
+                  style={{ padding: 12, textAlign: 'center', cursor: 'pointer', border: 'none', width: '100%', color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)' }}
                 >
                   {f.label}
                 </button>
@@ -226,226 +235,256 @@ export default function Home() {
             </div>
 
             <textarea
-              className="w-full rounded-xl border border-gray-200 p-3 text-sm text-gray-700 resize-none focus:outline-none focus:border-gray-300 mb-4"
-              style={{ minHeight: '80px' }}
+              className="fs-input"
+              style={{ marginTop: 12, height: 80, resize: 'none' }}
               placeholder="Anything else on your mind? (optional)"
               value={logNote}
               onChange={e => setLogNote(e.target.value)}
             />
 
             {reflectionSaved ? (
-              <p className="text-center text-sm font-semibold py-2" style={{ color: '#1D9E75' }}>
+              <p style={{ textAlign: 'center', fontSize: 'var(--fs-text-sm)', fontWeight: 500, padding: '12px 0', color: 'var(--fs-teal-300)' }}>
                 Reflection saved ✓
               </p>
             ) : (
-              <div className="flex gap-3">
+              <>
                 <button
                   onClick={handleSaveReflection}
                   disabled={!feeling}
-                  className="flex-1 py-3 rounded-xl text-white font-semibold text-sm transition-opacity"
-                  style={{ backgroundColor: feeling ? '#534AB7' : '#c4c4c4', cursor: feeling ? 'pointer' : 'not-allowed' }}
+                  className="fs-btn-primary"
+                  style={{ width: '100%', marginTop: 12 }}
                 >
                   Save reflection
                 </button>
-                <button
-                  onClick={closeLogModal}
-                  className="px-5 py-3 rounded-xl text-sm text-gray-400 hover:text-gray-600 font-medium transition-colors"
-                >
+                <button onClick={closeLogModal} className="fs-btn-ghost" style={{ width: '100%', marginTop: 4 }}>
                   Skip
                 </button>
-              </div>
+              </>
             )}
           </div>
         </div>
       )}
 
-      {/* ── Top nav ──────────────────────────────────────────── */}
-      <nav className="border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 bg-white z-10">
-        <span className="text-lg font-semibold tracking-tight" style={{ color: '#534AB7' }}>
-          flowstate
-        </span>
-        <div className="flex items-center gap-1.5">
-          <span>🔥</span>
-          <span className="text-sm text-gray-500">{streak} day streak</span>
+      {/* ── Dev menu ─────────────────────────────────────────── */}
+      {showDevMenu && (
+        <div
+          className="fixed inset-0 z-50"
+          style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
+          onClick={() => setShowDevMenu(false)}
+        >
+          <div
+            className="fs-card"
+            style={{ position: 'fixed', bottom: 80, left: 16, right: 16, padding: 16, zIndex: 300 }}
+            onClick={e => e.stopPropagation()}
+          >
+            {[
+              { label: '🗑 Reset everything',  action: resetApp },
+              { label: '⏩ Jump to Day 7',      action: () => jumpToDay(7) },
+              { label: '⏩ Jump to Day 14',     action: () => jumpToDay(14) },
+              { label: '⏩ Jump to Day 21',     action: () => jumpToDay(21) },
+              { label: '🏆 Go to Graduation',   action: () => navigate('/graduation') },
+            ].map(({ label, action }) => (
+              <button
+                key={label}
+                onClick={action}
+                style={{
+                  display: 'block', width: '100%', textAlign: 'left',
+                  padding: '12px 0', background: 'none', border: 'none',
+                  borderBottom: '1px solid var(--fs-border)',
+                  color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)',
+                  cursor: 'pointer',
+                }}
+              >
+                {label}
+              </button>
+            ))}
+            <button
+              onClick={() => setShowDevMenu(false)}
+              style={{
+                display: 'block', width: '100%', textAlign: 'center',
+                padding: '12px 0 0', background: 'none', border: 'none',
+                color: 'var(--fs-text-tertiary)', fontSize: 'var(--fs-text-sm)',
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
-      </nav>
+      )}
 
-      {/* ── Page content ─────────────────────────────────────── */}
-      <div className="max-w-[480px] mx-auto px-6 py-8 space-y-7">
+      {/* ── Main page ────────────────────────────────────────── */}
+      <div className="fs-page">
+
+        {/* Top bar */}
+        <nav className="fs-topbar">
+          <span className="fs-logo">flowstate</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span>🔥</span>
+            <span style={{ color: 'var(--fs-teal-300)', fontSize: 'var(--fs-text-sm)', fontWeight: 500 }}>
+              {streak}
+            </span>
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 'var(--fs-text-sm)' }}>
+              day streak
+            </span>
+          </div>
+        </nav>
 
         {/* Milestone banners */}
         {currentDay === 8 && (
-          <div className="rounded-xl px-4 py-3 text-sm font-medium leading-snug" style={{ backgroundColor: '#E1F5EE', color: '#0F6E56' }}>
-            🎉 Week 1 complete — you're ahead of 68% of people who started the same day
+          <div className="fs-card fs-card-teal" style={{ margin: '0 16px 16px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ color: 'var(--fs-teal-300)' }}>🎉</span>
+            <span style={{ color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)' }}>
+              Week 1 complete — you're ahead of 68% of people who started the same day
+            </span>
           </div>
         )}
         {currentDay === 15 && (
-          <div className="rounded-xl px-4 py-3 text-sm font-medium" style={{ backgroundColor: '#EEEDFE', color: '#534AB7' }}>
-            ⚡ Halfway there — 14 days down, 7 to go
+          <div className="fs-card fs-card-teal" style={{ margin: '0 16px 16px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ color: 'var(--fs-teal-300)' }}>⚡</span>
+            <span style={{ color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)' }}>
+              Halfway there — 14 days down, 7 to go
+            </span>
           </div>
         )}
 
-        {/* Track + day label */}
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">
+        {/* Day label + heading */}
+        <div style={{ padding: '24px 20px 16px' }}>
+          <p className="fs-label fs-label-purple" style={{ marginBottom: 8 }}>
             {subtrackName} — Day {currentDay} of {TOTAL}
           </p>
-          <h1 className="text-3xl font-bold text-gray-900 mb-1.5">
+          <h1 className="fs-heading-md" style={{ marginBottom: 6 }}>
             {getHeading(currentDay)}
           </h1>
-          <p className="text-sm text-gray-400">{getSubtext(currentDay)}</p>
+          <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-sm)' }}>
+            {getSubtext(currentDay)}
+          </p>
         </div>
 
-        {/* Progress dots + bar */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-gray-400">Your journey</span>
-            <span className="text-xs font-semibold" style={{ color: '#534AB7' }}>
-              {completedDays.length}/{TOTAL} days
-            </span>
+        {/* Progress */}
+        <div style={{ padding: '0 20px 20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <span className="fs-label">Your journey</span>
+            <span style={{ color: 'var(--fs-purple-300)', fontSize: 13 }}>{currentDay}/21 days</span>
           </div>
-          <div className="flex flex-wrap gap-2 mb-3">
+          <div style={{ height: 2, background: 'rgba(255,255,255,0.08)', borderRadius: 1, marginBottom: 12 }}>
+            <div style={{
+              height: 2,
+              background: 'var(--fs-purple-500)',
+              boxShadow: '0 0 8px var(--fs-purple-glow)',
+              borderRadius: 1,
+              width: `${(completedDays.length / TOTAL) * 100}%`,
+              transition: 'width 0.5s ease',
+            }} />
+          </div>
+          <div className="fs-dots-container">
             {Array.from({ length: TOTAL }, (_, i) => {
-              const day = i + 1
+              const day  = i + 1
               const done  = completedDays.includes(day)
               const today = day === currentDay && !done
-              const bg    = done ? '#1D9E75' : today ? '#534AB7' : null
               return (
                 <div
                   key={i}
-                  className="w-4 h-4 rounded-full transition-colors"
-                  style={bg ? { backgroundColor: bg } : { border: '1.5px solid #e5e5e5' }}
+                  className={`fs-dot ${done ? 'fs-dot-completed' : today ? 'fs-dot-today' : 'fs-dot-future'}`}
                 />
               )
             })}
           </div>
-          <div className="w-full bg-gray-100 rounded-full h-1 overflow-hidden">
-            <div
-              className="h-1 rounded-full transition-all duration-500"
-              style={{ backgroundColor: '#534AB7', width: `${(completedDays.length / TOTAL) * 100}%` }}
-            />
-          </div>
         </div>
 
         {/* Today's task card */}
-        <div className="rounded-xl p-5" style={{ backgroundColor: '#EEEDFE' }}>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#3C3489' }}>
-            Today's Task
+        <div className="fs-card fs-card-purple" style={{ margin: '0 16px 16px', padding: 16 }}>
+          <p className="fs-label fs-label-purple" style={{ marginBottom: 10 }}>TODAY'S TASK</p>
+          <p style={{ color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)', lineHeight: 1.6, marginBottom: 14 }}>
+            {taskText}
           </p>
-          <p className="text-sm text-gray-800 leading-relaxed mb-4">{taskText}</p>
           {task && (
-            <div className="flex gap-2 flex-wrap">
-              <span className="text-xs text-white px-3 py-1 rounded-full font-medium" style={{ backgroundColor: '#534AB7' }}>
-                ⏱ {task.duration}
-              </span>
-              <span className="text-xs text-white px-3 py-1 rounded-full font-medium" style={{ backgroundColor: '#534AB7' }}>
-                {task.difficulty}
-              </span>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <span className="fs-badge fs-badge-purple">⏱ {task.duration}</span>
+              <span className="fs-badge fs-badge-purple">{task.difficulty}</span>
             </div>
           )}
         </div>
 
         {/* Daily quote */}
-        <div className="py-3 px-4 rounded-r-lg" style={{ borderLeft: '3px solid #534AB7', backgroundColor: '#f9f9f9' }}>
-          <p className="text-sm italic text-gray-700 leading-relaxed mb-1">
+        <div style={{
+          margin: '0 16px 16px',
+          padding: '14px 16px',
+          borderLeft: '2px solid var(--fs-purple-500)',
+          background: 'rgba(83, 74, 183, 0.08)',
+          borderRadius: '0 var(--fs-radius-md) var(--fs-radius-md) 0',
+        }}>
+          <p style={{ color: 'var(--fs-text-secondary)', fontStyle: 'italic', fontSize: 'var(--fs-text-sm)', lineHeight: 1.6, marginBottom: 6 }}>
             "The secret of getting ahead is getting started."
           </p>
-          <p className="text-xs text-gray-400">— Mark Twain</p>
+          <p style={{ color: 'var(--fs-purple-300)', fontSize: 'var(--fs-text-xs)' }}>— Mark Twain</p>
         </div>
 
         {/* Action buttons */}
-        <div className="space-y-3">
+        <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <button
             onClick={handleMarkComplete}
             disabled={completed}
-            className="w-full py-3 px-6 rounded-xl text-white font-semibold text-base transition-all duration-300"
-            style={{ backgroundColor: completed ? '#1D9E75' : '#534AB7' }}
+            className="fs-btn-primary"
+            style={{
+              width: '100%',
+              ...(completed ? {
+                background: 'var(--fs-teal-500)',
+                boxShadow: 'var(--fs-glow-teal)',
+              } : {}),
+            }}
           >
             {completed ? `Day ${currentDay} Complete! ✓` : `Mark Day ${currentDay} Complete ✓`}
           </button>
           <button
             onClick={() => setShowLogModal(true)}
-            className="w-full py-3 px-6 rounded-xl font-semibold text-base border-2 bg-white transition-colors hover:bg-gray-50"
-            style={{ borderColor: '#534AB7', color: '#534AB7' }}
+            className="fs-btn-secondary"
+            style={{ width: '100%' }}
           >
             Add to my log
           </button>
         </div>
 
         {/* Community peek */}
-        <div className="pb-4">
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-4">
-            Others on their journey
-          </p>
-          <div className="space-y-4">
-            {COMMUNITY.map(user => (
-              <div key={user.initials} className="flex items-center gap-3">
-                <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                  style={{ backgroundColor: user.color }}
-                >
-                  {user.initials}
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-800">{user.name}</p>
-                  <p className="text-xs text-gray-400">Day {currentDay} · {streak} day streak 🔥</p>
-                </div>
+        <div style={{ padding: '0 16px 24px' }}>
+          <p className="fs-label" style={{ marginBottom: 12 }}>OTHERS ON THE SAME JOURNEY</p>
+          {COMMUNITY.map(user => (
+            <div
+              key={user.initials}
+              className="fs-card"
+              style={{ padding: '10px 14px', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 10 }}
+            >
+              <div style={{
+                width: 32, height: 32, borderRadius: '50%',
+                background: user.color,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 12, fontWeight: 500, color: 'white', flexShrink: 0,
+              }}>
+                {user.initials}
               </div>
-            ))}
-          </div>
+              <span style={{ color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)', flex: 1 }}>
+                {user.name}
+              </span>
+              <span style={{ color: 'var(--fs-teal-300)', fontSize: 'var(--fs-text-xs)' }}>
+                {streak} day streak 🔥
+              </span>
+            </div>
+          ))}
         </div>
 
-        {/* Dev menu — remove before launch */}
-        <div className="text-center pb-4">
+        {/* Testing tools trigger */}
+        <div style={{ textAlign: 'center', paddingBottom: 16 }}>
           <button
             onClick={() => setShowDevMenu(true)}
-            className="text-xs text-gray-300 hover:text-gray-400 transition-colors"
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.2)', fontSize: 11, cursor: 'pointer' }}
           >
             Testing tools
           </button>
         </div>
 
-        {showDevMenu && (
-          <div
-            className="fixed inset-0 z-50 flex items-end justify-center pb-8 px-6"
-            style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
-            onClick={() => setShowDevMenu(false)}
-          >
-            <div
-              className="w-full max-w-[440px] bg-white rounded-xl shadow-xl overflow-hidden"
-              onClick={e => e.stopPropagation()}
-            >
-              {[
-                { label: '🗑 Reset everything',  action: resetApp },
-                { label: '⏩ Jump to Day 7',      action: () => jumpToDay(7) },
-                { label: '⏩ Jump to Day 14',     action: () => jumpToDay(14) },
-                { label: '⏩ Jump to Day 21',     action: () => jumpToDay(21) },
-                { label: '🏆 Go to Graduation',   action: () => navigate('/graduation') },
-              ].map(({ label, action }) => (
-                <button
-                  key={label}
-                  onClick={action}
-                  className="w-full text-left px-5 py-4 text-sm font-medium text-gray-800 border-b border-gray-100 hover:bg-gray-50 transition-colors last:border-0"
-                >
-                  {label}
-                </button>
-              ))}
-              <button
-                onClick={() => setShowDevMenu(false)}
-                className="w-full px-5 py-4 text-sm font-medium text-gray-400 hover:bg-gray-50 transition-colors border-t border-gray-100"
-              >
-                Cancel
-              </button>
-              <p className="text-center text-xs text-gray-300 py-3">
-                Testing tools — remove before launch
-              </p>
-            </div>
-          </div>
-        )}
-
       </div>
 
       <BottomNav />
-    </div>
+    </>
   )
 }
