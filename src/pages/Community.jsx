@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { HiCog6Tooth } from 'react-icons/hi2'
 import AuroraBackground from '../components/AuroraBackground'
 import BottomNav from '../components/BottomNav'
 
@@ -161,6 +163,7 @@ function LeaderboardTab() {
 }
 
 export default function Community() {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab]     = useState('squad')
   const [myReactions, setMyReactions] = useState({})
 
@@ -175,7 +178,12 @@ export default function Community() {
       <div className="fs-page">
         <nav className="fs-topbar">
           <span className="fs-logo">flowstate</span>
-          <span style={{ fontSize: 20, cursor: 'pointer' }}>🔔</span>
+          <button
+            onClick={() => navigate('/settings')}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}
+          >
+            <HiCog6Tooth size={20} color="rgba(255,255,255,0.6)" />
+          </button>
         </nav>
 
         <div style={{ padding: '24px 20px 0' }}>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { HiArrowLeft, HiCog6Tooth } from 'react-icons/hi2'
 import BottomNav from '../components/BottomNav'
 import AuroraBackground from '../components/AuroraBackground'
 import { getDayContent, getSubtrackByName } from '../lib/curriculum'
@@ -327,11 +328,28 @@ export default function Home() {
 
         {/* Top bar */}
         <nav className="fs-topbar">
-          <span className="fs-logo">flowstate</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span>🔥</span>
-            <span style={{ color: 'var(--fs-teal-300)', fontSize: 'var(--fs-text-sm)', fontWeight: 500 }}>{streak}</span>
-            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 'var(--fs-text-sm)' }}>day streak</span>
+          {currentDay === 1 ? (
+            <button
+              onClick={() => navigate('/bridge')}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}
+            >
+              <HiArrowLeft size={20} color="rgba(255,255,255,0.6)" />
+            </button>
+          ) : (
+            <span className="fs-logo">flowstate</span>
+          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span>🔥</span>
+              <span style={{ color: 'var(--fs-teal-300)', fontSize: 'var(--fs-text-sm)', fontWeight: 500 }}>{streak}</span>
+              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 'var(--fs-text-sm)' }}>day streak</span>
+            </div>
+            <button
+              onClick={() => navigate('/settings')}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}
+            >
+              <HiCog6Tooth size={20} color="rgba(255,255,255,0.6)" />
+            </button>
           </div>
         </nav>
 
@@ -424,14 +442,24 @@ export default function Home() {
 
         {/* No content fallback */}
         {!contentLoading && !dayContent && (
-          <div className="fs-card" style={{ margin: '0 16px 16px', padding: 20, textAlign: 'center' }}>
-            <p style={{ fontSize: 24, marginBottom: 8 }}>🚧</p>
-            <p style={{ color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)', fontWeight: 500, marginBottom: 6 }}>
-              Content coming soon
+          <div className="fs-card" style={{ margin: '0 16px 16px', padding: 20 }}>
+            <p style={{ fontSize: 24, marginBottom: 10 }}>🚧</p>
+            <p style={{ color: 'var(--fs-text-primary)', fontSize: 15, fontWeight: 600, marginBottom: 6 }}>
+              {subtrackName}
             </p>
-            <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-xs)', lineHeight: 1.5 }}>
-              We are still building the curriculum for this track. Check back soon.
+            <p style={{ color: 'var(--fs-purple-300)', fontSize: 'var(--fs-text-xs)', fontWeight: 500, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Curriculum launching soon
             </p>
+            <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-sm)', lineHeight: 1.6, marginBottom: 16 }}>
+              In the meantime, Day 1 is simple: show up. Commit to this track for 21 days and watch what happens.
+            </p>
+            <button
+              onClick={() => navigate('/sub-track-select')}
+              className="fs-btn-secondary"
+              style={{ width: '100%' }}
+            >
+              Change track
+            </button>
           </div>
         )}
 

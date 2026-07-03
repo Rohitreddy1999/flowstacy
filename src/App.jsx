@@ -15,6 +15,7 @@ import Profile from './pages/Profile'
 import SubTrackSelect from './pages/SubTrackSelect'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
+import Settings from './pages/Settings'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
       <Route path="/profile"    element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/graduation" element={<ProtectedRoute><Graduation /></ProtectedRoute>} />
       <Route path="/experts"    element={<ProtectedRoute><Experts /></ProtectedRoute>} />
+      <Route path="/settings"   element={<ProtectedRoute><Settings /></ProtectedRoute>} />
     </Routes>
   )
 }
