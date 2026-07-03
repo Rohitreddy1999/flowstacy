@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import RootRedirect from './components/RootRedirect'
+import InstallPrompt from './components/InstallPrompt'
 import Onboarding from './pages/Onboarding'
 import Bridge from './pages/Bridge'
 import TrackSelect from './pages/TrackSelect'
@@ -20,6 +21,8 @@ import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
   return (
+    <>
+    <InstallPrompt />
     <Routes>
       {/* Root — smart redirect based on auth + localStorage state */}
       <Route path="/"            element={<RootRedirect />} />
@@ -44,6 +47,7 @@ function App() {
       <Route path="/experts"    element={<ProtectedRoute><Experts /></ProtectedRoute>} />
       <Route path="/settings"   element={<ProtectedRoute><Settings /></ProtectedRoute>} />
     </Routes>
+    </>
   )
 }
 
