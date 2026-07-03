@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AuroraBackground from '../components/AuroraBackground'
+import PageTransition from '../components/PageTransition'
 
 const LIFE_STAGES = [
   { id: 'studying',   emoji: '🎓', title: 'Still studying',      description: 'Figuring out who I am and what I want' },
@@ -20,6 +21,7 @@ export default function Onboarding() {
   }
 
   return (
+    <PageTransition>
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '40px 24px' }}>
       <AuroraBackground />
 
@@ -76,5 +78,6 @@ export default function Onboarding() {
         </button>
       </div>
     </div>
+    </PageTransition>
   )
 }

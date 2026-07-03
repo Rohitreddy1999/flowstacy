@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import AuroraBackground from '../components/AuroraBackground'
+import PageTransition from '../components/PageTransition'
 
 function getStrength(pwd) {
   if (!pwd) return null
@@ -47,6 +48,7 @@ export default function Signup() {
   }
 
   return (
+    <PageTransition>
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '40px 24px' }}>
       <AuroraBackground />
 
@@ -141,5 +143,6 @@ export default function Signup() {
 
       </div>
     </div>
+    </PageTransition>
   )
 }

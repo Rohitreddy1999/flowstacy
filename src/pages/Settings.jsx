@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import toast from 'react-hot-toast'
 import AuroraBackground from '../components/AuroraBackground'
+import PageTransition from '../components/PageTransition'
 
 export default function Settings() {
   const navigate = useNavigate()
@@ -101,6 +102,7 @@ export default function Settings() {
   ]
 
   return (
+    <PageTransition>
     <div style={{
       minHeight: '100vh',
       background: '#0A0812',
@@ -298,5 +300,6 @@ export default function Settings() {
         </button>
       </div>
     </div>
+    </PageTransition>
   )
 }

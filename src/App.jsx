@@ -1,4 +1,5 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
+import { AnimatePresence } from 'framer-motion'
 import RootRedirect from './components/RootRedirect'
 import InstallPrompt from './components/InstallPrompt'
 import Onboarding from './pages/Onboarding'
@@ -19,34 +20,40 @@ import Signup from './pages/Signup'
 import Settings from './pages/Settings'
 import ProtectedRoute from './components/ProtectedRoute'
 
+function AppRoutes() {
+  const location = useLocation()
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/"            element={<RootRedirect />} />
+
+        <Route path="/onboarding"        element={<Onboarding />} />
+        <Route path="/bridge"            element={<Bridge />} />
+        <Route path="/track-select"      element={<TrackSelect />} />
+        <Route path="/login"             element={<Login />} />
+        <Route path="/signup"            element={<Signup />} />
+        <Route path="/discovery"         element={<Discovery />} />
+        <Route path="/recommendation"    element={<Recommendation />} />
+        <Route path="/sub-track-select"  element={<SubTrackSelect />} />
+        <Route path="/track/:trackId"    element={<TrackDetail />} />
+
+        <Route path="/home"       element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/community"  element={<ProtectedRoute><Community /></ProtectedRoute>} />
+        <Route path="/progress"   element={<ProtectedRoute><Progress /></ProtectedRoute>} />
+        <Route path="/profile"    element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/graduation" element={<ProtectedRoute><Graduation /></ProtectedRoute>} />
+        <Route path="/experts"    element={<ProtectedRoute><Experts /></ProtectedRoute>} />
+        <Route path="/settings"   element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+      </Routes>
+    </AnimatePresence>
+  )
+}
+
 function App() {
   return (
     <>
-    <InstallPrompt />
-    <Routes>
-      {/* Root — smart redirect based on auth + localStorage state */}
-      <Route path="/"            element={<RootRedirect />} />
-
-      {/* Public / onboarding routes */}
-      <Route path="/onboarding"        element={<Onboarding />} />
-      <Route path="/bridge"            element={<Bridge />} />
-      <Route path="/track-select"      element={<TrackSelect />} />
-      <Route path="/login"             element={<Login />} />
-      <Route path="/signup"            element={<Signup />} />
-      <Route path="/discovery"         element={<Discovery />} />
-      <Route path="/recommendation"    element={<Recommendation />} />
-      <Route path="/sub-track-select"  element={<SubTrackSelect />} />
-      <Route path="/track/:trackId"    element={<TrackDetail />} />
-
-      {/* Protected routes */}
-      <Route path="/home"       element={<ProtectedRoute><Home /></ProtectedRoute>} />
-      <Route path="/community"  element={<ProtectedRoute><Community /></ProtectedRoute>} />
-      <Route path="/progress"   element={<ProtectedRoute><Progress /></ProtectedRoute>} />
-      <Route path="/profile"    element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-      <Route path="/graduation" element={<ProtectedRoute><Graduation /></ProtectedRoute>} />
-      <Route path="/experts"    element={<ProtectedRoute><Experts /></ProtectedRoute>} />
-      <Route path="/settings"   element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-    </Routes>
+      <InstallPrompt />
+      <AppRoutes />
     </>
   )
 }

@@ -1,11 +1,12 @@
 import { useNavigate } from 'react-router-dom'
 import AuroraBackground from '../components/AuroraBackground'
 import BottomNav from '../components/BottomNav'
+import PageTransition from '../components/PageTransition'
 
 export default function Progress() {
   const navigate = useNavigate()
   return (
-    <>
+    <PageTransition>
       <AuroraBackground />
       <div className="fs-page">
         <nav className="fs-topbar">
@@ -30,6 +31,6 @@ export default function Progress() {
         </div>
       </div>
       <BottomNav />
-    </>
+    </PageTransition>
   )
 }

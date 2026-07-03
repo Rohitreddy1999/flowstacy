@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import AuroraBackground from '../components/AuroraBackground'
 import BackButton from '../components/BackButton'
+import PageTransition from '../components/PageTransition'
 
 const TRACKS = [
   { id: 'fitness',    emoji: '💪', title: 'Body & Fitness',              desc: 'Show up. Move. Become someone who never skips.',              color: '#534AB7' },
@@ -33,6 +35,7 @@ export default function Recommendation() {
   }
 
   return (
+    <PageTransition>
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '40px 24px' }}>
       <AuroraBackground />
 
@@ -96,5 +99,6 @@ export default function Recommendation() {
         </button>
       </div>
     </div>
+    </PageTransition>
   )
 }

@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import AuroraBackground from '../components/AuroraBackground'
 import BackButton from '../components/BackButton'
+import PageTransition from '../components/PageTransition'
 
 const QUESTIONS = [
   {
@@ -73,11 +75,28 @@ function computeScores(answers) {
   return scores
 }
 
+const questionVariants = {
+  enter: (direction) => ({
+    x: direction > 0 ? 60 : -60,
+    opacity: 0
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    transition: { duration: 0.3, ease: 'easeOut' }
+  },
+  exit: (direction) => ({
+    x: direction < 0 ? 60 : -60,
+    opacity: 0,
+    transition: { duration: 0.2, ease: 'easeIn' }
+  })
+}
+
 export default function Discovery() {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState(Array.from({ length: 5 }, (_, i) => (i < 4 ? new Set() : '')))
-  const [fading, setFading] = useState(false)
+  const [direction, setDirection] = useState(1)
 
   const q = QUESTIONS[step]
   const currentAnswer = answers[step]
@@ -85,15 +104,15 @@ export default function Discovery() {
     ? currentAnswer instanceof Set && currentAnswer.size > 0
     : typeof currentAnswer === 'string' && currentAnswer.trim().length >= 3
 
-  function goTo(nextStep) {
-    setFading(true)
-    setTimeout(() => { setStep(nextStep); setFading(false) }, 180)
+  function goTo(nextStep, dir) {
+    setDirection(dir)
+    setStep(nextStep)
   }
 
   function handleNext() {
-    if (!canNext || fading) return
+    if (!canNext) return
     if (step < 4) {
-      goTo(step + 1)
+      goTo(step + 1, 1)
     } else {
       const scores = computeScores(answers)
       localStorage.setItem('flowstate_scores', JSON.stringify(scores))
@@ -102,7 +121,7 @@ export default function Discovery() {
     }
   }
 
-  function handleBack() { if (step > 0 && !fading) goTo(step - 1) }
+  function handleBack() { if (step > 0) goTo(step - 1, -1) }
 
   function toggleOption(optId) {
     setAnswers(prev => {
@@ -122,6 +141,7 @@ export default function Discovery() {
   const progressPct = ((step + 1) / 5) * 100
 
   return (
+    <PageTransition>
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '40px 24px' }}>
       <AuroraBackground />
 
@@ -140,60 +160,75 @@ export default function Discovery() {
           </div>
         </div>
 
-        <div style={{ opacity: fading ? 0 : 1, transition: 'opacity 0.2s', flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <h1 className="fs-heading-sm" style={{ marginBottom: 6, fontWeight: 400 }}>{q.text}</h1>
-          <p style={{ color: 'var(--fs-text-tertiary)', fontSize: 'var(--fs-text-sm)', marginBottom: 24 }}>{q.subtext}</p>
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={step}
+            custom={direction}
+            variants={questionVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+          >
+            <h1 className="fs-heading-sm" style={{ marginBottom: 6, fontWeight: 400 }}>{q.text}</h1>
+            <p style={{ color: 'var(--fs-text-tertiary)', fontSize: 'var(--fs-text-sm)', marginBottom: 24 }}>{q.subtext}</p>
 
-          {q.type === 'multi' ? (
-            <>
-              <p style={{ color: 'var(--fs-text-tertiary)', fontSize: 'var(--fs-text-xs)', marginBottom: 12 }}>Select up to 2</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
-                {q.options.map(opt => {
-                  const isSelected = currentAnswer instanceof Set && currentAnswer.has(opt.id)
-                  return (
-                    <button
-                      key={opt.id}
-                      onClick={() => toggleOption(opt.id)}
-                      className={isSelected ? 'fs-card fs-card-purple' : 'fs-card'}
-                      style={{ padding: '14px 16px', textAlign: 'left', border: 'none', width: '100%', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', gap: 12 }}
-                    >
-                      {isSelected && (
-                        <span style={{ position: 'absolute', top: 10, right: 10, width: 16, height: 16, borderRadius: '50%', background: 'var(--fs-purple-500)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: 'white' }}>✓</span>
-                      )}
-                      <span style={{ fontSize: 18 }}>{opt.emoji}</span>
-                      <span style={{ color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)', lineHeight: 1.5 }}>{opt.label}</span>
-                    </button>
-                  )
-                })}
+            {q.type === 'multi' ? (
+              <>
+                <p style={{ color: 'var(--fs-text-tertiary)', fontSize: 'var(--fs-text-xs)', marginBottom: 12 }}>Select up to 2</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
+                  {q.options.map((opt, i) => {
+                    const isSelected = currentAnswer instanceof Set && currentAnswer.has(opt.id)
+                    return (
+                      <motion.button
+                        key={opt.id}
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.06, duration: 0.3, ease: 'easeOut' }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => toggleOption(opt.id)}
+                        className={isSelected ? 'fs-card fs-card-purple' : 'fs-card'}
+                        style={{ padding: '14px 16px', textAlign: 'left', border: 'none', width: '100%', cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center', gap: 12 }}
+                      >
+                        {isSelected && (
+                          <span style={{ position: 'absolute', top: 10, right: 10, width: 16, height: 16, borderRadius: '50%', background: 'var(--fs-purple-500)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: 'white' }}>✓</span>
+                        )}
+                        <span style={{ fontSize: 18 }}>{opt.emoji}</span>
+                        <span style={{ color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)', lineHeight: 1.5 }}>{opt.label}</span>
+                      </motion.button>
+                    )
+                  })}
+                </div>
+              </>
+            ) : (
+              <div style={{ marginBottom: 32 }}>
+                <textarea
+                  className="fs-input"
+                  style={{ minHeight: 160, resize: 'none' }}
+                  placeholder={q.placeholder}
+                  value={typeof currentAnswer === 'string' ? currentAnswer : ''}
+                  onChange={handleTextChange}
+                />
+                <p style={{ color: 'var(--fs-text-tertiary)', fontSize: 'var(--fs-text-xs)', marginTop: 6, textAlign: 'right' }}>
+                  {typeof currentAnswer === 'string' ? currentAnswer.length : 0} characters
+                </p>
               </div>
-            </>
-          ) : (
-            <div style={{ marginBottom: 32 }}>
-              <textarea
-                className="fs-input"
-                style={{ minHeight: 160, resize: 'none' }}
-                placeholder={q.placeholder}
-                value={typeof currentAnswer === 'string' ? currentAnswer : ''}
-                onChange={handleTextChange}
-              />
-              <p style={{ color: 'var(--fs-text-tertiary)', fontSize: 'var(--fs-text-xs)', marginTop: 6, textAlign: 'right' }}>
-                {typeof currentAnswer === 'string' ? currentAnswer.length : 0} characters
-              </p>
-            </div>
-          )}
+            )}
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button
-              onClick={handleNext}
-              disabled={!canNext || fading}
-              className="fs-btn-primary"
-              style={{ minWidth: 140 }}
-            >
-              {step === 4 ? 'Show my match →' : 'Next →'}
-            </button>
-          </div>
-        </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                onClick={handleNext}
+                disabled={!canNext}
+                className="fs-btn-primary"
+                style={{ minWidth: 140 }}
+              >
+                {step === 4 ? 'Show my match →' : 'Next →'}
+              </button>
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
+    </PageTransition>
   )
 }

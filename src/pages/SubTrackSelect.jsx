@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import AuroraBackground from '../components/AuroraBackground'
 import BackButton from '../components/BackButton'
+import PageTransition from '../components/PageTransition'
 
 const MAIN_TRACKS = [
   { id: 'fitness',    emoji: '💪', title: 'Body & Fitness' },
@@ -46,9 +48,13 @@ const SUB_TRACKS = {
   ],
 }
 
-function SelectCard({ isSelected, onClick, children }) {
+function SelectCard({ isSelected, onClick, children, animIndex = 0 }) {
   return (
-    <button
+    <motion.button
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: animIndex * 0.06, duration: 0.3, ease: 'easeOut' }}
+      whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className={isSelected ? 'fs-card fs-card-purple' : 'fs-card'}
       style={{ padding: '14px 16px', textAlign: 'left', cursor: 'pointer', width: '100%', position: 'relative', border: 'none' }}
@@ -57,7 +63,7 @@ function SelectCard({ isSelected, onClick, children }) {
         <span style={{ position: 'absolute', top: 10, right: 10, width: 16, height: 16, borderRadius: '50%', background: 'var(--fs-purple-500)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: 'white' }}>✓</span>
       )}
       {children}
-    </button>
+    </motion.button>
   )
 }
 
@@ -88,6 +94,7 @@ export default function SubTrackSelect() {
   }
 
   return (
+    <PageTransition>
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '40px 24px' }}>
       <AuroraBackground />
 
@@ -109,8 +116,8 @@ export default function SubTrackSelect() {
 
           {isExplore && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
-              {MAIN_TRACKS.map(track => (
-                <SelectCard key={track.id} isSelected={exploreTrack === track.id} onClick={() => handleSelectMainTrack(track.id)}>
+              {MAIN_TRACKS.map((track, i) => (
+                <SelectCard key={track.id} isSelected={exploreTrack === track.id} onClick={() => handleSelectMainTrack(track.id)} animIndex={i}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                     <span style={{ fontSize: 22 }}>{track.emoji}</span>
                     <p style={{ fontWeight: 500, color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)' }}>{track.title}</p>
@@ -128,8 +135,8 @@ export default function SubTrackSelect() {
               <p className="fs-label" style={{ marginBottom: 10 }}>
                 {isExplore ? 'NOW PICK YOUR FOCUS' : 'PICK YOUR FOCUS'}
               </p>
-              {subOptions.map(opt => (
-                <SelectCard key={opt.id} isSelected={selected === opt.id} onClick={() => setSelected(opt.id)}>
+              {subOptions.map((opt, i) => (
+                <SelectCard key={opt.id} isSelected={selected === opt.id} onClick={() => setSelected(opt.id)} animIndex={i}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
                     <span style={{ fontSize: 22, flexShrink: 0, marginTop: 2 }}>{opt.emoji}</span>
                     <div>
@@ -148,5 +155,6 @@ export default function SubTrackSelect() {
         </button>
       </div>
     </div>
+    </PageTransition>
   )
 }

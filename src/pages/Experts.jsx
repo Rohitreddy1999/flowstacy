@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AuroraBackground from '../components/AuroraBackground'
 import BackButton from '../components/BackButton'
+import PageTransition from '../components/PageTransition'
 
 const FILTERS = [
   { id: 'all',     label: 'All tracks' },
@@ -153,7 +154,7 @@ export default function Experts() {
   const filtered = activeFilter === 'all' ? EXPERTS : EXPERTS.filter(e => e.tracks.includes(activeFilter))
 
   return (
-    <>
+    <PageTransition>
       <AuroraBackground />
       <div style={{ minHeight: '100vh', maxWidth: 480, margin: '0 auto' }}>
         <nav className="fs-topbar">
@@ -219,6 +220,6 @@ export default function Experts() {
           )}
         </div>
       </div>
-    </>
+    </PageTransition>
   )
 }

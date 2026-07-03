@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AuroraBackground from '../components/AuroraBackground'
 import BottomNav from '../components/BottomNav'
+import PageTransition from '../components/PageTransition'
 
 const TOTAL = 21
 
@@ -172,7 +173,7 @@ export default function Community() {
   }
 
   return (
-    <>
+    <PageTransition>
       <AuroraBackground />
       <div className="fs-page">
         <nav className="fs-topbar">
@@ -220,6 +221,6 @@ export default function Community() {
         </div>
       </div>
       <BottomNav />
-    </>
+    </PageTransition>
   )
 }

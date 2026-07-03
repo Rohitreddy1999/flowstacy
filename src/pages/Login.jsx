@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import AuroraBackground from '../components/AuroraBackground'
+import PageTransition from '../components/PageTransition'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -34,6 +35,7 @@ export default function Login() {
   }
 
   return (
+    <PageTransition>
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '40px 24px' }}>
       <AuroraBackground />
 
@@ -117,5 +119,6 @@ export default function Login() {
 
       </div>
     </div>
+    </PageTransition>
   )
 }

@@ -1,6 +1,7 @@
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import AuroraBackground from '../components/AuroraBackground'
 import BackButton from '../components/BackButton'
+import PageTransition from '../components/PageTransition'
 
 export default function Bridge() {
   const navigate = useNavigate()
@@ -8,6 +9,7 @@ export default function Bridge() {
   const isRestart = searchParams.get('restart') === 'true'
 
   return (
+    <PageTransition>
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '40px 24px' }}>
       <AuroraBackground />
 
@@ -69,5 +71,6 @@ export default function Bridge() {
         </p>
       </div>
     </div>
+    </PageTransition>
   )
 }

@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import AuroraBackground from '../components/AuroraBackground'
 import BackButton from '../components/BackButton'
+import PageTransition from '../components/PageTransition'
 
 const TRACKS = [
   { id: 'fitness',    emoji: '💪', title: 'Body & Fitness',              desc: 'Show up. Move. Become someone who never skips.',              color: '#534AB7' },
@@ -22,6 +24,7 @@ export default function TrackSelect() {
   }
 
   return (
+    <PageTransition>
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '40px 24px' }}>
       <AuroraBackground />
 
@@ -38,11 +41,15 @@ export default function TrackSelect() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1, marginBottom: 20 }}>
-          {TRACKS.map(track => {
+          {TRACKS.map((track, i) => {
             const isSelected = selected === track.id
             return (
-              <button
+              <motion.button
                 key={track.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.06, duration: 0.3, ease: 'easeOut' }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setSelected(track.id)}
                 className="fs-card"
                 style={{
@@ -63,7 +70,7 @@ export default function TrackSelect() {
                     <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-sm)', lineHeight: 1.5 }}>{track.desc}</p>
                   </div>
                 </div>
-              </button>
+              </motion.button>
             )
           })}
         </div>
@@ -73,5 +80,6 @@ export default function TrackSelect() {
         </button>
       </div>
     </div>
+    </PageTransition>
   )
 }
