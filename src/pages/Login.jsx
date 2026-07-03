@@ -22,7 +22,7 @@ export default function Login() {
       setError(error.message)
     } else {
       const hasSubtrack = localStorage.getItem('flowstate_selected_subtrack')
-      navigate(hasSubtrack ? '/home' : '/discovery')
+      navigate(hasSubtrack ? '/home' : '/bridge')
     }
   }
 

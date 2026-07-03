@@ -88,8 +88,11 @@ export default function Recommendation() {
           })}
         </div>
 
-        <button onClick={handleStart} disabled={!selected} className="fs-btn-primary" style={{ width: '100%' }}>
+        <button onClick={handleStart} disabled={!selected} className="fs-btn-primary" style={{ width: '100%', marginBottom: 10 }}>
           Start this track →
+        </button>
+        <button onClick={() => navigate('/track-select')} className="fs-btn-secondary" style={{ width: '100%' }}>
+          Explore all tracks
         </button>
       </div>
     </div>

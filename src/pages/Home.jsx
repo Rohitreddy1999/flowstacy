@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { HiArrowLeft, HiCog6Tooth } from 'react-icons/hi2'
 import BottomNav from '../components/BottomNav'
 import AuroraBackground from '../components/AuroraBackground'
 import { getDayContent, getSubtrackByName } from '../lib/curriculum'
@@ -328,28 +327,26 @@ export default function Home() {
 
         {/* Top bar */}
         <nav className="fs-topbar">
-          {currentDay === 1 ? (
-            <button
-              onClick={() => navigate('/bridge')}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}
-            >
-              <HiArrowLeft size={20} color="rgba(255,255,255,0.6)" />
-            </button>
-          ) : (
-            <span className="fs-logo">flowstate</span>
-          )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span>🔥</span>
-              <span style={{ color: 'var(--fs-teal-300)', fontSize: 'var(--fs-text-sm)', fontWeight: 500 }}>{streak}</span>
-              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 'var(--fs-text-sm)' }}>day streak</span>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            {currentDay === 1 && (
+              <button
+                onClick={() => navigate('/bridge')}
+                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', fontSize: '22px', cursor: 'pointer', padding: '8px', lineHeight: 1, display: 'flex', alignItems: 'center' }}
+              >
+                ←
+              </button>
+            )}
             <button
               onClick={() => navigate('/settings')}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '20px', cursor: 'pointer', padding: '8px', lineHeight: 1 }}
             >
-              <HiCog6Tooth size={20} color="rgba(255,255,255,0.6)" />
+              ⚙
             </button>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span>🔥</span>
+            <span style={{ color: 'var(--fs-teal-300)', fontSize: 'var(--fs-text-sm)', fontWeight: 500 }}>{streak}</span>
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 'var(--fs-text-sm)' }}>day streak</span>
           </div>
         </nav>
 

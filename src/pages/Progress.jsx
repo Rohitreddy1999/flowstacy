@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom'
-import { HiCog6Tooth } from 'react-icons/hi2'
 import AuroraBackground from '../components/AuroraBackground'
 import BottomNav from '../components/BottomNav'
 
@@ -10,12 +9,17 @@ export default function Progress() {
       <AuroraBackground />
       <div className="fs-page">
         <nav className="fs-topbar">
-          <span className="fs-logo">flowstate</span>
+          <button
+            onClick={() => navigate('/home')}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', fontSize: '22px', cursor: 'pointer', padding: '8px', lineHeight: 1, display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            ←
+          </button>
           <button
             onClick={() => navigate('/settings')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '20px', cursor: 'pointer', padding: '8px', lineHeight: 1 }}
           >
-            <HiCog6Tooth size={20} color="rgba(255,255,255,0.6)" />
+            ⚙
           </button>
         </nav>
         <div style={{ padding: '32px 20px' }}>

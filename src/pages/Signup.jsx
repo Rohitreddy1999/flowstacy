@@ -42,7 +42,7 @@ export default function Signup() {
       setError(error.message)
     } else {
       const hasSubtrack = localStorage.getItem('flowstate_selected_subtrack')
-      navigate(hasSubtrack ? '/home' : '/discovery')
+      navigate(hasSubtrack ? '/home' : '/bridge')
     }
   }
 
@@ -52,8 +52,15 @@ export default function Signup() {
 
       <div style={{ maxWidth: 420, margin: '0 auto', width: '100%', flex: 1, display: 'flex', flexDirection: 'column' }}>
 
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 40 }}>
+          <button
+            onClick={() => navigate('/login')}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', fontSize: '22px', cursor: 'pointer', padding: '8px', lineHeight: 1, display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            ←
+          </button>
           <span className="fs-logo" style={{ fontSize: 22 }}>flowstate</span>
+          <div style={{ width: 40 }} />
         </div>
 
         <div style={{ marginBottom: 28 }}>

@@ -1,11 +1,11 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { HiHome, HiUserGroup, HiChartBar, HiUser } from 'react-icons/hi2'
+import { HiHome, HiUserGroup, HiChartBar, HiCog6Tooth } from 'react-icons/hi2'
 
 const TABS = [
-  { path: '/home',      Icon: HiHome,      label: 'Home'      },
-  { path: '/community', Icon: HiUserGroup, label: 'Community' },
-  { path: '/progress',  Icon: HiChartBar,  label: 'Progress'  },
-  { path: '/profile',   Icon: HiUser,      label: 'Profile'   },
+  { path: '/home',      Icon: HiHome,       label: 'Home'      },
+  { path: '/community', Icon: HiUserGroup,  label: 'Community' },
+  { path: '/progress',  Icon: HiChartBar,   label: 'Progress'  },
+  { path: '/settings',  Icon: HiCog6Tooth,  label: 'Settings'  },
 ]
 
 export default function BottomNav() {

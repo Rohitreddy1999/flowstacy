@@ -157,8 +157,18 @@ export default function Experts() {
       <AuroraBackground />
       <div style={{ minHeight: '100vh', maxWidth: 480, margin: '0 auto' }}>
         <nav className="fs-topbar">
-          <BackButton onClick={() => navigate('/home')} />
-          <span style={{ color: 'var(--fs-teal-300)', fontSize: 'var(--fs-text-sm)', fontWeight: 500 }}>Graduated 🏆</span>
+          <button
+            onClick={() => navigate('/home')}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', fontSize: '22px', cursor: 'pointer', padding: '8px', lineHeight: 1, display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            ←
+          </button>
+          <button
+            onClick={() => navigate('/settings')}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '20px', cursor: 'pointer', padding: '8px', lineHeight: 1 }}
+          >
+            ⚙
+          </button>
         </nav>
 
         <div style={{ padding: '24px 20px' }}>
