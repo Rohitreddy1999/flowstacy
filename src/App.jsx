@@ -1,6 +1,7 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import LoadingScreen from './components/LoadingScreen'
+import Welcome from './pages/Welcome'
 import InstallPrompt from './components/InstallPrompt'
 import Onboarding from './pages/Onboarding'
 import Bridge from './pages/Bridge'
@@ -27,6 +28,7 @@ function AppRoutes() {
       <Routes location={location} key={location.pathname}>
         <Route path="/"            element={<LoadingScreen />} />
 
+        <Route path="/welcome"           element={<Welcome />} />
         <Route path="/onboarding"        element={<Onboarding />} />
         <Route path="/bridge"            element={<Bridge />} />
         <Route path="/track-select"      element={<TrackSelect />} />

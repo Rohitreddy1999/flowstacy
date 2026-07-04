@@ -8,22 +8,19 @@ export default function LoadingScreen() {
 
   useEffect(() => {
     const timer = setTimeout(async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+      const { data: { session } } =
+        await supabase.auth.getSession()
 
       if (session) {
-        const subtrack = localStorage.getItem('flowstate_selected_subtrack')
-        if (subtrack) {
-          navigate('/home')
-        } else {
-          navigate('/bridge')
-        }
+        const subtrack = localStorage.getItem(
+          'flowstate_selected_subtrack'
+        )
+        navigate(subtrack ? '/home' : '/bridge')
       } else {
-        const lifeStage = localStorage.getItem('flowstate_life_stage')
-        if (lifeStage) {
-          navigate('/login')
-        } else {
-          navigate('/onboarding')
-        }
+        const lifeStage = localStorage.getItem(
+          'flowstate_life_stage'
+        )
+        navigate(lifeStage ? '/login' : '/welcome')
       }
     }, 2500)
 
@@ -31,103 +28,56 @@ export default function LoadingScreen() {
   }, [])
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: '#0A0812',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Aurora glow — top center */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 0.3 }}
-        style={{
-          position: 'absolute',
-          width: 300,
-          height: 300,
-          background: 'radial-gradient(circle, rgba(83,74,183,0.5) 0%, transparent 70%)',
-          top: '15%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          filter: 'blur(60px)',
-          pointerEvents: 'none',
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      background: '#0A0812',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
+      <motion.h1
+        initial={{
+          opacity: 0,
+          scale: 0.9
         }}
-      />
-
-      {/* Aurora glow — bottom right */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 0.3 }}
-        style={{
-          position: 'absolute',
-          width: 200,
-          height: 200,
-          background: 'radial-gradient(circle, rgba(29,158,117,0.25) 0%, transparent 70%)',
-          bottom: '25%',
-          right: '10%',
-          filter: 'blur(50px)',
-          pointerEvents: 'none',
+        animate={{
+          opacity: 1,
+          scale: 1
         }}
-      />
-
-      {/* Center content */}
-      <div
+        transition={{
+          duration: 1.2,
+          ease: 'easeOut'
+        }}
         style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+          fontSize: '52px',
+          fontWeight: '600',
+          color: 'white',
+          letterSpacing: '-0.02em',
+          margin: 0,
+          userSelect: 'none'
         }}
       >
         <motion.span
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, ease: 'easeOut' }}
-          style={{
-            fontSize: 42,
-            fontWeight: 600,
-            color: '#ffffff',
-            letterSpacing: '-0.02em',
-            textShadow: '0 0 40px rgba(157,146,248,0.8), 0 0 80px rgba(83,74,183,0.4)',
-            lineHeight: 1,
+          animate={{
+            textShadow: [
+              '0 0 20px rgba(157,146,248,0.4), 0 0 60px rgba(83,74,183,0.2)',
+              '0 0 40px rgba(157,146,248,0.9), 0 0 80px rgba(83,74,183,0.6), 0 0 120px rgba(83,74,183,0.3)',
+              '0 0 20px rgba(157,146,248,0.4), 0 0 60px rgba(83,74,183,0.2)'
+            ],
+            scale: [1, 1.02, 1],
+            y: [0, -3, 0]
           }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: 'easeInOut'
+          }}
+          style={{ display: 'inline-block' }}
         >
           flowstate
         </motion.span>
-
-        {/* Pulsing dot */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.8 }}
-          style={{ marginTop: 32 }}
-        >
-          <motion.div
-            animate={{
-              scale: [1, 1.5, 1],
-              opacity: [1, 0.4, 1],
-            }}
-            transition={{
-              duration: 1.8,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: '50%',
-              backgroundColor: '#9D92F8',
-            }}
-          />
-        </motion.div>
-      </div>
+      </motion.h1>
     </div>
   )
 }
