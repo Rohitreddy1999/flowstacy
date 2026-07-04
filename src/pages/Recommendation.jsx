@@ -1,104 +1,283 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import AuroraBackground from '../components/AuroraBackground'
-import BackButton from '../components/BackButton'
-import PageTransition from '../components/PageTransition'
-
-const TRACKS = [
-  { id: 'fitness',    emoji: '💪', title: 'Body & Fitness',              desc: 'Show up. Move. Become someone who never skips.',              color: '#534AB7' },
-  { id: 'discipline', emoji: '☀️', title: 'Daily Discipline',            desc: "Master the boring things. That's where the magic lives.",     color: '#0F6E56' },
-  { id: 'instrument', emoji: '🎵', title: 'Learn an Instrument',         desc: "You don't need talent. You need 21 days and one song.",       color: '#993C1D' },
-  { id: 'journal',    emoji: '📓', title: 'Journaling & Self-Discovery', desc: 'Write it down. Find out who you actually are.',               color: '#993556' },
-  { id: 'drawing',    emoji: '✏️', title: 'Drawing & Sketching',         desc: "You don't need to be an artist. You just need to start.",    color: '#854F0B' },
-]
-
-function getRecommendedIds(scores) {
-  if (!scores) return []
-  const sorted = Object.keys(scores)
-    .sort((a, b) => { const diff = scores[b] - scores[a]; return diff !== 0 ? diff : a.localeCompare(b) })
-    .filter(id => scores[id] > 0)
-  return sorted.slice(0, 2)
-}
+import { TRACKS } from '../lib/tracks'
 
 export default function Recommendation() {
   const navigate = useNavigate()
-  const raw = localStorage.getItem('flowstate_scores')
-  const scores = raw ? JSON.parse(raw) : null
-  const recommendedIds = getRecommendedIds(scores)
   const [selected, setSelected] = useState(null)
+  const [recommended, setRecommended] = useState([])
 
-  function handleStart() {
+  useEffect(() => {
+    const scoresRaw = localStorage.getItem('flowstate_scores')
+    if (scoresRaw) {
+      const scores = JSON.parse(scoresRaw)
+      const sorted = Object.entries(scores)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 2)
+        .map(([track]) => track)
+      setRecommended(sorted)
+      setSelected(sorted[0])
+    }
+  }, [])
+
+  const handleContinue = () => {
     if (!selected) return
     localStorage.setItem('flowstate_selected_track', selected)
-    navigate('/sub-track-select', { state: { from: 'recommendation' } })
+    navigate('/sub-track-select')
   }
 
   return (
-    <PageTransition>
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '40px 24px' }}>
-      <AuroraBackground />
+    <div style={{
+      minHeight: '100vh',
+      background: '#0A0812',
+      display: 'flex',
+      flexDirection: 'column',
+      maxWidth: '480px',
+      margin: '0 auto'
+    }}>
 
-      <div style={{ maxWidth: 480, margin: '0 auto', width: '100%', flex: 1, display: 'flex', flexDirection: 'column' }}>
+      {/* Top bar */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '52px 20px 16px'
+      }}>
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate('/discovery')}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'rgba(255,255,255,0.5)',
+            fontSize: '22px',
+            cursor: 'pointer',
+            padding: '8px',
+            lineHeight: 1
+          }}
+        >
+          ←
+        </motion.button>
+      </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
-          <BackButton onClick={() => navigate('/discovery')} />
-          <span className="fs-logo">flowstate</span>
-        </div>
+      <div style={{ padding: '0 28px 140px' }}>
 
-        <div style={{ marginBottom: 28 }}>
-          <h1 className="fs-heading-sm" style={{ marginBottom: 8, fontWeight: 400 }}>
-            Here's what we think — but you know yourself best.
-          </h1>
-          <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-sm)', lineHeight: 1.6 }}>
-            We've highlighted what resonated most from your answers. But choose whatever calls to you.
+        {/* Heading */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          style={{ marginBottom: '32px' }}
+        >
+          <p style={{
+            fontSize: '11px',
+            fontWeight: '500',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.3)',
+            margin: '0 0 10px'
+          }}>
+            Your match
           </p>
-        </div>
+          <h1 style={{
+            fontSize: '26px',
+            fontWeight: '600',
+            color: 'white',
+            lineHeight: 1.25,
+            margin: '0 0 8px',
+            letterSpacing: '-0.01em'
+          }}>
+            Here's what we think —<br />
+            but you know yourself best.
+          </h1>
+          <p style={{
+            fontSize: '14px',
+            color: 'rgba(255,255,255,0.38)',
+            margin: 0,
+            lineHeight: 1.5
+          }}>
+            We've highlighted what resonated most
+            from your answers. Choose whatever
+            calls to you.
+          </p>
+        </motion.div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1, marginBottom: 20 }}>
-          {TRACKS.map(track => {
+        {/* Track cards */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px'
+        }}>
+          {TRACKS.map((track, i) => {
             const isSelected = selected === track.id
-            const isRecommended = recommendedIds.includes(track.id)
+            const isRecommended = recommended.includes(track.id)
+            const isTopMatch = recommended[0] === track.id
+
             return (
-              <button
+              <motion.button
                 key={track.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.07, duration: 0.4 }}
+                whileTap={{ scale: 0.99 }}
                 onClick={() => setSelected(track.id)}
-                className="fs-card"
                 style={{
-                  padding: 18, textAlign: 'left', cursor: 'pointer', width: '100%',
+                  width: '100%',
+                  padding: '16px',
+                  background: isSelected
+                    ? track.lightColor
+                    : 'rgba(255,255,255,0.03)',
+                  border: isSelected
+                    ? `1px solid ${track.borderColor}`
+                    : '1px solid rgba(255,255,255,0.07)',
+                  borderRadius: '16px',
+                  cursor: 'pointer',
+                  textAlign: 'left',
                   position: 'relative',
-                  border: isSelected ? `1px solid ${track.color}` : undefined,
-                  background: isSelected ? `${track.color}22` : undefined,
+                  transition: 'all 0.2s'
                 }}
               >
-                {isRecommended && !isSelected && (
-                  <span className="fs-badge fs-badge-purple" style={{ position: 'absolute', top: 12, right: 12 }}>
-                    ✨ Recommended
-                  </span>
-                )}
-                {isSelected && (
-                  <span style={{ position: 'absolute', top: 14, right: 14, width: 18, height: 18, borderRadius: '50%', background: track.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: 'white' }}>✓</span>
-                )}
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, paddingRight: 80 }}>
-                  <span style={{ fontSize: 26, lineHeight: 1, flexShrink: 0 }}>{track.emoji}</span>
-                  <div>
-                    <p style={{ fontWeight: 500, color: 'var(--fs-text-primary)', marginBottom: 4, fontSize: 'var(--fs-text-base)' }}>{track.title}</p>
-                    <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-sm)', lineHeight: 1.5 }}>{track.desc}</p>
+                {/* Recommended badge */}
+                {isRecommended && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '12px',
+                    right: '12px',
+                    fontSize: '10px',
+                    fontWeight: '500',
+                    letterSpacing: '0.05em',
+                    color: isTopMatch
+                      ? track.color
+                      : 'rgba(255,255,255,0.4)',
+                    background: isTopMatch
+                      ? track.lightColor
+                      : 'rgba(255,255,255,0.06)',
+                    border: isTopMatch
+                      ? `1px solid ${track.borderColor}`
+                      : '1px solid rgba(255,255,255,0.08)',
+                    padding: '3px 8px',
+                    borderRadius: '20px'
+                  }}>
+                    {isTopMatch ? '✦ TOP MATCH' : 'GOOD FIT'}
                   </div>
+                )}
+
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '14px',
+                  paddingRight: isRecommended ? '80px' : '0'
+                }}>
+                  {/* Icon */}
+                  <div style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '12px',
+                    background: isSelected
+                      ? `${track.color}25`
+                      : 'rgba(255,255,255,0.06)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: isSelected
+                      ? track.color
+                      : 'rgba(255,255,255,0.4)',
+                    flexShrink: 0,
+                    transition: 'all 0.2s'
+                  }}>
+                    {track.icon}
+                  </div>
+
+                  {/* Text */}
+                  <div style={{ flex: 1 }}>
+                    <p style={{
+                      fontSize: '15px',
+                      fontWeight: '500',
+                      color: 'white',
+                      margin: '0 0 3px'
+                    }}>
+                      {track.name}
+                    </p>
+                    <p style={{
+                      fontSize: '12px',
+                      color: 'rgba(255,255,255,0.35)',
+                      margin: 0,
+                      lineHeight: 1.4
+                    }}>
+                      {track.tagline}
+                    </p>
+                  </div>
+
+                  {/* Selected indicator */}
+                  {isSelected && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 400,
+                        damping: 20
+                      }}
+                      style={{
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '50%',
+                        background: track.color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}
+                    >
+                      <svg width="10" height="8"
+                        viewBox="0 0 10 8" fill="none">
+                        <path d="M1 4l3 3 5-6"
+                          stroke="white"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"/>
+                      </svg>
+                    </motion.div>
+                  )}
                 </div>
-              </button>
+              </motion.button>
             )
           })}
         </div>
+      </div>
 
-        <button onClick={handleStart} disabled={!selected} className="fs-btn-primary" style={{ width: '100%', marginBottom: 10 }}>
+      {/* Fixed continue button */}
+      <div style={{
+        position: 'fixed',
+        bottom: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '100%',
+        maxWidth: '480px',
+        padding: '16px 28px 40px',
+        background: 'linear-gradient(transparent, #0A0812 35%)'
+      }}>
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          onClick={handleContinue}
+          style={{
+            width: '100%',
+            height: '54px',
+            background: selected ? '#534AB7' : 'rgba(255,255,255,0.06)',
+            border: 'none',
+            borderRadius: '27px',
+            color: selected ? 'white' : 'rgba(255,255,255,0.2)',
+            fontSize: '16px',
+            fontWeight: '500',
+            cursor: selected ? 'pointer' : 'not-allowed',
+            boxShadow: selected ? '0 0 30px rgba(83,74,183,0.3)' : 'none',
+            transition: 'all 0.3s'
+          }}
+        >
           Start this track →
-        </button>
-        <button onClick={() => navigate('/track-select')} className="fs-btn-secondary" style={{ width: '100%' }}>
-          Explore all tracks
-        </button>
+        </motion.button>
       </div>
     </div>
-    </PageTransition>
   )
 }

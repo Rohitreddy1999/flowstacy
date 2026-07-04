@@ -1,85 +1,228 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import AuroraBackground from '../components/AuroraBackground'
-import BackButton from '../components/BackButton'
-import PageTransition from '../components/PageTransition'
-
-const TRACKS = [
-  { id: 'fitness',    emoji: '💪', title: 'Body & Fitness',              desc: 'Show up. Move. Become someone who never skips.',              color: '#534AB7' },
-  { id: 'discipline', emoji: '☀️', title: 'Daily Discipline',            desc: "Master the boring things. That's where the magic lives.",     color: '#0F6E56' },
-  { id: 'instrument', emoji: '🎵', title: 'Learn an Instrument',         desc: "You don't need talent. You need 21 days and one song.",       color: '#993C1D' },
-  { id: 'journal',    emoji: '📓', title: 'Journaling & Self-Discovery', desc: 'Write it down. Find out who you actually are.',               color: '#993556' },
-  { id: 'drawing',    emoji: '✏️', title: 'Drawing & Sketching',         desc: "You don't need to be an artist. You just need to start.",    color: '#854F0B' },
-]
+import { TRACKS } from '../lib/tracks'
 
 export default function TrackSelect() {
   const navigate = useNavigate()
   const [selected, setSelected] = useState(null)
 
-  function handleContinue() {
+  const handleContinue = () => {
     if (!selected) return
     localStorage.setItem('flowstate_selected_track', selected)
-    navigate('/sub-track-select', { state: { from: 'track-select' } })
+    navigate('/sub-track-select')
   }
 
   return (
-    <PageTransition>
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '40px 24px' }}>
-      <AuroraBackground />
+    <div style={{
+      minHeight: '100vh',
+      background: '#0A0812',
+      display: 'flex',
+      flexDirection: 'column',
+      maxWidth: '480px',
+      margin: '0 auto'
+    }}>
 
-      <div style={{ maxWidth: 480, margin: '0 auto', width: '100%', flex: 1, display: 'flex', flexDirection: 'column' }}>
+      {/* Top bar */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '52px 20px 16px'
+      }}>
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate('/bridge')}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'rgba(255,255,255,0.5)',
+            fontSize: '22px',
+            cursor: 'pointer',
+            padding: '8px',
+            lineHeight: 1
+          }}
+        >
+          ←
+        </motion.button>
+      </div>
 
-        <BackButton onClick={() => navigate('/bridge')} />
+      <div style={{ padding: '0 28px 140px' }}>
 
-        <div style={{ margin: '16px 0 28px' }}>
-          <p className="fs-label fs-label-purple" style={{ marginBottom: 8 }}>Choose your path</p>
-          <h1 className="fs-heading-md" style={{ marginBottom: 8 }}>What do you want to work on?</h1>
-          <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-sm)', lineHeight: 1.6 }}>
-            Pick the track that calls to you. You can always try others after you graduate.
+        {/* Heading */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          style={{ marginBottom: '32px' }}
+        >
+          <h1 style={{
+            fontSize: '26px',
+            fontWeight: '600',
+            color: 'white',
+            lineHeight: 1.25,
+            margin: '0 0 8px',
+            letterSpacing: '-0.01em'
+          }}>
+            Choose your path
+          </h1>
+          <p style={{
+            fontSize: '14px',
+            color: 'rgba(255,255,255,0.38)',
+            margin: 0,
+            lineHeight: 1.5
+          }}>
+            Pick the track that calls to you.
+            You can always try others after you graduate.
           </p>
-        </div>
+        </motion.div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1, marginBottom: 20 }}>
+        {/* Track cards */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px'
+        }}>
           {TRACKS.map((track, i) => {
             const isSelected = selected === track.id
+
             return (
               <motion.button
                 key={track.id}
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.06, duration: 0.3, ease: 'easeOut' }}
-                whileTap={{ scale: 0.98 }}
+                transition={{ delay: i * 0.07, duration: 0.4 }}
+                whileTap={{ scale: 0.99 }}
                 onClick={() => setSelected(track.id)}
-                className="fs-card"
                 style={{
-                  padding: 18, textAlign: 'left', cursor: 'pointer', width: '100%',
-                  position: 'relative',
-                  borderColor: isSelected ? track.color : undefined,
-                  background: isSelected ? `${track.color}22` : undefined,
-                  border: isSelected ? `1px solid ${track.color}` : undefined,
+                  width: '100%',
+                  padding: '16px',
+                  background: isSelected
+                    ? track.lightColor
+                    : 'rgba(255,255,255,0.03)',
+                  border: isSelected
+                    ? `1px solid ${track.borderColor}`
+                    : '1px solid rgba(255,255,255,0.07)',
+                  borderRadius: '16px',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'all 0.2s'
                 }}
               >
-                {isSelected && (
-                  <span style={{ position: 'absolute', top: 14, right: 14, width: 18, height: 18, borderRadius: '50%', background: track.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: 'white' }}>✓</span>
-                )}
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, paddingRight: 24 }}>
-                  <span style={{ fontSize: 26, lineHeight: 1, flexShrink: 0 }}>{track.emoji}</span>
-                  <div>
-                    <p style={{ fontWeight: 500, color: 'var(--fs-text-primary)', marginBottom: 4, fontSize: 'var(--fs-text-base)' }}>{track.title}</p>
-                    <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-sm)', lineHeight: 1.5 }}>{track.desc}</p>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '14px'
+                }}>
+                  {/* Icon */}
+                  <div style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '12px',
+                    background: isSelected
+                      ? `${track.color}25`
+                      : 'rgba(255,255,255,0.06)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: isSelected
+                      ? track.color
+                      : 'rgba(255,255,255,0.4)',
+                    flexShrink: 0,
+                    transition: 'all 0.2s'
+                  }}>
+                    {track.icon}
                   </div>
+
+                  {/* Text */}
+                  <div style={{ flex: 1 }}>
+                    <p style={{
+                      fontSize: '15px',
+                      fontWeight: '500',
+                      color: 'white',
+                      margin: '0 0 3px'
+                    }}>
+                      {track.name}
+                    </p>
+                    <p style={{
+                      fontSize: '12px',
+                      color: 'rgba(255,255,255,0.35)',
+                      margin: 0,
+                      lineHeight: 1.4
+                    }}>
+                      {track.tagline}
+                    </p>
+                  </div>
+
+                  {/* Selected indicator */}
+                  {isSelected && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 400,
+                        damping: 20
+                      }}
+                      style={{
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '50%',
+                        background: track.color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}
+                    >
+                      <svg width="10" height="8"
+                        viewBox="0 0 10 8" fill="none">
+                        <path d="M1 4l3 3 5-6"
+                          stroke="white"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"/>
+                      </svg>
+                    </motion.div>
+                  )}
                 </div>
               </motion.button>
             )
           })}
         </div>
+      </div>
 
-        <button onClick={handleContinue} disabled={!selected} className="fs-btn-primary" style={{ width: '100%' }}>
-          Let's go →
-        </button>
+      {/* Fixed continue button */}
+      <div style={{
+        position: 'fixed',
+        bottom: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '100%',
+        maxWidth: '480px',
+        padding: '16px 28px 40px',
+        background: 'linear-gradient(transparent, #0A0812 35%)'
+      }}>
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          onClick={handleContinue}
+          style={{
+            width: '100%',
+            height: '54px',
+            background: selected ? '#534AB7' : 'rgba(255,255,255,0.06)',
+            border: 'none',
+            borderRadius: '27px',
+            color: selected ? 'white' : 'rgba(255,255,255,0.2)',
+            fontSize: '16px',
+            fontWeight: '500',
+            cursor: selected ? 'pointer' : 'not-allowed',
+            boxShadow: selected ? '0 0 30px rgba(83,74,183,0.3)' : 'none',
+            transition: 'all 0.3s'
+          }}
+        >
+          Start this track →
+        </motion.button>
       </div>
     </div>
-    </PageTransition>
   )
 }

@@ -1,160 +1,274 @@
 import { useState } from 'react'
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import AuroraBackground from '../components/AuroraBackground'
-import BackButton from '../components/BackButton'
-import PageTransition from '../components/PageTransition'
-
-const MAIN_TRACKS = [
-  { id: 'fitness',    emoji: '💪', title: 'Body & Fitness' },
-  { id: 'discipline', emoji: '☀️', title: 'Daily Discipline' },
-  { id: 'instrument', emoji: '🎵', title: 'Learn an Instrument' },
-  { id: 'journal',    emoji: '📓', title: 'Journaling & Self-Discovery' },
-  { id: 'drawing',    emoji: '✏️', title: 'Drawing & Sketching' },
-]
-
-const SUB_TRACKS = {
-  fitness: [
-    { id: 'gym',          emoji: '🏋️', title: 'Gym & Weightlifting',    desc: 'Build strength with progressive resistance training' },
-    { id: 'calisthenics', emoji: '🤸', title: 'Calisthenics',           desc: 'Master your bodyweight — no equipment needed' },
-    { id: 'running',      emoji: '🏃', title: 'Running & Stamina',      desc: 'Build the habit of running every day' },
-    { id: 'sport',        emoji: '🎾', title: 'Sport & Athletics',      desc: 'Pick your sport and train consistently for it' },
-    { id: 'yoga',         emoji: '🧘', title: 'Yoga & Flexibility',     desc: 'Move better, feel better, recover faster' },
-  ],
-  discipline: [
-    { id: 'morning',    emoji: '☀️', title: 'Morning Routine',  desc: 'Design and stick to a powerful morning ritual' },
-    { id: 'reading',    emoji: '📚', title: 'Daily Reading',    desc: 'Read 10 pages every single day without fail' },
-    { id: 'steps',      emoji: '🚶', title: '10,000 Steps',     desc: 'Walk your way to a healthier body and clearer mind' },
-    { id: 'meditation', emoji: '🧘', title: 'Meditation',       desc: '5 minutes a day of stillness that compounds over time' },
-    { id: 'detox',      emoji: '📵', title: 'Digital Detox',    desc: 'Take back control from your phone and social media' },
-  ],
-  instrument: [
-    { id: 'guitar',  emoji: '🎸', title: 'Guitar',           desc: 'From your first chord to your first full song' },
-    { id: 'piano',   emoji: '🎹', title: 'Piano & Keyboard', desc: 'Learn the fundamentals of keys and music theory' },
-    { id: 'drums',   emoji: '🥁', title: 'Drums & Rhythm',   desc: 'Build timing and rhythm from the ground up' },
-    { id: 'vocals',  emoji: '🎤', title: 'Vocals & Singing', desc: 'Train your voice and learn to sing with confidence' },
-  ],
-  journal: [
-    { id: 'self',      emoji: '📓', title: 'Self-Discovery',          desc: 'Deep prompts that help you understand who you truly are' },
-    { id: 'gratitude', emoji: '🙏', title: 'Gratitude Practice',      desc: 'Daily gratitude that shifts how you see everything' },
-    { id: 'stream',    emoji: '💭', title: 'Stream of Consciousness', desc: 'Free writing with no rules — just honesty' },
-    { id: 'goals',     emoji: '🎯', title: 'Goal Setting & Vision',   desc: 'Clarify what you want and build a plan to get it' },
-  ],
-  drawing: [
-    { id: 'fundamentals', emoji: '✏️', title: 'Sketching Fundamentals', desc: 'Lines, shapes, shading — the building blocks' },
-    { id: 'portrait',     emoji: '👤', title: 'Portrait Drawing',       desc: 'Learn to draw faces and capture people' },
-    { id: 'urban',        emoji: '🏙️', title: 'Urban Sketching',        desc: 'Draw buildings, streets and the world around you' },
-    { id: 'nature',       emoji: '🐾', title: 'Nature & Animals',       desc: 'Bring the natural world to life on paper' },
-  ],
-}
-
-function SelectCard({ isSelected, onClick, children, animIndex = 0 }) {
-  return (
-    <motion.button
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: animIndex * 0.06, duration: 0.3, ease: 'easeOut' }}
-      whileTap={{ scale: 0.98 }}
-      onClick={onClick}
-      className={isSelected ? 'fs-card fs-card-purple' : 'fs-card'}
-      style={{ padding: '14px 16px', textAlign: 'left', cursor: 'pointer', width: '100%', position: 'relative', border: 'none' }}
-    >
-      {isSelected && (
-        <span style={{ position: 'absolute', top: 10, right: 10, width: 16, height: 16, borderRadius: '50%', background: 'var(--fs-purple-500)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: 'white' }}>✓</span>
-      )}
-      {children}
-    </motion.button>
-  )
-}
+import { TRACKS } from '../lib/tracks'
 
 export default function SubTrackSelect() {
   const navigate = useNavigate()
-  const location = useLocation()
-  const [searchParams] = useSearchParams()
-  const isExplore = searchParams.get('mode') === 'explore'
-  const backTarget = location.state?.from === 'track-select' ? '/track-select' : '/recommendation'
-
-  const recommendedTrack = localStorage.getItem('flowstate_selected_track') || 'fitness'
-  const [exploreTrack, setExploreTrack] = useState(null)
   const [selected, setSelected] = useState(null)
 
-  const activeTrack = isExplore ? exploreTrack : recommendedTrack
-  const subOptions = activeTrack ? SUB_TRACKS[activeTrack] : null
+  const trackId = localStorage.getItem('flowstate_selected_track')
+  const track = TRACKS.find(t => t.id === trackId) || TRACKS[0]
 
-  function handleSelectMainTrack(id) {
-    setExploreTrack(id)
-    setSelected(null)
-    localStorage.setItem('flowstate_selected_track', id)
-  }
-
-  function handleBegin() {
+  const handleContinue = () => {
     if (!selected) return
     localStorage.setItem('flowstate_selected_subtrack', selected)
     navigate('/home')
   }
 
   return (
-    <PageTransition>
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '40px 24px' }}>
-      <AuroraBackground />
+    <div style={{
+      minHeight: '100vh',
+      background: '#0A0812',
+      display: 'flex',
+      flexDirection: 'column',
+      maxWidth: '480px',
+      margin: '0 auto'
+    }}>
 
-      <div style={{ maxWidth: 480, margin: '0 auto', width: '100%', flex: 1, display: 'flex', flexDirection: 'column' }}>
+      {/* Top bar */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '52px 20px 16px'
+      }}>
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate(-1)}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'rgba(255,255,255,0.5)',
+            fontSize: '22px',
+            cursor: 'pointer',
+            padding: '8px',
+            lineHeight: 1
+          }}
+        >
+          ←
+        </motion.button>
+      </div>
 
-        <BackButton onClick={() => navigate(backTarget)} />
+      <div style={{ padding: '0 28px 140px' }}>
 
-        <div style={{ margin: '16px 0 28px' }}>
-          <p className="fs-label fs-label-purple" style={{ marginBottom: 8 }}>You're on your way</p>
-          <h1 className="fs-heading-md" style={{ marginBottom: 8 }}>
-            {isExplore ? 'Explore all tracks' : 'Pick your focus'}
-          </h1>
-          <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-sm)', lineHeight: 1.6 }}>
-            Choose what you want to work on for the next 21 days. You can always try others after you graduate.
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1, marginBottom: 20 }}>
-
-          {isExplore && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
-              {MAIN_TRACKS.map((track, i) => (
-                <SelectCard key={track.id} isSelected={exploreTrack === track.id} onClick={() => handleSelectMainTrack(track.id)} animIndex={i}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <span style={{ fontSize: 22 }}>{track.emoji}</span>
-                    <p style={{ fontWeight: 500, color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)' }}>{track.title}</p>
-                  </div>
-                </SelectCard>
-              ))}
+        {/* Track context */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          style={{ marginBottom: '32px' }}
+        >
+          {/* Track pill */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            background: `${track.color}20`,
+            border: `1px solid ${track.borderColor}`,
+            borderRadius: '20px',
+            padding: '6px 12px',
+            marginBottom: '16px'
+          }}>
+            <div style={{
+              color: track.color,
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              {track.icon}
             </div>
-          )}
+            <span style={{
+              fontSize: '13px',
+              color: track.color,
+              fontWeight: '500'
+            }}>
+              {track.name}
+            </span>
+          </div>
 
-          {subOptions && (
-            <>
-              {isExplore && (
-                <div style={{ height: 1, background: 'var(--fs-border)', margin: '4px 0 12px' }} />
-              )}
-              <p className="fs-label" style={{ marginBottom: 10 }}>
-                {isExplore ? 'NOW PICK YOUR FOCUS' : 'PICK YOUR FOCUS'}
-              </p>
-              {subOptions.map((opt, i) => (
-                <SelectCard key={opt.id} isSelected={selected === opt.id} onClick={() => setSelected(opt.id)} animIndex={i}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-                    <span style={{ fontSize: 22, flexShrink: 0, marginTop: 2 }}>{opt.emoji}</span>
-                    <div>
-                      <p style={{ fontWeight: 500, color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)', marginBottom: 3 }}>{opt.title}</p>
-                      <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-xs)', lineHeight: 1.5 }}>{opt.desc}</p>
-                    </div>
+          <h1 style={{
+            fontSize: '26px',
+            fontWeight: '600',
+            color: 'white',
+            lineHeight: 1.25,
+            margin: '0 0 8px',
+            letterSpacing: '-0.01em'
+          }}>
+            Pick your focus
+          </h1>
+          <p style={{
+            fontSize: '14px',
+            color: 'rgba(255,255,255,0.38)',
+            margin: 0,
+            lineHeight: 1.5
+          }}>
+            Choose what you want to work on
+            for the next 21 days.
+          </p>
+        </motion.div>
+
+        {/* Subtrack cards */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px'
+        }}>
+          {track.subtracks.map((sub, i) => {
+            const isSelected = selected === sub.id
+            const isAvailable = sub.available
+
+            return (
+              <motion.button
+                key={sub.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.07, duration: 0.4 }}
+                whileTap={isAvailable ? { scale: 0.99 } : {}}
+                onClick={() => isAvailable && setSelected(sub.id)}
+                style={{
+                  width: '100%',
+                  minHeight: '68px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '0 16px',
+                  background: isSelected
+                    ? track.lightColor
+                    : isAvailable
+                    ? 'rgba(255,255,255,0.04)'
+                    : 'rgba(255,255,255,0.02)',
+                  border: isSelected
+                    ? `1px solid ${track.borderColor}`
+                    : '1px solid rgba(255,255,255,0.07)',
+                  borderRadius: '14px',
+                  cursor: isAvailable ? 'pointer' : 'default',
+                  textAlign: 'left',
+                  transition: 'all 0.2s',
+                  opacity: isAvailable ? 1 : 0.45,
+                  gap: '12px'
+                }}
+              >
+                {/* Available dot indicator */}
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: isAvailable
+                    ? isSelected
+                      ? track.color
+                      : 'rgba(255,255,255,0.2)'
+                    : 'rgba(255,255,255,0.1)',
+                  flexShrink: 0,
+                  transition: 'all 0.2s'
+                }} />
+
+                {/* Text */}
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    marginBottom: '3px'
+                  }}>
+                    <p style={{
+                      fontSize: '15px',
+                      fontWeight: '500',
+                      color: isAvailable
+                        ? 'white'
+                        : 'rgba(255,255,255,0.4)',
+                      margin: 0
+                    }}>
+                      {sub.name}
+                    </p>
+                    {!isAvailable && (
+                      <span style={{
+                        fontSize: '10px',
+                        color: 'rgba(255,255,255,0.25)',
+                        background: 'rgba(255,255,255,0.06)',
+                        padding: '2px 7px',
+                        borderRadius: '10px',
+                        letterSpacing: '0.05em'
+                      }}>
+                        SOON
+                      </span>
+                    )}
                   </div>
-                </SelectCard>
-              ))}
-            </>
-          )}
-        </div>
+                  <p style={{
+                    fontSize: '12px',
+                    color: 'rgba(255,255,255,0.3)',
+                    margin: 0
+                  }}>
+                    {sub.desc}
+                  </p>
+                </div>
 
-        <button onClick={handleBegin} disabled={!selected} className="fs-btn-primary" style={{ width: '100%' }}>
-          Let's begin →
-        </button>
+                {/* Checkmark */}
+                {isSelected && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 400,
+                      damping: 20
+                    }}
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      background: track.color,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}
+                  >
+                    <svg width="10" height="8"
+                      viewBox="0 0 10 8" fill="none">
+                      <path d="M1 4l3 3 5-6"
+                        stroke="white"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"/>
+                    </svg>
+                  </motion.div>
+                )}
+              </motion.button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Fixed continue button */}
+      <div style={{
+        position: 'fixed',
+        bottom: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '100%',
+        maxWidth: '480px',
+        padding: '16px 28px 40px',
+        background: 'linear-gradient(transparent, #0A0812 35%)'
+      }}>
+        <motion.button
+          whileTap={{ scale: selected ? 0.98 : 1 }}
+          onClick={handleContinue}
+          style={{
+            width: '100%',
+            height: '54px',
+            background: selected ? track.color : 'rgba(255,255,255,0.06)',
+            border: 'none',
+            borderRadius: '27px',
+            color: selected ? 'white' : 'rgba(255,255,255,0.2)',
+            fontSize: '16px',
+            fontWeight: '500',
+            cursor: selected ? 'pointer' : 'not-allowed',
+            boxShadow: selected ? `0 0 30px ${track.color}50` : 'none',
+            transition: 'all 0.3s'
+          }}
+        >
+          Begin my 21 days →
+        </motion.button>
       </div>
     </div>
-    </PageTransition>
   )
 }
