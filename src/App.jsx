@@ -1,6 +1,6 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
-import RootRedirect from './components/RootRedirect'
+import LoadingScreen from './components/LoadingScreen'
 import InstallPrompt from './components/InstallPrompt'
 import Onboarding from './pages/Onboarding'
 import Bridge from './pages/Bridge'
@@ -25,7 +25,7 @@ function AppRoutes() {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/"            element={<RootRedirect />} />
+        <Route path="/"            element={<LoadingScreen />} />
 
         <Route path="/onboarding"        element={<Onboarding />} />
         <Route path="/bridge"            element={<Bridge />} />
