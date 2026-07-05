@@ -9,10 +9,28 @@ export default function ProtectedRoute({ children }) {
   const navigate = useNavigate()
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) {
+        navigate('/login', { replace: true })
+        return
+      }
+
+      // Check if user has an active journey in Supabase
+      const { data: journey } = await supabase
+        .from('user_journeys')
+        .select('id, subtrack_id')
+        .eq('user_id', session.user.id)
+        .eq('status', 'active')
+        .single()
+
+      if (!journey || !journey.subtrack_id) {
+        // Authenticated but no journey -- send back to onboarding
+        navigate('/onboarding', { replace: true })
+        return
+      }
+
+      setUser(session.user)
       setLoading(false)
-      if (!session) navigate('/login', { replace: true })
     })
   }, [navigate])
 

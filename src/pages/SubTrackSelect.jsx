@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { TRACKS } from '../lib/tracks'
+import { supabase } from '../lib/supabase'
 
 export default function SubTrackSelect() {
   const navigate = useNavigate()
@@ -10,10 +11,23 @@ export default function SubTrackSelect() {
   const trackId = localStorage.getItem('flowstate_selected_track')
   const track = TRACKS.find(t => t.id === trackId) || TRACKS[0]
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!selected) return
     localStorage.setItem('flowstate_selected_subtrack', selected)
-    navigate('/home')
+
+    const { data: { session } } = await supabase.auth.getSession()
+
+    await supabase
+      .from('user_journeys')
+      .upsert({
+        user_id: session.user.id,
+        subtrack_id: selected,
+        current_day: 1,
+        status: 'active',
+        started_at: new Date().toISOString()
+      }, { onConflict: 'user_id' })
+
+    navigate('/home', { replace: true })
   }
 
   return (
