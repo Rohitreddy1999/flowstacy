@@ -49,20 +49,29 @@ function getDayType(content) {
   return 'Training'
 }
 
-function parseSteps(text) {
-  if (!text) return []
-  const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean)
-  const numbered = lines.filter(l => /^\d+[\.\)]/.test(l))
-  if (numbered.length >= 2) {
-    return numbered.map(l => l.replace(/^\d+[\.\)]\s*/, ''))
-  }
-  return []
-}
+function parseTaskDescription(text) {
+  if (!text) return { steps: [], why: '' }
 
-function getWhyParagraph(text) {
-  if (!text) return null
-  const paras = text.split(/\n\n+/).map(p => p.trim()).filter(Boolean)
-  return paras.length > 1 ? paras[paras.length - 1] : null
+  const whyIndex = text.indexOf('Why this matters:')
+
+  let whatText = whyIndex > -1
+    ? text.substring(0, whyIndex).trim()
+    : text
+
+  let whyText = whyIndex > -1
+    ? text.substring(whyIndex + 'Why this matters:'.length).trim()
+    : ''
+
+  whatText = whatText.replace('What to do:', '').trim()
+
+  const rawSteps = whatText
+    .split(/\.\s+(?=[A-Z0-9])/)
+    .map(s => s.trim())
+    .filter(s => s.length > 15)
+
+  const steps = rawSteps.map(step => step.replace(/\.$/, '').trim())
+
+  return { steps, why: whyText }
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -198,8 +207,7 @@ export default function Home() {
 
   // ── Derived ────────────────────────────────────────────────────────────────
 
-  const steps     = parseSteps(dayContent?.task_description)
-  const whyText   = getWhyParagraph(dayContent?.task_description)
+  const { steps, why: whyText } = parseTaskDescription(dayContent?.task_description)
   const phase     = getPhase(currentDay)
   const dayType   = getDayType(dayContent)
   const refs      = [
@@ -211,7 +219,7 @@ export default function Home() {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0A0812', paddingBottom: 80 }}>
+    <div style={{ minHeight: '100vh', background: '#0A0812', paddingBottom: 100 }}>
 
       {/* ── Celebration overlay ──────────────────────────────────────────── */}
       <AnimatePresence>
@@ -588,9 +596,12 @@ export default function Home() {
         padding: '0 20px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
-        background: 'rgba(10,8,18,0.95)',
+        background: 'rgba(10,8,18,0.97)',
         backdropFilter: 'blur(20px)',
-        position: 'sticky', top: 0, zIndex: 100
+        WebkitBackdropFilter: 'blur(20px)',
+        position: 'sticky', top: 0, zIndex: 100,
+        maxWidth: 480, width: '100%', margin: '0 auto',
+        boxSizing: 'border-box'
       }}>
         <motion.span
           animate={{
@@ -617,7 +628,7 @@ export default function Home() {
       </div>
 
       {/* ── Day hero ─────────────────────────────────────────────────────── */}
-      <div style={{ padding: '24px 20px 16px' }}>
+      <div style={{ padding: '28px 20px 16px', maxWidth: 480, margin: '0 auto' }}>
         <p style={{
           fontSize: 11, fontWeight: 500, letterSpacing: '0.1em',
           textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)',
@@ -643,7 +654,7 @@ export default function Home() {
       </div>
 
       {/* ── Progress section ─────────────────────────────────────────────── */}
-      <div style={{ padding: '0 20px 20px' }}>
+      <div style={{ padding: '0 20px 20px', maxWidth: 480, margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
           <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>Your journey</span>
           <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{currentDay} of 21 days</span>
