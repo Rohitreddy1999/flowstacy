@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { TRACKS } from '../lib/tracks'
@@ -8,14 +8,33 @@ export default function SubTrackSelect() {
   const navigate = useNavigate()
   const [selected, setSelected] = useState(null)
 
-  const trackId = localStorage.getItem('flowstate_selected_track')
-  const track = TRACKS.find(t => t.id === trackId) || TRACKS[0]
+  const [trackId, setTrackId] = useState(
+    localStorage.getItem('flowstate_selected_track')
+  )
+
+  useEffect(() => {
+    if (trackId) return
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) return
+      const { data: journey } = await supabase
+        .from('user_journeys')
+        .select('subtrack_id, subtracks(track_id)')
+        .eq('user_id', session.user.id)
+        .eq('status', 'active')
+        .single()
+
+      if (journey?.subtracks?.track_id) {
+        setTrackId(journey.subtracks.track_id)
+      }
+    })
+  }, [])
 
   const handleContinue = async () => {
     if (!selected) return
-    localStorage.setItem('flowstate_selected_subtrack', selected)
 
     const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
 
     await supabase
       .from('user_journeys')
@@ -26,6 +45,9 @@ export default function SubTrackSelect() {
         status: 'active',
         started_at: new Date().toISOString()
       }, { onConflict: 'user_id' })
+
+    localStorage.setItem('flowstate_selected_subtrack', selected)
+    localStorage.setItem('flowstate_selected_track', trackId)
 
     navigate('/home', { replace: true })
   }
