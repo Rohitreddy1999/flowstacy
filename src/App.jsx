@@ -20,6 +20,7 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Settings from './pages/Settings'
 import ProtectedRoute from './components/ProtectedRoute'
+import PhoneFrame from './components/PhoneFrame'
 
 function AppRoutes() {
   const location = useLocation()
@@ -53,10 +54,10 @@ function AppRoutes() {
 
 function App() {
   return (
-    <>
+    <PhoneFrame>
       <InstallPrompt />
       <AppRoutes />
-    </>
+    </PhoneFrame>
   )
 }
 
