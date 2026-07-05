@@ -8,30 +8,19 @@ export default function LoadingScreen() {
 
   useEffect(() => {
     const timer = setTimeout(async () => {
-      // Check if user has an active auth session
-      const { data: { session } } = await supabase.auth.getSession()
+      const { data: { session } } =
+        await supabase.auth.getSession()
 
-      if (!session) {
-        // No session -- check if they started onboarding without signing up
-        const lifeStage = localStorage.getItem('flowstate_life_stage')
-        navigate(lifeStage ? '/login' : '/welcome')
-        return
-      }
-
-      // Session exists -- check Supabase for an active journey
-      const { data: journey } = await supabase
-        .from('user_journeys')
-        .select('id, subtrack_id, current_day, status')
-        .eq('user_id', session.user.id)
-        .eq('status', 'active')
-        .single()
-
-      if (journey && journey.subtrack_id) {
-        // Returning user with active journey -- go straight to home
-        navigate('/home', { replace: true })
+      if (session) {
+        const subtrack = localStorage.getItem(
+          'flowstate_selected_subtrack'
+        )
+        navigate(subtrack ? '/home' : '/bridge')
       } else {
-        // Logged in but no journey yet -- they signed up but never finished onboarding
-        navigate('/onboarding', { replace: true })
+        const lifeStage = localStorage.getItem(
+          'flowstate_life_stage'
+        )
+        navigate(lifeStage ? '/login' : '/welcome')
       }
     }, 2500)
 
