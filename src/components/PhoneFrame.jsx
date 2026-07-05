@@ -38,7 +38,7 @@ export default function PhoneFrame({ children }) {
       <div style={{
         position: 'relative',
         width: '393px',
-        minHeight: '852px',
+        height: '852px',
         background: '#0A0812',
         borderRadius: '48px',
         border: '1px solid rgba(255,255,255,0.1)',
@@ -64,15 +64,19 @@ export default function PhoneFrame({ children }) {
           zIndex: 100,
         }} />
 
-        {/* App content */}
-        <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          overflowX: 'hidden',
-          paddingTop: '0px',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-        }}>
+        {/* App content -- scrolls inside the frame */}
+        <div
+          className="phone-frame-content"
+          style={{
+            flex: 1,
+            height: '100%',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
           {children}
         </div>
       </div>

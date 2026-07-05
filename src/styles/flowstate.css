@@ -554,3 +554,7 @@
   border-radius: var(--fs-radius-sm);
   animation: skeleton-pulse 1.5s ease infinite;
 }
+
+.phone-frame-content::-webkit-scrollbar {
+  display: none;
+}
