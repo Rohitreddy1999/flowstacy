@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import BottomNav from '../components/BottomNav'
-import { getDayContent, getSubtrackByName, SUBTRACK_NAMES } from '../lib/curriculum'
+import { getDayContent, SUBTRACK_NAMES, SUBTRACK_IDS } from '../lib/curriculum'
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -145,20 +145,16 @@ export default function Home() {
       const subtracks_name = localStorage.getItem('flowstate_selected_subtrack')
       if (!subtracks_name) { setContentLoading(false); return }
 
-      const displayName  = SUBTRACK_NAMES[subtracks_name] || subtracks_name
-      const subtrackData = await getSubtrackByName(displayName)
+      const subtrackId = SUBTRACK_IDS[subtracks_name]
+      if (!subtrackId) { setContentLoading(false); return }
 
-      if (subtrackData) {
-        const content = await getDayContent(subtrackData.id, currentDay)
-        setDayContent(content)
+      const content = await getDayContent(subtrackId, currentDay)
+      setDayContent(content)
 
-        const allContent = await Promise.all(
-          Array.from({ length: 21 }, (_, i) =>
-            getDayContent(subtrackData.id, i + 1)
-          )
-        )
-        setAllDays(allContent)
-      }
+      const allContent = await Promise.all(
+        Array.from({ length: 21 }, (_, i) => getDayContent(subtrackId, i + 1))
+      )
+      setAllDays(allContent)
 
       setContentLoading(false)
     }

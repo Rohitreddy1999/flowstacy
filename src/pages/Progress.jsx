@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
-import { resolveSubtrack } from '../lib/curriculum'
+import { SUBTRACK_NAMES, SUBTRACK_IDS } from '../lib/curriculum'
 import BottomNav from '../components/BottomNav'
 import PageTransition from '../components/PageTransition'
 
@@ -134,19 +134,18 @@ export default function Progress() {
 
   useEffect(() => {
     if (!subtractId) { setLoading(false); return }
-    async function load() {
-      const st = await resolveSubtrack(subtractId)
-      if (!st) { setLoading(false); return }
-      setSubtrack(st)
-      const { data: days } = await supabase
-        .from('curriculum_days')
-        .select('day_number, task_title, duration_minutes')
-        .eq('subtrack_id', st.id)
-        .order('day_number', { ascending: true })
-      if (days) setCurriculumDays(days)
-      setLoading(false)
-    }
-    load()
+    const subtrackId = SUBTRACK_IDS[subtractId]
+    if (!subtrackId) { setLoading(false); return }
+    setSubtrack({ name: SUBTRACK_NAMES[subtractId] || subtractId, tracks: null })
+    supabase
+      .from('curriculum_days')
+      .select('day_number, task_title, duration_minutes')
+      .eq('subtrack_id', subtrackId)
+      .order('day_number', { ascending: true })
+      .then(({ data: days }) => {
+        if (days) setCurriculumDays(days)
+        setLoading(false)
+      })
   }, [subtractId])
 
   const completedCount = completedDays.length
