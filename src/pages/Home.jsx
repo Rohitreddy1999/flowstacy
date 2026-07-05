@@ -142,11 +142,8 @@ export default function Home() {
   useEffect(() => {
     async function fetchCurriculumData() {
       setContentLoading(true)
-      const subtracks_name = localStorage.getItem('flowstate_selected_subtrack')
-      if (!subtracks_name) { setContentLoading(false); return }
-
       const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-      const subtrackId = UUID_RE.test(subtracks_name) ? subtracks_name : SUBTRACK_IDS[subtracks_name]
+      const subtrackId = UUID_RE.test(subtrackKey) ? subtrackKey : SUBTRACK_IDS[subtrackKey]
       if (!subtrackId) { setContentLoading(false); return }
 
       const content = await getDayContent(subtrackId, currentDay)
