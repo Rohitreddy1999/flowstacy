@@ -26,10 +26,20 @@ export default function Login() {
       return
     }
 
-    const subtrack = localStorage.getItem(
-      'flowstate_selected_subtrack'
-    )
-    navigate(subtrack ? '/home' : '/bridge')
+    // After successful login, check Supabase for active journey
+    const { data: { session } } = await supabase.auth.getSession()
+    const { data: journey } = await supabase
+      .from('user_journeys')
+      .select('id, subtrack_id, is_active')
+      .eq('user_id', session.user.id)
+      .eq('is_active', true)
+      .single()
+
+    if (journey && journey.subtrack_id) {
+      navigate('/home', { replace: true })
+    } else {
+      navigate('/bridge', { replace: true })
+    }
   }
 
   return (
