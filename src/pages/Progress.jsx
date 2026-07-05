@@ -2,21 +2,9 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
-import { getSubtrackByName } from '../lib/curriculum'
+import { resolveSubtrack } from '../lib/curriculum'
 import BottomNav from '../components/BottomNav'
 import PageTransition from '../components/PageTransition'
-
-const SUBTRACK_NAMES = {
-  gym: 'Gym & Weightlifting', calisthenics: 'Calisthenics', running: 'Running & Stamina',
-  sport: 'Sport & Athletics', yoga: 'Yoga & Flexibility',
-  morning: 'Morning Routine', reading: 'Daily Reading', steps: '10,000 Steps',
-  meditation: 'Meditation', detox: 'Digital Detox',
-  guitar: 'Guitar', piano: 'Piano & Keyboard', drums: 'Drums & Rhythm', vocals: 'Vocals & Singing',
-  self: 'Self-Discovery', gratitude: 'Gratitude Practice', stream: 'Stream of Consciousness', goals: 'Goal Setting & Vision',
-  fundamentals: 'Sketching Fundamentals', portrait: 'Portrait Drawing', urban: 'Urban Sketching', nature: 'Nature & Animals',
-}
-
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 // ── SVG Icons ──────────────────────────────────────────────────────────────────
 
@@ -147,18 +135,14 @@ export default function Progress() {
   useEffect(() => {
     if (!subtractId) { setLoading(false); return }
     async function load() {
-      let resolvedId = subtractId
-      if (!UUID_RE.test(subtractId)) {
-        const displayName = SUBTRACK_NAMES[subtractId] || subtractId
-        const subtrackData = await getSubtrackByName(displayName)
-        if (!subtrackData) { setLoading(false); return }
-        resolvedId = subtrackData.id
-      }
-      const [{ data: st }, { data: days }] = await Promise.all([
-        supabase.from('subtracks').select('name, tracks(name, color)').eq('id', resolvedId).single(),
-        supabase.from('curriculum_days').select('day_number, task_title, duration_minutes').eq('subtrack_id', resolvedId).order('day_number', { ascending: true }),
-      ])
-      if (st) setSubtrack(st)
+      const st = await resolveSubtrack(subtractId)
+      if (!st) { setLoading(false); return }
+      setSubtrack(st)
+      const { data: days } = await supabase
+        .from('curriculum_days')
+        .select('day_number, task_title, duration_minutes')
+        .eq('subtrack_id', st.id)
+        .order('day_number', { ascending: true })
       if (days) setCurriculumDays(days)
       setLoading(false)
     }

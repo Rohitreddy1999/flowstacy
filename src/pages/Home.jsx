@@ -3,21 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import BottomNav from '../components/BottomNav'
-import { getDayContent, getSubtrackByName } from '../lib/curriculum'
+import { getDayContent, getSubtrackByName, SUBTRACK_NAMES, resolveSubtrack } from '../lib/curriculum'
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
 const TOTAL = 21
-
-const SUBTRACK_NAMES = {
-  gym: 'Gym & Weightlifting', calisthenics: 'Calisthenics', running: 'Running & Stamina',
-  sport: 'Sport & Athletics', yoga: 'Yoga & Flexibility',
-  morning: 'Morning Routine', reading: 'Daily Reading', steps: '10,000 Steps',
-  meditation: 'Meditation', detox: 'Digital Detox',
-  guitar: 'Guitar', piano: 'Piano & Keyboard', drums: 'Drums & Rhythm', vocals: 'Vocals & Singing',
-  self: 'Self-Discovery', gratitude: 'Gratitude Practice', stream: 'Stream of Consciousness', goals: 'Goal Setting & Vision',
-  fundamentals: 'Sketching Fundamentals', portrait: 'Portrait Drawing', urban: 'Urban Sketching', nature: 'Nature & Animals',
-}
 
 const FEELINGS = [
   { id: 'crushed',   label: '🔥 Crushed it' },
@@ -117,8 +107,8 @@ function parseTaskDescription(text) {
 export default function Home() {
   const navigate = useNavigate()
 
-  const subtrackKey  = localStorage.getItem('flowstate_selected_subtrack') || 'gym'
-  const subtrackName = SUBTRACK_NAMES[subtrackKey] || subtrackKey
+  const subtrackKey          = localStorage.getItem('flowstate_selected_subtrack') || 'gym'
+  const [subtrackName, setSubtrackName] = useState(SUBTRACK_NAMES[subtrackKey] || '')
 
   const [currentDay, setCurrentDay] = useState(() => {
     const v = localStorage.getItem('flowstate_current_day')
@@ -155,8 +145,8 @@ export default function Home() {
       const subtracks_name = localStorage.getItem('flowstate_selected_subtrack')
       if (!subtracks_name) { setContentLoading(false); return }
 
-      const displayName  = SUBTRACK_NAMES[subtracks_name] || subtracks_name
-      const subtrackData = await getSubtrackByName(displayName)
+      const subtrackData = await resolveSubtrack(subtracks_name)
+      if (subtrackData?.name) setSubtrackName(subtrackData.name)
 
       if (subtrackData) {
         const content = await getDayContent(subtrackData.id, currentDay)
