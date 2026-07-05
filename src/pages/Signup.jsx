@@ -56,7 +56,7 @@ export default function Signup() {
     }
 
     setLoading(true)
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -67,6 +67,20 @@ export default function Signup() {
     if (error) {
       toast.error(error.message)
       setLoading(false)
+      return
+    }
+
+    // Email already registered — Supabase silently returns empty identities
+    if (data?.user?.identities?.length === 0) {
+      toast.error('An account with this email already exists. Please sign in.')
+      setLoading(false)
+      return
+    }
+
+    // Email confirmation required — no session yet
+    if (!data?.session) {
+      toast.success('Account created! Check your email to verify, then sign in.')
+      navigate('/login')
       return
     }
 
