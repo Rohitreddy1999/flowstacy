@@ -3,12 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import BottomNav from '../components/BottomNav'
-import AuroraBackground from '../components/AuroraBackground'
-import PageTransition from '../components/PageTransition'
-import SkeletonCard from '../components/SkeletonCard'
 import { getDayContent, getSubtrackByName } from '../lib/curriculum'
 
-// ── Constants ─────────────────────────────────────────────────────────────────
+// ── Constants ──────────────────────────────────────────────────────────────────
 
 const TOTAL = 21
 
@@ -30,54 +27,45 @@ const FEELINGS = [
 ]
 
 const COMMUNITY = [
-  { initials: 'AK', name: 'Arjun K.', color: '#534AB7' },
-  { initials: 'SM', name: 'Sarah M.', color: '#0D9488' },
-  { initials: 'RJ', name: 'Raj J.',   color: '#E8604A' },
+  { initials: 'MJ', name: 'Maya J.',  day: 12, streak: 12,
+    bg: 'rgba(83,74,183,0.3)',   color: '#9D92F8' },
+  { initials: 'TR', name: 'Theo R.',  day: 9,  streak: 9,
+    bg: 'rgba(15,110,86,0.3)',   color: '#5DCAA5' },
+  { initials: 'AK', name: 'Aria K.',  day: 11, streak: 11,
+    bg: 'rgba(133,79,11,0.3)',   color: '#EF9F27' },
 ]
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Helpers ────────────────────────────────────────────────────────────────────
 
-function getHeading(day) {
-  if (day <= 7)  return `Welcome to Day ${day}`
-  if (day <= 14) return `Day ${day} — Build`
-  if (day <= 20) return `Day ${day} — Commit`
-  return 'Day 21 — Final day'
+function getPhase(day) {
+  if (day <= 7)  return 'Week 1 — Foundation'
+  if (day <= 14) return 'Week 2 — Build'
+  return 'Week 3 — Commit'
 }
 
-function getSubtext(day) {
-  if (day <= 7)  return "Every legend started exactly here. Let's begin."
-  if (day <= 14) return "You made it through Week 1. Most people didn't. You did."
-  if (day <= 20) return 'You are not the same person who started this.'
-  return 'This is it. Show up one last time.'
+function getDayType(content) {
+  if (!content) return 'Session'
+  if (content.difficulty) return content.difficulty
+  return 'Training'
 }
 
-// ── Stagger variants ───────────────────────────────────────────────────────────
-
-const itemVariants = {
-  initial: { opacity: 0, y: 16 },
-  animate: (i) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: i * 0.08,
-      duration: 0.4,
-      ease: 'easeOut'
-    }
-  })
+function parseSteps(text) {
+  if (!text) return []
+  const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean)
+  const numbered = lines.filter(l => /^\d+[\.\)]/.test(l))
+  if (numbered.length >= 2) {
+    return numbered.map(l => l.replace(/^\d+[\.\)]\s*/, ''))
+  }
+  return []
 }
 
-// ── Skeleton ──────────────────────────────────────────────────────────────────
-
-function Skeleton({ height = 16, style = {} }) {
-  return (
-    <div
-      className="fs-skeleton"
-      style={{ height, marginBottom: 10, ...style }}
-    />
-  )
+function getWhyParagraph(text) {
+  if (!text) return null
+  const paras = text.split(/\n\n+/).map(p => p.trim()).filter(Boolean)
+  return paras.length > 1 ? paras[paras.length - 1] : null
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── Component ──────────────────────────────────────────────────────────────────
 
 export default function Home() {
   const navigate = useNavigate()
@@ -98,59 +86,61 @@ export default function Home() {
     return v ? JSON.parse(v) : []
   })
 
-  const [completed,            setCompleted]            = useState(false)
-  const [celebrating,          setCelebrating]          = useState(false)
-  const [showCelebrationCard,  setShowCelebrationCard]  = useState(false)
-  const [showLogModal,         setShowLogModal]         = useState(false)
-  const [feeling,              setFeeling]              = useState(null)
-  const [logNote,              setLogNote]              = useState('')
-  const [reflectionSaved,      setReflectionSaved]      = useState(false)
-  const [showDevMenu,          setShowDevMenu]          = useState(false)
+  const [completed,           setCompleted]           = useState(false)
+  const [celebrating,         setCelebrating]         = useState(false)
+  const [showCelebrationCard, setShowCelebrationCard] = useState(false)
+  const [showLogModal,        setShowLogModal]        = useState(false)
+  const [feeling,             setFeeling]             = useState(null)
+  const [logNote,             setLogNote]             = useState('')
+  const [reflectionSaved,     setReflectionSaved]     = useState(false)
+  const [showDevMenu,         setShowDevMenu]         = useState(false)
+  const [showFullPlan,        setShowFullPlan]        = useState(false)
 
-  // Curriculum state
-  const [dayContent,      setDayContent]      = useState(null)
-  const [contentLoading,  setContentLoading]  = useState(true)
-  const [subtracksId,     setSubtracksId]     = useState(null)
+  const [dayContent,     setDayContent]     = useState(null)
+  const [contentLoading, setContentLoading] = useState(true)
+  const [allDays,        setAllDays]        = useState([])
 
-  // ── Fetch curriculum data ──────────────────────────────────────────────────
+  // ── Fetch curriculum ───────────────────────────────────────────────────────
 
   useEffect(() => {
     async function fetchCurriculumData() {
       setContentLoading(true)
-
       const subtracks_name = localStorage.getItem('flowstate_selected_subtrack')
-      if (!subtracks_name) {
-        setContentLoading(false)
-        return
-      }
+      if (!subtracks_name) { setContentLoading(false); return }
 
-      const displayName = SUBTRACK_NAMES[subtracks_name] || subtracks_name
+      const displayName  = SUBTRACK_NAMES[subtracks_name] || subtracks_name
       const subtrackData = await getSubtrackByName(displayName)
 
       if (subtrackData) {
-        setSubtracksId(subtrackData.id)
         const content = await getDayContent(subtrackData.id, currentDay)
         setDayContent(content)
+
+        // Fetch all 21 days for the full plan sheet
+        const allContent = await Promise.all(
+          Array.from({ length: 21 }, (_, i) =>
+            getDayContent(subtrackData.id, i + 1)
+          )
+        )
+        setAllDays(allContent)
       }
 
       setContentLoading(false)
     }
-
     fetchCurriculumData()
   }, [currentDay])
 
-  // ── Handlers ──────────────────────────────────────────────────────────────
+  // ── Handlers ───────────────────────────────────────────────────────────────
 
   function handleMarkComplete() {
     if (completed) return
 
     const newCompletedDays = [...completedDays, currentDay]
-    const newStreak  = streak + 1
-    const newDay     = Math.min(currentDay + 1, 21)
+    const newStreak        = streak + 1
+    const newDay           = Math.min(currentDay + 1, 21)
 
     localStorage.setItem('flowstate_completed_days', JSON.stringify(newCompletedDays))
-    localStorage.setItem('flowstate_streak', String(newStreak))
-    localStorage.setItem('flowstate_current_day', String(newDay))
+    localStorage.setItem('flowstate_streak',         String(newStreak))
+    localStorage.setItem('flowstate_current_day',    String(newDay))
 
     setCompleted(true)
     setCompletedDays(newCompletedDays)
@@ -165,9 +155,7 @@ export default function Home() {
       disableForReducedMotion: true
     })
 
-    setTimeout(() => {
-      setShowCelebrationCard(true)
-    }, 400)
+    setTimeout(() => setShowCelebrationCard(true), 400)
   }
 
   function handleSaveReflection() {
@@ -197,8 +185,8 @@ export default function Home() {
 
   function jumpToDay(day) {
     const done = Array.from({ length: day - 1 }, (_, i) => i + 1)
-    localStorage.setItem('flowstate_current_day', String(day))
-    localStorage.setItem('flowstate_streak', String(day))
+    localStorage.setItem('flowstate_current_day',    String(day))
+    localStorage.setItem('flowstate_streak',         String(day))
     localStorage.setItem('flowstate_completed_days', JSON.stringify(done))
     setCurrentDay(day)
     setStreak(day)
@@ -208,13 +196,24 @@ export default function Home() {
     setShowDevMenu(false)
   }
 
+  // ── Derived ────────────────────────────────────────────────────────────────
+
+  const steps     = parseSteps(dayContent?.task_description)
+  const whyText   = getWhyParagraph(dayContent?.task_description)
+  const phase     = getPhase(currentDay)
+  const dayType   = getDayType(dayContent)
+  const refs      = [
+    { url: dayContent?.reference_url_1, label: dayContent?.ref_label_1 },
+    { url: dayContent?.reference_url_2, label: dayContent?.ref_label_2 },
+    { url: dayContent?.reference_url_3, label: dayContent?.ref_label_3 },
+  ].filter(r => r.url && r.label)
+
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <PageTransition>
-      <AuroraBackground />
+    <div style={{ minHeight: '100vh', background: '#0A0812', paddingBottom: 80 }}>
 
-      {/* ── Celebration card overlay ─────────────────────────── */}
+      {/* ── Celebration overlay ──────────────────────────────────────────── */}
       <AnimatePresence>
         {showCelebrationCard && (
           <motion.div
@@ -222,14 +221,11 @@ export default function Home() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             style={{
-              position: 'fixed',
-              inset: 0,
+              position: 'fixed', inset: 0,
               background: 'rgba(10,8,18,0.85)',
               backdropFilter: 'blur(12px)',
               zIndex: 500,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
               padding: '20px'
             }}
             onClick={() => setShowCelebrationCard(false)}
@@ -243,8 +239,7 @@ export default function Home() {
                 borderRadius: '24px',
                 padding: '32px 24px',
                 textAlign: 'center',
-                maxWidth: '320px',
-                width: '100%'
+                maxWidth: '320px', width: '100%'
               }}
               onClick={e => e.stopPropagation()}
             >
@@ -254,9 +249,7 @@ export default function Home() {
                 transition={{ delay: 0.2, type: 'spring', stiffness: 400 }}
                 style={{ fontSize: '64px', marginBottom: '16px', lineHeight: 1 }}
               >
-                {currentDay === 7 ? '🔥' :
-                 currentDay === 14 ? '⚡' :
-                 currentDay === 21 ? '🏆' : '✓'}
+                {currentDay === 7 ? '🔥' : currentDay === 14 ? '⚡' : currentDay === 21 ? '🏆' : '✓'}
               </motion.div>
 
               <motion.h2
@@ -265,7 +258,7 @@ export default function Home() {
                 transition={{ delay: 0.3 }}
                 style={{ fontSize: '24px', fontWeight: '500', color: 'white', margin: '0 0 8px' }}
               >
-                {currentDay === 7 ? 'Week 1 done.' :
+                {currentDay === 7  ? 'Week 1 done.'   :
                  currentDay === 14 ? 'Halfway there.' :
                  currentDay === 21 ? 'You graduated.' :
                  `Day ${currentDay} complete.`}
@@ -277,13 +270,10 @@ export default function Home() {
                 transition={{ delay: 0.4 }}
                 style={{ fontSize: '15px', color: 'rgba(255,255,255,0.5)', margin: '0 0 24px', lineHeight: 1.5 }}
               >
-                {currentDay === 7 ?
-                  'You showed up every day this week. Most people quit here.' :
-                 currentDay === 14 ?
-                  'Two weeks in. You are not the same person who started.' :
-                 currentDay === 21 ?
-                  'You did it. All 21 days. That identity is yours now.' :
-                  'See you tomorrow. The streak continues.'}
+                {currentDay === 7  ? 'You showed up every day this week. Most people quit here.' :
+                 currentDay === 14 ? 'Two weeks in. You are not the same person who started.'    :
+                 currentDay === 21 ? 'You did it. All 21 days. That identity is yours now.'      :
+                 'See you tomorrow. The streak continues.'}
               </motion.p>
 
               <motion.div
@@ -312,15 +302,10 @@ export default function Home() {
                   }
                 }}
                 style={{
-                  width: '100%',
-                  padding: '14px',
+                  width: '100%', padding: '14px',
                   background: currentDay === 21 ? '#1D9E75' : '#534AB7',
-                  border: 'none',
-                  borderRadius: '14px',
-                  color: 'white',
-                  fontSize: '15px',
-                  fontWeight: '500',
-                  cursor: 'pointer'
+                  border: 'none', borderRadius: '14px',
+                  color: 'white', fontSize: '15px', fontWeight: '500', cursor: 'pointer'
                 }}
               >
                 {currentDay === 21 ? 'Go to graduation →' : 'Keep going →'}
@@ -330,436 +315,700 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* ── Reflection modal ─────────────────────────────────── */}
-      {showLogModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-end"
-          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
-          onClick={closeLogModal}
-        >
-          <div
-            className="fs-card"
+      {/* ── Reflection modal ─────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showLogModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             style={{
-              position: 'absolute', bottom: 0, left: 0, right: 0,
-              borderRadius: 'var(--fs-radius-xl) var(--fs-radius-xl) 0 0',
-              padding: '24px 20px 40px',
+              position: 'fixed', inset: 0, zIndex: 200,
+              background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
+              display: 'flex', alignItems: 'flex-end'
             }}
-            onClick={e => e.stopPropagation()}
+            onClick={closeLogModal}
           >
-            <p className="fs-heading-sm" style={{ marginBottom: 16 }}>How did today feel?</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              {FEELINGS.map(f => (
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              style={{
+                width: '100%', maxWidth: 480, margin: '0 auto',
+                background: '#0F0C1A',
+                borderRadius: '24px 24px 0 0',
+                borderTop: '1px solid rgba(255,255,255,0.08)',
+                padding: '24px 20px 40px'
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <p style={{ fontSize: '17px', fontWeight: 600, color: 'white', marginBottom: 16 }}>
+                How did today feel?
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+                {FEELINGS.map(f => (
+                  <button
+                    key={f.id}
+                    onClick={() => setFeeling(f.id)}
+                    style={{
+                      padding: 12, textAlign: 'center', cursor: 'pointer',
+                      background: feeling === f.id ? 'rgba(83,74,183,0.2)' : 'rgba(255,255,255,0.05)',
+                      border: feeling === f.id ? '1px solid rgba(157,146,248,0.4)' : '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: 12, color: 'white', fontSize: 14
+                    }}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+              <textarea
+                style={{
+                  width: '100%', height: 80, resize: 'none',
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: 12, padding: 12,
+                  color: 'white', fontSize: 14, outline: 'none',
+                  fontFamily: 'system-ui', boxSizing: 'border-box'
+                }}
+                placeholder="Anything else on your mind? (optional)"
+                value={logNote}
+                onChange={e => setLogNote(e.target.value)}
+              />
+              {reflectionSaved ? (
+                <p style={{ textAlign: 'center', fontSize: 14, fontWeight: 500, padding: '12px 0', color: '#5DCAA5' }}>
+                  Reflection saved ✓
+                </p>
+              ) : (
+                <>
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleSaveReflection}
+                    disabled={!feeling}
+                    style={{
+                      width: '100%', height: 50, marginTop: 12,
+                      background: feeling ? '#534AB7' : 'rgba(255,255,255,0.06)',
+                      border: 'none', borderRadius: 25,
+                      color: feeling ? 'white' : 'rgba(255,255,255,0.2)',
+                      fontSize: 15, fontWeight: 500, cursor: feeling ? 'pointer' : 'not-allowed'
+                    }}
+                  >
+                    Save reflection
+                  </motion.button>
+                  <button
+                    onClick={closeLogModal}
+                    style={{
+                      width: '100%', height: 44, marginTop: 8,
+                      background: 'none', border: 'none',
+                      color: 'rgba(255,255,255,0.3)', fontSize: 14, cursor: 'pointer'
+                    }}
+                  >
+                    Skip
+                  </button>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Dev menu ─────────────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showDevMenu && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 300,
+              background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)'
+            }}
+            onClick={() => setShowDevMenu(false)}
+          >
+            <div
+              style={{
+                position: 'fixed', bottom: 80, left: 16, right: 16, maxWidth: 448,
+                margin: '0 auto', background: '#0F0C1A',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 16, padding: 16, zIndex: 300
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              {[
+                { label: '🗑 Reset everything',  action: resetApp },
+                { label: '⏩ Jump to Day 7',      action: () => jumpToDay(7) },
+                { label: '⏩ Jump to Day 14',     action: () => jumpToDay(14) },
+                { label: '⏩ Jump to Day 21',     action: () => jumpToDay(21) },
+                { label: '🏆 Go to Graduation',   action: () => navigate('/graduation') },
+              ].map(({ label, action }) => (
                 <button
-                  key={f.id}
-                  onClick={() => setFeeling(f.id)}
-                  className={feeling === f.id ? 'fs-card fs-card-purple' : 'fs-card'}
-                  style={{ padding: 12, textAlign: 'center', cursor: 'pointer', border: 'none', width: '100%', color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)' }}
+                  key={label}
+                  onClick={action}
+                  style={{
+                    display: 'block', width: '100%', textAlign: 'left',
+                    padding: '12px 0', background: 'none', border: 'none',
+                    borderBottom: '1px solid rgba(255,255,255,0.06)',
+                    color: 'rgba(255,255,255,0.8)', fontSize: 14, cursor: 'pointer'
+                  }}
                 >
-                  {f.label}
+                  {label}
                 </button>
               ))}
+              <button
+                onClick={() => setShowDevMenu(false)}
+                style={{
+                  display: 'block', width: '100%', textAlign: 'center',
+                  padding: '12px 0 0', background: 'none', border: 'none',
+                  color: 'rgba(255,255,255,0.3)', fontSize: 14, cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
             </div>
-            <textarea
-              className="fs-input"
-              style={{ marginTop: 12, height: 80, resize: 'none' }}
-              placeholder="Anything else on your mind? (optional)"
-              value={logNote}
-              onChange={e => setLogNote(e.target.value)}
-            />
-            {reflectionSaved ? (
-              <p style={{ textAlign: 'center', fontSize: 'var(--fs-text-sm)', fontWeight: 500, padding: '12px 0', color: 'var(--fs-teal-300)' }}>
-                Reflection saved ✓
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Full plan bottom sheet ────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showFullPlan && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 200,
+              background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)'
+            }}
+            onClick={() => setShowFullPlan(false)}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              style={{
+                position: 'fixed', bottom: 0, left: 0, right: 0,
+                maxWidth: 480, margin: '0 auto',
+                background: '#0F0C1A',
+                borderRadius: '24px 24px 0 0',
+                borderTop: '1px solid rgba(255,255,255,0.08)',
+                maxHeight: '80vh',
+                overflow: 'hidden',
+                display: 'flex', flexDirection: 'column'
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Sheet header */}
+              <div style={{
+                padding: '20px 20px 0',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                flexShrink: 0
+              }}>
+                <span style={{ fontSize: 17, fontWeight: 600, color: 'white' }}>
+                  Your 21-day plan
+                </span>
+                <button
+                  onClick={() => setShowFullPlan(false)}
+                  style={{
+                    background: 'none', border: 'none',
+                    color: 'rgba(255,255,255,0.4)',
+                    fontSize: 24, cursor: 'pointer', lineHeight: 1, padding: '4px'
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Scrollable list */}
+              <div style={{ padding: '16px 20px', overflowY: 'auto', flex: 1 }}>
+                {Array.from({ length: 21 }, (_, i) => {
+                  const day     = i + 1
+                  const isDone  = completedDays.includes(day)
+                  const isToday = day === currentDay && !isDone
+                  const content = allDays[i]
+
+                  return (
+                    <div
+                      key={day}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 14,
+                        padding: '12px 0',
+                        borderBottom: '1px solid rgba(255,255,255,0.05)'
+                      }}
+                    >
+                      {/* Day circle */}
+                      <div style={{
+                        width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 12, fontWeight: 600,
+                        background: isDone  ? '#1D9E75' :
+                                    isToday ? '#534AB7'  :
+                                    'rgba(255,255,255,0.06)',
+                        color: isDone || isToday ? 'white' : 'rgba(255,255,255,0.3)',
+                        boxShadow: isToday ? '0 0 12px rgba(83,74,183,0.5)' : 'none'
+                      }}>
+                        {isDone ? '✓' : day}
+                      </div>
+
+                      {/* Title */}
+                      <span style={{
+                        flex: 1, fontSize: 14,
+                        color:          isDone  ? 'rgba(255,255,255,0.4)' :
+                                        isToday ? 'white' :
+                                        'rgba(255,255,255,0.6)',
+                        fontWeight:     isToday ? 500 : 400,
+                        textDecoration: isDone ? 'line-through' : 'none'
+                      }}>
+                        {content?.task_title || `Day ${day} — ${getPhase(day).split(' — ')[1]}`}
+                      </span>
+
+                      {/* Duration pill */}
+                      {content?.duration_minutes && (
+                        <span style={{
+                          fontSize: 11, color: 'rgba(255,255,255,0.3)',
+                          background: 'rgba(255,255,255,0.05)',
+                          padding: '3px 8px', borderRadius: 10
+                        }}>
+                          {content.duration_minutes}m
+                        </span>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Sticky top bar ───────────────────────────────────────────────── */}
+      <div style={{
+        height: 52,
+        padding: '0 20px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        background: 'rgba(10,8,18,0.95)',
+        backdropFilter: 'blur(20px)',
+        position: 'sticky', top: 0, zIndex: 100
+      }}>
+        <motion.span
+          animate={{
+            textShadow: [
+              '0 0 10px rgba(157,146,248,0.3)',
+              '0 0 20px rgba(157,146,248,0.7)',
+              '0 0 10px rgba(157,146,248,0.3)'
+            ]
+          }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          style={{
+            fontSize: 18, fontWeight: 600,
+            color: '#9D92F8', letterSpacing: '0.01em'
+          }}
+        >
+          flowstate
+        </motion.span>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ fontSize: 13 }}>🔥</span>
+          <span style={{ fontSize: 13, color: '#9D92F8', fontWeight: 600 }}>{streak}</span>
+          <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}> day streak</span>
+        </div>
+      </div>
+
+      {/* ── Day hero ─────────────────────────────────────────────────────── */}
+      <div style={{ padding: '24px 20px 16px' }}>
+        <p style={{
+          fontSize: 11, fontWeight: 500, letterSpacing: '0.1em',
+          textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)',
+          margin: '0 0 8px'
+        }}>
+          {subtrackName.toUpperCase()}
+        </p>
+        <motion.h1
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          style={{
+            fontSize: 48, fontWeight: 700, color: 'white',
+            letterSpacing: '-0.02em', lineHeight: 1,
+            margin: '0 0 6px'
+          }}
+        >
+          Day {currentDay}
+        </motion.h1>
+        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', margin: 0 }}>
+          {phase} · {dayType}
+        </p>
+      </div>
+
+      {/* ── Progress section ─────────────────────────────────────────────── */}
+      <div style={{ padding: '0 20px 20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>Your journey</span>
+          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{currentDay} of 21 days</span>
+        </div>
+
+        {/* Progress bar */}
+        <div style={{
+          height: 2, background: 'rgba(255,255,255,0.08)',
+          borderRadius: 1, marginBottom: 14, overflow: 'hidden'
+        }}>
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${(currentDay / 21) * 100}%` }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+            style={{
+              height: 2, background: '#534AB7',
+              boxShadow: '0 0 8px rgba(83,74,183,0.5)'
+            }}
+          />
+        </div>
+
+        {/* Dots */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {Array.from({ length: 21 }, (_, i) => {
+            const day   = i + 1
+            const done  = completedDays.includes(day)
+            const today = day === currentDay && !done
+            return (
+              <motion.div
+                key={day}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: i * 0.02, type: 'spring', stiffness: 400, damping: 20 }}
+                style={{
+                  width: 9, height: 9, borderRadius: '50%',
+                  background: done  ? '#1D9E75' :
+                              today ? '#9D92F8'  :
+                              'rgba(255,255,255,0.1)'
+                }}
+              >
+                {today && (
+                  <motion.div
+                    animate={{ scale: [1, 1.6, 1], opacity: [1, 0, 1] }}
+                    transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                    style={{
+                      width: '100%', height: '100%', borderRadius: '50%',
+                      background: '#9D92F8'
+                    }}
+                  />
+                )}
+              </motion.div>
+            )
+          })}
+        </div>
+
+        <button
+          onClick={() => setShowFullPlan(true)}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: 12, color: 'rgba(157,146,248,0.6)',
+            marginTop: 10, padding: 0
+          }}
+        >
+          View full 21-day plan →
+        </button>
+      </div>
+
+      {/* ── Today's task card ─────────────────────────────────────────────── */}
+      <div style={{ margin: '0 16px 16px' }}>
+        {contentLoading ? (
+          <div style={{
+            padding: 20, background: 'rgba(83,74,183,0.08)',
+            border: '1px solid rgba(157,146,248,0.12)',
+            borderRadius: 20
+          }}>
+            {[120, 80, 60].map((h, i) => (
+              <div
+                key={i}
+                style={{
+                  height: h, background: 'rgba(255,255,255,0.06)',
+                  borderRadius: 8, marginBottom: 12,
+                  animation: 'pulse 1.5s ease-in-out infinite'
+                }}
+              />
+            ))}
+          </div>
+        ) : (
+          <div style={{
+            padding: 20,
+            background: 'rgba(83,74,183,0.08)',
+            border: '1px solid rgba(157,146,248,0.12)',
+            borderRadius: 20
+          }}>
+            {/* Header row */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{
+                fontSize: 11, fontWeight: 500, letterSpacing: '0.08em',
+                color: 'rgba(157,146,248,0.7)'
+              }}>
+                TODAY'S TASK
+              </span>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {dayContent?.duration_minutes && (
+                  <span style={{
+                    fontSize: 11, padding: '4px 10px', borderRadius: 20,
+                    background: 'rgba(255,255,255,0.07)',
+                    color: 'rgba(255,255,255,0.45)'
+                  }}>
+                    ⏱ {dayContent.duration_minutes} min
+                  </span>
+                )}
+                {dayContent?.difficulty && (
+                  <span style={{
+                    fontSize: 11, padding: '4px 10px', borderRadius: 20,
+                    background: 'rgba(255,255,255,0.07)',
+                    color: 'rgba(255,255,255,0.45)'
+                  }}>
+                    {dayContent.difficulty}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Task title */}
+            {dayContent?.task_title && (
+              <p style={{
+                fontSize: 16, fontWeight: 600, color: 'white',
+                margin: '12px 0 0', lineHeight: 1.3
+              }}>
+                {dayContent.task_title}
               </p>
-            ) : (
+            )}
+
+            {/* WHAT TO DO */}
+            <div style={{ marginTop: 16 }}>
+              <p style={{
+                fontSize: 11, fontWeight: 500, letterSpacing: '0.08em',
+                color: 'rgba(255,255,255,0.25)', marginBottom: 12
+              }}>
+                WHAT TO DO
+              </p>
+
+              {steps.length > 0 ? (
+                steps.map((step, i) => (
+                  <div key={i} style={{
+                    display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 10
+                  }}>
+                    <span style={{
+                      fontSize: 14, fontWeight: 600, color: '#9D92F8',
+                      minWidth: 20, lineHeight: 1.5
+                    }}>
+                      {i + 1}.
+                    </span>
+                    <span style={{
+                      fontSize: 14, color: 'rgba(255,255,255,0.82)', lineHeight: 1.5
+                    }}>
+                      {step}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p style={{
+                  fontSize: 14, color: 'rgba(255,255,255,0.82)', lineHeight: 1.6, margin: 0
+                }}>
+                  {dayContent?.task_description ||
+                    `Day ${currentDay} of your ${subtrackName} journey. Show up today. That's all that's required.`}
+                </p>
+              )}
+            </div>
+
+            {/* WHY THIS MATTERS */}
+            {whyText && (
               <>
-                <button onClick={handleSaveReflection} disabled={!feeling} className="fs-btn-primary" style={{ width: '100%', marginTop: 12 }}>
-                  Save reflection
-                </button>
-                <button onClick={closeLogModal} className="fs-btn-ghost" style={{ width: '100%', marginTop: 4 }}>
-                  Skip
-                </button>
+                <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '16px 0' }} />
+                <p style={{
+                  fontSize: 11, fontWeight: 500, letterSpacing: '0.08em',
+                  color: 'rgba(255,255,255,0.25)', marginBottom: 8
+                }}>
+                  WHY THIS MATTERS
+                </p>
+                <p style={{
+                  fontSize: 13, color: 'rgba(255,255,255,0.4)',
+                  lineHeight: 1.6, margin: 0
+                }}>
+                  {whyText}
+                </p>
               </>
             )}
           </div>
-        </div>
-      )}
-
-      {/* ── Dev menu ─────────────────────────────────────────── */}
-      {showDevMenu && (
-        <div
-          className="fixed inset-0 z-50"
-          style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
-          onClick={() => setShowDevMenu(false)}
-        >
-          <div
-            className="fs-card"
-            style={{ position: 'fixed', bottom: 80, left: 16, right: 16, padding: 16, zIndex: 300 }}
-            onClick={e => e.stopPropagation()}
-          >
-            {[
-              { label: '🗑 Reset everything', action: resetApp },
-              { label: '⏩ Jump to Day 7',     action: () => jumpToDay(7) },
-              { label: '⏩ Jump to Day 14',    action: () => jumpToDay(14) },
-              { label: '⏩ Jump to Day 21',    action: () => jumpToDay(21) },
-              { label: '🏆 Go to Graduation',  action: () => navigate('/graduation') },
-            ].map(({ label, action }) => (
-              <button
-                key={label}
-                onClick={action}
-                style={{
-                  display: 'block', width: '100%', textAlign: 'left',
-                  padding: '12px 0', background: 'none', border: 'none',
-                  borderBottom: '1px solid var(--fs-border)',
-                  color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)',
-                  cursor: 'pointer',
-                }}
-              >
-                {label}
-              </button>
-            ))}
-            <button
-              onClick={() => setShowDevMenu(false)}
-              style={{
-                display: 'block', width: '100%', textAlign: 'center',
-                padding: '12px 0 0', background: 'none', border: 'none',
-                color: 'var(--fs-text-tertiary)', fontSize: 'var(--fs-text-sm)',
-                cursor: 'pointer',
-              }}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Main page ────────────────────────────────────────── */}
-      <div className="fs-page">
-
-        {/* Top bar */}
-        <nav className="fs-topbar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            {currentDay === 1 && (
-              <button
-                onClick={() => navigate('/bridge')}
-                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', fontSize: '22px', cursor: 'pointer', padding: '8px', lineHeight: 1, display: 'flex', alignItems: 'center' }}
-              >
-                ←
-              </button>
-            )}
-            <button
-              onClick={() => navigate('/settings')}
-              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '20px', cursor: 'pointer', padding: '8px', lineHeight: 1 }}
-            >
-              ⚙
-            </button>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <motion.span
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              🔥
-            </motion.span>
-            <span style={{ color: 'var(--fs-teal-300)', fontSize: 'var(--fs-text-sm)', fontWeight: 500 }}>{streak}</span>
-            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 'var(--fs-text-sm)' }}>day streak</span>
-          </div>
-        </nav>
-
-        {/* Milestone banners */}
-        {currentDay === 8 && (
-          <div className="fs-card fs-card-teal" style={{ margin: '0 16px 16px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ color: 'var(--fs-teal-300)' }}>🎉</span>
-            <span style={{ color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)' }}>
-              Week 1 complete — you're ahead of 68% of people who started the same day
-            </span>
-          </div>
         )}
-        {currentDay === 15 && (
-          <div className="fs-card fs-card-teal" style={{ margin: '0 16px 16px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ color: 'var(--fs-teal-300)' }}>⚡</span>
-            <span style={{ color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)' }}>
-              Halfway there — 14 days down, 7 to go
-            </span>
-          </div>
-        )}
+      </div>
 
-        {/* Day label + heading — custom={0} */}
-        <motion.div
-          variants={itemVariants}
-          initial="initial"
-          animate="animate"
-          custom={0}
-          style={{ padding: '24px 20px 16px' }}
-        >
-          <p className="fs-label fs-label-purple" style={{ marginBottom: 8 }}>
-            {subtrackName} — Day {currentDay} of {TOTAL}
+      {/* ── Watch & Learn ─────────────────────────────────────────────────── */}
+      {!contentLoading && (dayContent?.youtube_url || refs.length > 0) && (
+        <div style={{ padding: '0 16px 16px' }}>
+          <p style={{
+            fontSize: 11, fontWeight: 500, letterSpacing: '0.08em',
+            color: 'rgba(255,255,255,0.25)', marginBottom: 12
+          }}>
+            WATCH &amp; LEARN
           </p>
-          <h1 className="fs-heading-md" style={{ marginBottom: 6 }}>{getHeading(currentDay)}</h1>
-          <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-sm)' }}>{getSubtext(currentDay)}</p>
-        </motion.div>
 
-        {/* Progress bar + dots — custom={1} */}
-        <motion.div
-          variants={itemVariants}
-          initial="initial"
-          animate="animate"
-          custom={1}
-          style={{ padding: '0 20px 20px' }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <span className="fs-label">Your journey</span>
-            <span style={{ color: 'var(--fs-purple-300)', fontSize: 13 }}>{currentDay}/21 days</span>
-          </div>
-          <div style={{ height: 2, background: 'rgba(255,255,255,0.08)', borderRadius: 1, marginBottom: 12 }}>
-            <div style={{
-              height: 2,
-              background: 'var(--fs-purple-500)',
-              boxShadow: '0 0 8px var(--fs-purple-glow)',
-              borderRadius: 1,
-              width: `${(completedDays.length / TOTAL) * 100}%`,
-              transition: 'width 0.5s ease',
-            }} />
-          </div>
-          <div className="fs-dots-container">
-            {Array.from({ length: TOTAL }, (_, i) => {
-              const day   = i + 1
-              const done  = completedDays.includes(day)
-              const today = day === currentDay && !done
-              return (
-                <motion.div
-                  key={i}
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: i * 0.03, type: 'spring', stiffness: 400, damping: 20 }}
-                  className={`fs-dot ${done ? 'fs-dot-completed' : today ? 'fs-dot-today' : 'fs-dot-future'}`}
-                />
-              )
-            })}
-          </div>
-        </motion.div>
-
-        {/* Today's task card — custom={2} */}
-        <motion.div
-          variants={itemVariants}
-          initial="initial"
-          animate="animate"
-          custom={2}
-        >
-          {contentLoading ? (
-            <>
-              <SkeletonCard height={120} />
-              <SkeletonCard height={80} />
-              <SkeletonCard height={60} />
-            </>
-          ) : (
-            <>
-              <div className="fs-card fs-card-purple" style={{ margin: '0 16px 16px', padding: 16 }}>
-                <p className="fs-label fs-label-purple" style={{ marginBottom: 10 }}>
-                  {dayContent?.task_title || "TODAY'S TASK"}
-                </p>
-                <p style={{ color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)', lineHeight: 1.6, marginBottom: 14 }}>
-                  {dayContent?.task_description || `Day ${currentDay} of your ${subtrackName} journey. Show up today. That's all that's required.`}
-                </p>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {dayContent?.duration_minutes && (
-                    <span className="fs-badge fs-badge-purple">⏱ {dayContent.duration_minutes} min</span>
-                  )}
-                  {dayContent?.difficulty && (
-                    <span className="fs-badge fs-badge-purple">{dayContent.difficulty}</span>
-                  )}
-                </div>
-              </div>
-
-              {/* No content fallback */}
-              {!dayContent && (
-                <div className="fs-card" style={{ margin: '0 16px 16px', padding: 20 }}>
-                  <p style={{ fontSize: 24, marginBottom: 10 }}>🚧</p>
-                  <p style={{ color: 'var(--fs-text-primary)', fontSize: 15, fontWeight: 600, marginBottom: 6 }}>
-                    {subtrackName}
-                  </p>
-                  <p style={{ color: 'var(--fs-purple-300)', fontSize: 'var(--fs-text-xs)', fontWeight: 500, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                    Curriculum launching soon
-                  </p>
-                  <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-sm)', lineHeight: 1.6, marginBottom: 16 }}>
-                    In the meantime, Day 1 is simple: show up. Commit to this track for 21 days and watch what happens.
-                  </p>
-                  <button
-                    onClick={() => navigate('/sub-track-select')}
-                    className="fs-btn-secondary"
-                    style={{ width: '100%' }}
-                  >
-                    Change track
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-        </motion.div>
-
-        {/* Watch & Learn */}
-        {!contentLoading && dayContent?.youtube_url && (
-          <motion.div
-            variants={itemVariants}
-            initial="initial"
-            animate="animate"
-            custom={3}
-            className="fs-card"
-            style={{ margin: '0 16px 16px', padding: '14px 16px' }}
-          >
-            <p className="fs-label fs-label-purple" style={{ marginBottom: 10 }}>WATCH &amp; LEARN</p>
-            <a
-              href={dayContent.youtube_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                padding: '10px 12px',
-                background: 'rgba(255,255,255,0.05)',
-                borderRadius: 'var(--fs-radius-md)',
-                textDecoration: 'none',
-                marginBottom: 8,
-                border: '1px solid rgba(255,255,255,0.08)',
-                transition: 'var(--fs-transition)',
-              }}
-            >
-              <span style={{ fontSize: 20 }}>▶️</span>
-              <div>
-                <p style={{ color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)', fontWeight: 500 }}>
-                  {dayContent.must_watch_label || "Watch today's guide"}
-                </p>
-                <p style={{ color: 'var(--fs-text-tertiary)', fontSize: 'var(--fs-text-xs)' }}>Must watch</p>
-              </div>
-            </a>
-            {[
-              { url: dayContent.reference_url_1, label: dayContent.ref_label_1 },
-              { url: dayContent.reference_url_2, label: dayContent.ref_label_2 },
-              { url: dayContent.reference_url_3, label: dayContent.ref_label_3 },
-            ].filter(ref => ref.url && ref.label).map((ref, i) => (
-              <a
-                key={i}
-                href={ref.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '8px 12px',
-                  borderRadius: 'var(--fs-radius-md)',
-                  textDecoration: 'none',
-                  marginBottom: 4,
-                  transition: 'var(--fs-transition)',
-                }}
-              >
-                <span style={{ fontSize: 14, color: 'var(--fs-text-tertiary)' }}>↗</span>
-                <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-xs)' }}>{ref.label}</p>
-              </a>
-            ))}
-          </motion.div>
-        )}
-
-        {/* Daily quote — custom={3} */}
-        {(dayContent?.quote_text || !contentLoading) && !contentLoading && (
-          <motion.div
-            variants={itemVariants}
-            initial="initial"
-            animate="animate"
-            custom={3}
-            style={{
-              margin: '0 16px 16px', padding: '14px 16px',
-              borderLeft: '2px solid var(--fs-purple-500)',
-              background: 'rgba(83, 74, 183, 0.08)',
-              borderRadius: '0 var(--fs-radius-md) var(--fs-radius-md) 0',
-            }}
-          >
-            <p style={{ color: 'var(--fs-text-secondary)', fontStyle: 'italic', fontSize: 'var(--fs-text-sm)', lineHeight: 1.6, marginBottom: 6 }}>
-              "{dayContent?.quote_text || 'The secret of getting ahead is getting started.'}"
-            </p>
-            <p style={{ color: 'var(--fs-purple-300)', fontSize: 'var(--fs-text-xs)' }}>
-              {dayContent?.quote_author ? `— ${dayContent.quote_author}` : '— Mark Twain'}
-            </p>
-          </motion.div>
-        )}
-
-        {/* Source credits */}
-        {!contentLoading && dayContent?.source_credits && (
-          <div style={{ margin: '0 16px 16px', padding: '10px 14px' }}>
-            <p style={{ color: 'var(--fs-text-tertiary)', fontSize: 11, lineHeight: 1.5 }}>
-              📚 Sources: {dayContent.source_credits}
-            </p>
-          </div>
-        )}
-
-        {/* Action buttons — custom={4} */}
-        <motion.div
-          variants={itemVariants}
-          initial="initial"
-          animate="animate"
-          custom={4}
-          style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}
-        >
-          <motion.button
-            whileTap={{ scale: 0.96 }}
-            whileHover={{ scale: 1.01 }}
-            animate={celebrating ? {
-              backgroundColor: '#1D9E75',
-              transition: { duration: 0.3 }
-            } : {}}
-            onClick={handleMarkComplete}
-            disabled={completed}
-            className="fs-btn-primary"
-            style={{
-              width: '100%',
-              ...(completed ? { background: 'var(--fs-teal-500)', boxShadow: 'var(--fs-glow-teal)' } : {}),
-            }}
-          >
-            {celebrating ? 'Day complete ✓' : `Mark Day ${currentDay} Complete ✓`}
-          </motion.button>
-          <button onClick={() => setShowLogModal(true)} className="fs-btn-secondary" style={{ width: '100%' }}>
-            Add to my log
-          </button>
-        </motion.div>
-
-        {/* Community peek — custom={5} */}
-        <motion.div
-          variants={itemVariants}
-          initial="initial"
-          animate="animate"
-          custom={5}
-          style={{ padding: '0 16px 24px' }}
-        >
-          <p className="fs-label" style={{ marginBottom: 12 }}>OTHERS ON THE SAME JOURNEY</p>
-          {COMMUNITY.map(user => (
+          {/* Must watch */}
+          {dayContent?.youtube_url && (
             <div
-              key={user.initials}
-              className="fs-card"
-              style={{ padding: '10px 14px', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 10 }}
+              onClick={() => window.open(dayContent.youtube_url, '_blank')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                padding: '12px 14px',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: 14, marginBottom: 8, cursor: 'pointer'
+              }}
             >
               <div style={{
-                width: 32, height: 32, borderRadius: '50%',
-                background: user.color,
+                width: 36, height: 36, borderRadius: '50%',
+                background: 'rgba(83,74,183,0.2)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 12, fontWeight: 500, color: 'white', flexShrink: 0,
+                color: '#9D92F8', fontSize: 14, flexShrink: 0
               }}>
-                {user.initials}
+                ▶
               </div>
-              <span style={{ color: 'var(--fs-text-primary)', fontSize: 'var(--fs-text-sm)', flex: 1 }}>{user.name}</span>
-              <span style={{ color: 'var(--fs-teal-300)', fontSize: 'var(--fs-text-xs)' }}>{streak} day streak 🔥</span>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: 14, color: 'white', fontWeight: 500, margin: 0 }}>
+                  {dayContent.must_watch_label || "Watch today's guide"}
+                </p>
+                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', margin: '2px 0 0' }}>
+                  Must watch{dayContent.duration_minutes ? ` · ${dayContent.duration_minutes} min` : ''}
+                </p>
+              </div>
+              <span style={{ fontSize: 18, color: 'rgba(255,255,255,0.2)' }}>›</span>
+            </div>
+          )}
+
+          {/* Reference links */}
+          {refs.map((ref, i) => (
+            <div
+              key={i}
+              onClick={() => window.open(ref.url, '_blank')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                padding: '12px 14px',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: 14, marginBottom: 8, cursor: 'pointer'
+              }}
+            >
+              <div style={{
+                width: 36, height: 36, borderRadius: '50%',
+                background: 'rgba(255,255,255,0.05)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'rgba(255,255,255,0.4)', fontSize: 14, flexShrink: 0
+              }}>
+                ↗
+              </div>
+              <p style={{ flex: 1, fontSize: 14, color: 'rgba(255,255,255,0.7)', margin: 0, fontWeight: 500 }}>
+                {ref.label}
+              </p>
+              <span style={{ fontSize: 18, color: 'rgba(255,255,255,0.2)' }}>›</span>
             </div>
           ))}
-        </motion.div>
-
-        {/* Testing tools */}
-        <div style={{ textAlign: 'center', paddingBottom: 16 }}>
-          <button
-            onClick={() => setShowDevMenu(true)}
-            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.2)', fontSize: 11, cursor: 'pointer' }}
-          >
-            Testing tools
-          </button>
         </div>
+      )}
 
+      {/* ── Daily quote ───────────────────────────────────────────────────── */}
+      {!contentLoading && (
+        <div style={{
+          margin: '0 16px 16px', padding: '14px 16px',
+          borderLeft: '2px solid #534AB7',
+          background: 'rgba(83,74,183,0.06)',
+          borderRadius: '0 14px 14px 0'
+        }}>
+          <p style={{
+            fontSize: 14, color: 'rgba(255,255,255,0.55)',
+            lineHeight: 1.6, fontStyle: 'italic', marginBottom: 6
+          }}>
+            "{dayContent?.quote_text || 'The secret of getting ahead is getting started.'}"
+          </p>
+          <p style={{ fontSize: 12, color: '#9D92F8', margin: 0 }}>
+            {dayContent?.quote_author ? `— ${dayContent.quote_author}` : '— Mark Twain'}
+          </p>
+        </div>
+      )}
+
+      {/* ── Action buttons ────────────────────────────────────────────────── */}
+      <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <motion.button
+          whileTap={{ scale: completed ? 1 : 0.98 }}
+          onClick={handleMarkComplete}
+          disabled={completed}
+          style={{
+            width: '100%', height: 54, border: 'none', borderRadius: 27,
+            background: completed ? '#1D9E75' : '#534AB7',
+            color: 'white', fontSize: 15, fontWeight: 500,
+            cursor: completed ? 'default' : 'pointer',
+            boxShadow: completed
+              ? '0 0 30px rgba(29,158,117,0.3)'
+              : '0 0 30px rgba(83,74,183,0.3)',
+            transition: 'all 0.3s'
+          }}
+        >
+          {completed ? `Day ${currentDay} Complete ✓` : `Mark Day ${currentDay} Complete`}
+        </motion.button>
+
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          onClick={() => setShowLogModal(true)}
+          style={{
+            width: '100%', height: 46, border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 27, background: 'transparent',
+            color: 'rgba(255,255,255,0.45)', fontSize: 14, cursor: 'pointer'
+          }}
+        >
+          Add to my log
+        </motion.button>
+      </div>
+
+      {/* ── Community peek ────────────────────────────────────────────────── */}
+      <div style={{ padding: '0 16px 24px' }}>
+        <p style={{
+          fontSize: 11, fontWeight: 500, letterSpacing: '0.08em',
+          color: 'rgba(255,255,255,0.25)', marginBottom: 12
+        }}>
+          YOUR SQUAD TODAY
+        </p>
+        {COMMUNITY.map(user => (
+          <div
+            key={user.initials}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10
+            }}
+          >
+            <div style={{
+              width: 32, height: 32, borderRadius: '50%',
+              background: user.bg,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 12, fontWeight: 500, color: user.color, flexShrink: 0
+            }}>
+              {user.initials}
+            </div>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: 14, color: 'white', fontWeight: 500, margin: 0 }}>{user.name}</p>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', margin: 0 }}>Day {user.day}</p>
+            </div>
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#EF9F27' }}>
+              {user.streak}d 🔥
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Testing tools ────────────────────────────────────────────────── */}
+      <div style={{ textAlign: 'center', paddingBottom: 16 }}>
+        <button
+          onClick={() => setShowDevMenu(true)}
+          style={{
+            background: 'none', border: 'none',
+            color: 'rgba(255,255,255,0.15)', fontSize: 11, cursor: 'pointer'
+          }}
+        >
+          Testing tools
+        </button>
       </div>
 
       <BottomNav />
-    </PageTransition>
+    </div>
   )
 }
