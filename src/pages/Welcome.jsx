@@ -91,7 +91,7 @@ export default function Welcome() {
       >
         <motion.button
           whileTap={{ scale: 0.98 }}
-          onClick={() => navigate('/onboarding')}
+          onClick={() => navigate('/signup')}
           style={{
             width: '100%',
             height: '56px',

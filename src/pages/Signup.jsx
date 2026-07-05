@@ -71,7 +71,7 @@ export default function Signup() {
     }
 
     toast.success('Account created!')
-    navigate('/bridge')
+    navigate('/onboarding')
   }
 
   const inputStyle = {
