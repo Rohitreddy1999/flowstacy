@@ -27,13 +27,36 @@ const FEELINGS = [
 ]
 
 const COMMUNITY = [
-  { initials: 'MJ', name: 'Maya J.',  day: 12, streak: 12,
-    bg: 'rgba(83,74,183,0.3)',   color: '#9D92F8' },
-  { initials: 'TR', name: 'Theo R.',  day: 9,  streak: 9,
-    bg: 'rgba(15,110,86,0.3)',   color: '#5DCAA5' },
-  { initials: 'AK', name: 'Aria K.',  day: 11, streak: 11,
-    bg: 'rgba(133,79,11,0.3)',   color: '#EF9F27' },
+  { initials: 'MJ', name: 'Maya J.',  day: 12, streak: 12, bg: 'rgba(83,74,183,0.3)',  color: '#9D92F8' },
+  { initials: 'TR', name: 'Theo R.',  day: 9,  streak: 9,  bg: 'rgba(15,110,86,0.3)',  color: '#5DCAA5' },
+  { initials: 'AK', name: 'Aria K.',  day: 11, streak: 11, bg: 'rgba(133,79,11,0.3)', color: '#EF9F27' },
 ]
+
+// ── SVG Icons ──────────────────────────────────────────────────────────────────
+
+function FlameSvg({ size = 14, color = '#EF9F27' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} style={{ flexShrink: 0, display: 'block' }}>
+      <path d="M12 2S6 10 6 15a6 6 0 0 0 12 0C18 10 12 2 12 2zm0 17a3 3 0 0 1-3-3c0-2.5 3-6 3-6s3 3.5 3 6a3 3 0 0 1-3 3z"/>
+    </svg>
+  )
+}
+
+function PlaySvg({ size = 14, color = 'white' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} style={{ flexShrink: 0, display: 'block', marginLeft: 2 }}>
+      <path d="M8 5v14l11-7z"/>
+    </svg>
+  )
+}
+
+function ChevronRightSvg({ size = 18, color = 'rgba(255,255,255,0.3)' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0, display: 'block' }}>
+      <path d="M9 18l6-6-6-6" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+}
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -43,10 +66,25 @@ function getPhase(day) {
   return 'Week 3 — Commit'
 }
 
+function getPhaseName(day) {
+  if (day <= 7)  return 'Foundation'
+  if (day <= 14) return 'Build'
+  return 'Commit'
+}
+
 function getDayType(content) {
   if (!content) return 'Session'
   if (content.difficulty) return content.difficulty
   return 'Training'
+}
+
+function getDifficultyColor(difficulty) {
+  if (!difficulty) return 'rgba(255,255,255,0.4)'
+  const d = difficulty.toLowerCase()
+  if (d.includes('light') || d.includes('easy') || d.includes('beginner') || d.includes('recovery')) return '#1D9E75'
+  if (d.includes('moderate') || d.includes('medium')) return '#EF9F27'
+  if (d.includes('hard') || d.includes('intense') || d.includes('heavy')) return '#E24B4A'
+  return 'rgba(255,255,255,0.45)'
 }
 
 function parseTaskDescription(text) {
@@ -124,7 +162,6 @@ export default function Home() {
         const content = await getDayContent(subtrackData.id, currentDay)
         setDayContent(content)
 
-        // Fetch all 21 days for the full plan sheet
         const allContent = await Promise.all(
           Array.from({ length: 21 }, (_, i) =>
             getDayContent(subtrackData.id, i + 1)
@@ -507,7 +544,6 @@ export default function Home() {
               }}
               onClick={e => e.stopPropagation()}
             >
-              {/* Sheet header */}
               <div style={{
                 padding: '20px 20px 0',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -528,7 +564,6 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* Scrollable list */}
               <div style={{ padding: '16px 20px', overflowY: 'auto', flex: 1 }}>
                 {Array.from({ length: 21 }, (_, i) => {
                   const day     = i + 1
@@ -545,7 +580,6 @@ export default function Home() {
                         borderBottom: '1px solid rgba(255,255,255,0.05)'
                       }}
                     >
-                      {/* Day circle */}
                       <div style={{
                         width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -558,8 +592,6 @@ export default function Home() {
                       }}>
                         {isDone ? '✓' : day}
                       </div>
-
-                      {/* Title */}
                       <span style={{
                         flex: 1, fontSize: 14,
                         color:          isDone  ? 'rgba(255,255,255,0.4)' :
@@ -570,8 +602,6 @@ export default function Home() {
                       }}>
                         {content?.task_title || `Day ${day} — ${getPhase(day).split(' — ')[1]}`}
                       </span>
-
-                      {/* Duration pill */}
                       {content?.duration_minutes && (
                         <span style={{
                           fontSize: 11, color: 'rgba(255,255,255,0.3)',
@@ -592,7 +622,7 @@ export default function Home() {
 
       {/* ── Sticky top bar ───────────────────────────────────────────────── */}
       <div style={{
-        height: 52,
+        height: 56,
         padding: '0 20px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
@@ -606,58 +636,90 @@ export default function Home() {
         <motion.span
           animate={{
             textShadow: [
-              '0 0 10px rgba(157,146,248,0.3)',
-              '0 0 20px rgba(157,146,248,0.7)',
-              '0 0 10px rgba(157,146,248,0.3)'
+              '0 0 10px rgba(83,74,183,0.3)',
+              '0 0 20px rgba(83,74,183,0.6)',
+              '0 0 10px rgba(83,74,183,0.3)'
             ]
           }}
           transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-          style={{
-            fontSize: 18, fontWeight: 600,
-            color: '#9D92F8', letterSpacing: '0.01em'
-          }}
+          style={{ fontSize: 18, fontWeight: 700, color: '#9D92F8', letterSpacing: '0.01em' }}
         >
           flowstate
         </motion.span>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span style={{ fontSize: 13 }}>🔥</span>
-          <span style={{ fontSize: 13, color: '#9D92F8', fontWeight: 600 }}>{streak}</span>
-          <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}> day streak</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <FlameSvg size={15} color="#EF9F27" />
+          <span style={{
+            fontSize: 15, fontWeight: 700, color: '#EF9F27',
+            textShadow: '0 0 10px rgba(239,159,39,0.45)'
+          }}>
+            {streak}
+          </span>
+          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>day streak</span>
         </div>
       </div>
 
       {/* ── Day hero ─────────────────────────────────────────────────────── */}
-      <div style={{ padding: '28px 20px 16px', maxWidth: 480, margin: '0 auto' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0 }}
+        style={{ padding: '28px 20px 16px', maxWidth: 480, margin: '0 auto' }}
+      >
         <p style={{
           fontSize: 11, fontWeight: 500, letterSpacing: '0.1em',
-          textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)',
-          margin: '0 0 8px'
+          textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)',
+          margin: '0 0 10px'
         }}>
           {subtrackName.toUpperCase()}
         </p>
-        <motion.h1
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          style={{
-            fontSize: 48, fontWeight: 700, color: 'white',
-            letterSpacing: '-0.02em', lineHeight: 1,
-            margin: '0 0 6px'
-          }}
-        >
+        <h1 style={{
+          fontSize: 56, fontWeight: 800, color: 'white',
+          letterSpacing: '-0.02em', lineHeight: 1,
+          margin: '0 0 14px'
+        }}>
           Day {currentDay}
-        </motion.h1>
-        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', margin: 0 }}>
-          {phase} · {dayType}
-        </p>
-      </div>
+        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{
+            fontSize: 12, fontWeight: 500, color: '#9D92F8',
+            background: 'rgba(83,74,183,0.2)',
+            border: '1px solid rgba(147,138,248,0.3)',
+            borderRadius: 20, padding: '4px 12px'
+          }}>
+            {getPhaseName(currentDay)}
+          </span>
+          {dayContent?.difficulty && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{
+                width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
+                background: getDifficultyColor(dayContent.difficulty)
+              }} />
+              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>
+                {dayContent.difficulty}
+              </span>
+            </div>
+          )}
+        </div>
+      </motion.div>
 
       {/* ── Progress section ─────────────────────────────────────────────── */}
-      <div style={{ padding: '0 20px 20px', maxWidth: 480, margin: '0 auto' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.05 }}
+        style={{ padding: '0 20px 24px', maxWidth: 480, margin: '0 auto' }}
+      >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>Your journey</span>
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{currentDay} of 21 days</span>
+          <span style={{
+            fontSize: 11, fontWeight: 500, letterSpacing: '0.08em',
+            textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)'
+          }}>
+            Progress
+          </span>
+          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
+            {completedDays.length} of 21 days
+          </span>
         </div>
 
         {/* Progress bar */}
@@ -667,10 +729,11 @@ export default function Home() {
         }}>
           <motion.div
             initial={{ width: 0 }}
-            animate={{ width: `${(currentDay / 21) * 100}%` }}
+            animate={{ width: `${(completedDays.length / 21) * 100}%` }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
             style={{
-              height: 2, background: '#534AB7',
+              height: 2,
+              background: 'linear-gradient(90deg, #534AB7, #9D92F8)',
               boxShadow: '0 0 8px rgba(83,74,183,0.5)'
             }}
           />
@@ -690,17 +753,22 @@ export default function Home() {
                 transition={{ delay: i * 0.02, type: 'spring', stiffness: 400, damping: 20 }}
                 style={{
                   width: 9, height: 9, borderRadius: '50%',
-                  background: done  ? '#1D9E75' :
+                  position: 'relative', flexShrink: 0,
+                  background: done  ? '#534AB7' :
                               today ? '#9D92F8'  :
-                              'rgba(255,255,255,0.1)'
+                              'rgba(255,255,255,0.12)'
                 }}
               >
                 {today && (
                   <motion.div
-                    animate={{ scale: [1, 1.6, 1], opacity: [1, 0, 1] }}
-                    transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                    animate={{ scale: [1, 2.4, 1], opacity: [0.5, 0, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                     style={{
-                      width: '100%', height: '100%', borderRadius: '50%',
+                      position: 'absolute',
+                      top: '50%', left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      width: '100%', height: '100%',
+                      borderRadius: '50%',
                       background: '#9D92F8'
                     }}
                   />
@@ -714,297 +782,382 @@ export default function Home() {
           onClick={() => setShowFullPlan(true)}
           style={{
             background: 'none', border: 'none', cursor: 'pointer',
-            fontSize: 12, color: 'rgba(157,146,248,0.6)',
-            marginTop: 10, padding: 0
+            fontSize: 12, color: '#9D92F8',
+            textDecoration: 'underline',
+            marginTop: 12, padding: 0
           }}
         >
           View full 21-day plan →
         </button>
-      </div>
+      </motion.div>
 
       {/* ── Today's task card ─────────────────────────────────────────────── */}
-      <div style={{ margin: '0 16px 16px' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+        style={{ margin: '0 16px 16px' }}
+      >
         {contentLoading ? (
           <div style={{
-            padding: 20, background: 'rgba(83,74,183,0.08)',
-            border: '1px solid rgba(157,146,248,0.12)',
-            borderRadius: 20
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: 20, overflow: 'hidden'
           }}>
-            {[120, 80, 60].map((h, i) => (
-              <div
-                key={i}
-                style={{
+            <div style={{ height: 4, background: 'rgba(83,74,183,0.25)' }} />
+            <div style={{ padding: 20 }}>
+              {[100, 80, 60].map((h, i) => (
+                <div key={i} style={{
                   height: h, background: 'rgba(255,255,255,0.06)',
                   borderRadius: 8, marginBottom: 12,
                   animation: 'pulse 1.5s ease-in-out infinite'
-                }}
-              />
-            ))}
+                }} />
+              ))}
+            </div>
           </div>
         ) : (
           <div style={{
-            padding: 20,
-            background: 'rgba(83,74,183,0.08)',
-            border: '1px solid rgba(157,146,248,0.12)',
-            borderRadius: 20
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: 20, overflow: 'hidden'
           }}>
-            {/* Header row */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{
-                fontSize: 11, fontWeight: 500, letterSpacing: '0.08em',
-                color: 'rgba(157,146,248,0.7)'
-              }}>
-                TODAY'S TASK
-              </span>
-              <div style={{ display: 'flex', gap: 6 }}>
-                {dayContent?.duration_minutes && (
-                  <span style={{
-                    fontSize: 11, padding: '4px 10px', borderRadius: 20,
-                    background: 'rgba(255,255,255,0.07)',
-                    color: 'rgba(255,255,255,0.45)'
-                  }}>
-                    ⏱ {dayContent.duration_minutes} min
-                  </span>
-                )}
-                {dayContent?.difficulty && (
-                  <span style={{
-                    fontSize: 11, padding: '4px 10px', borderRadius: 20,
-                    background: 'rgba(255,255,255,0.07)',
-                    color: 'rgba(255,255,255,0.45)'
-                  }}>
-                    {dayContent.difficulty}
-                  </span>
-                )}
-              </div>
-            </div>
+            {/* Gradient accent strip */}
+            <div style={{
+              height: 4,
+              background: 'linear-gradient(90deg, #534AB7, #1D9E75)'
+            }} />
 
-            {/* Task title */}
-            {dayContent?.task_title && (
-              <p style={{
-                fontSize: 16, fontWeight: 600, color: 'white',
-                margin: '12px 0 0', lineHeight: 1.3
-              }}>
-                {dayContent.task_title}
-              </p>
-            )}
-
-            {/* WHAT TO DO */}
-            <div style={{ marginTop: 16 }}>
-              <p style={{
-                fontSize: 11, fontWeight: 500, letterSpacing: '0.08em',
-                color: 'rgba(255,255,255,0.25)', marginBottom: 12
-              }}>
-                WHAT TO DO
-              </p>
-
-              {steps.length > 0 ? (
-                steps.map((step, i) => (
-                  <div key={i} style={{
-                    display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 10
-                  }}>
-                    <span style={{
-                      fontSize: 14, fontWeight: 600, color: '#9D92F8',
-                      minWidth: 20, lineHeight: 1.5
-                    }}>
-                      {i + 1}.
-                    </span>
-                    <span style={{
-                      fontSize: 14, color: 'rgba(255,255,255,0.82)', lineHeight: 1.5
-                    }}>
-                      {step}
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <p style={{
-                  fontSize: 14, color: 'rgba(255,255,255,0.82)', lineHeight: 1.6, margin: 0
+            <div style={{ padding: 20 }}>
+              {/* Header row */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{
+                  fontSize: 11, fontWeight: 500, letterSpacing: '0.1em',
+                  textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)'
                 }}>
-                  {dayContent?.task_description ||
-                    `Day ${currentDay} of your ${subtrackName} journey. Show up today. That's all that's required.`}
+                  TODAY'S TASK
+                </span>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {dayContent?.duration_minutes && (
+                    <span style={{
+                      fontSize: 11, padding: '4px 10px', borderRadius: 20,
+                      background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      color: 'rgba(255,255,255,0.5)'
+                    }}>
+                      {dayContent.duration_minutes} min
+                    </span>
+                  )}
+                  {dayContent?.difficulty && (
+                    <span style={{
+                      fontSize: 11, padding: '4px 10px', borderRadius: 20,
+                      background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      color: 'rgba(255,255,255,0.5)'
+                    }}>
+                      {dayContent.difficulty}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Task title */}
+              {dayContent?.task_title && (
+                <p style={{
+                  fontSize: 21, fontWeight: 700, color: 'white',
+                  margin: '8px 0 0', lineHeight: 1.25
+                }}>
+                  {dayContent.task_title}
                 </p>
               )}
-            </div>
 
-            {/* WHY THIS MATTERS */}
-            {whyText && (
-              <>
-                <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '16px 0' }} />
+              {/* Divider below title */}
+              <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '14px 0 0' }} />
+
+              {/* WHAT TO DO */}
+              <div style={{ paddingTop: 14 }}>
                 <p style={{
-                  fontSize: 11, fontWeight: 500, letterSpacing: '0.08em',
-                  color: 'rgba(255,255,255,0.25)', marginBottom: 8
+                  fontSize: 11, fontWeight: 500, letterSpacing: '0.1em',
+                  textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)',
+                  margin: '0 0 2px'
                 }}>
-                  WHY THIS MATTERS
+                  WHAT TO DO
                 </p>
-                <p style={{
-                  fontSize: 13, color: 'rgba(255,255,255,0.4)',
-                  lineHeight: 1.6, margin: 0
-                }}>
-                  {whyText}
-                </p>
-              </>
-            )}
+
+                {steps.length > 0 ? (
+                  steps.map((step, i) => (
+                    <div key={i}>
+                      <div style={{
+                        display: 'flex', alignItems: 'flex-start', gap: 14,
+                        paddingTop: 12, paddingBottom: 12
+                      }}>
+                        <span style={{
+                          fontSize: 15, fontWeight: 700, color: '#9D92F8',
+                          minWidth: 22, lineHeight: 1.5, flexShrink: 0
+                        }}>
+                          {i + 1}.
+                        </span>
+                        <span style={{
+                          fontSize: 14, color: 'rgba(255,255,255,0.85)', lineHeight: 1.55
+                        }}>
+                          {step}
+                        </span>
+                      </div>
+                      {i < steps.length - 1 && (
+                        <div style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p style={{
+                    fontSize: 14, color: 'rgba(255,255,255,0.82)', lineHeight: 1.6,
+                    margin: 0, paddingTop: 12
+                  }}>
+                    {dayContent?.task_description ||
+                      `Day ${currentDay} of your ${subtrackName} journey. Show up today. That's all that's required.`}
+                  </p>
+                )}
+              </div>
+
+              {/* WHY THIS MATTERS */}
+              {whyText && (
+                <>
+                  <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '16px 0 14px' }} />
+                  <p style={{
+                    fontSize: 11, fontWeight: 500, letterSpacing: '0.1em',
+                    textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)',
+                    margin: '0 0 10px'
+                  }}>
+                    WHY THIS MATTERS
+                  </p>
+                  <p style={{
+                    fontSize: 14, color: 'rgba(255,255,255,0.65)',
+                    lineHeight: 1.7, margin: 0,
+                    fontStyle: 'italic',
+                    borderLeft: '3px solid rgba(83,74,183,0.5)',
+                    paddingLeft: 14
+                  }}>
+                    {whyText}
+                  </p>
+                </>
+              )}
+            </div>
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* ── Watch & Learn ─────────────────────────────────────────────────── */}
       {!contentLoading && (dayContent?.youtube_url || refs.length > 0) && (
-        <div style={{ padding: '0 16px 16px' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.15 }}
+          style={{ padding: '0 16px 16px' }}
+        >
           <p style={{
-            fontSize: 11, fontWeight: 500, letterSpacing: '0.08em',
-            color: 'rgba(255,255,255,0.25)', marginBottom: 12
+            fontSize: 11, fontWeight: 500, letterSpacing: '0.1em',
+            textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)',
+            margin: '0 0 12px'
           }}>
             WATCH &amp; LEARN
           </p>
 
           {/* Must watch */}
           {dayContent?.youtube_url && (
-            <div
+            <motion.div
+              whileTap={{ scale: 0.98 }}
               onClick={() => window.open(dayContent.youtube_url, '_blank')}
               style={{
                 display: 'flex', alignItems: 'center', gap: 12,
-                padding: '12px 14px',
-                background: 'rgba(255,255,255,0.04)',
+                padding: 14,
+                background: 'rgba(255,255,255,0.03)',
                 border: '1px solid rgba(255,255,255,0.07)',
+                borderLeft: '3px solid #534AB7',
                 borderRadius: 14, marginBottom: 8, cursor: 'pointer'
               }}
             >
               <div style={{
                 width: 36, height: 36, borderRadius: '50%',
-                background: 'rgba(83,74,183,0.2)',
+                background: '#534AB7',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#9D92F8', fontSize: 14, flexShrink: 0
+                flexShrink: 0
               }}>
-                ▶
+                <PlaySvg size={14} color="white" />
               </div>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 14, color: 'white', fontWeight: 500, margin: 0 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: 14, color: 'white', fontWeight: 600, margin: 0, lineHeight: 1.3 }}>
                   {dayContent.must_watch_label || "Watch today's guide"}
                 </p>
-                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', margin: '2px 0 0' }}>
+                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', margin: '3px 0 0' }}>
                   Must watch{dayContent.duration_minutes ? ` · ${dayContent.duration_minutes} min` : ''}
                 </p>
               </div>
-              <span style={{ fontSize: 18, color: 'rgba(255,255,255,0.2)' }}>›</span>
-            </div>
+              <ChevronRightSvg size={18} color="rgba(255,255,255,0.3)" />
+            </motion.div>
           )}
 
           {/* Reference links */}
           {refs.map((ref, i) => (
-            <div
+            <motion.div
               key={i}
+              whileTap={{ scale: 0.98 }}
               onClick={() => window.open(ref.url, '_blank')}
               style={{
                 display: 'flex', alignItems: 'center', gap: 12,
-                padding: '12px 14px',
-                background: 'rgba(255,255,255,0.04)',
+                padding: 14,
+                background: 'rgba(255,255,255,0.03)',
                 border: '1px solid rgba(255,255,255,0.07)',
                 borderRadius: 14, marginBottom: 8, cursor: 'pointer'
               }}
             >
               <div style={{
                 width: 36, height: 36, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.05)',
+                background: 'rgba(255,255,255,0.06)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'rgba(255,255,255,0.4)', fontSize: 14, flexShrink: 0
+                flexShrink: 0
               }}>
-                ↗
+                <PlaySvg size={14} color="rgba(255,255,255,0.5)" />
               </div>
-              <p style={{ flex: 1, fontSize: 14, color: 'rgba(255,255,255,0.7)', margin: 0, fontWeight: 500 }}>
-                {ref.label}
-              </p>
-              <span style={{ fontSize: 18, color: 'rgba(255,255,255,0.2)' }}>›</span>
-            </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', fontWeight: 500, margin: 0, lineHeight: 1.3 }}>
+                  {ref.label}
+                </p>
+                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', margin: '3px 0 0' }}>
+                  Reference
+                </p>
+              </div>
+              <ChevronRightSvg size={18} color="rgba(255,255,255,0.25)" />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {/* ── Daily quote ───────────────────────────────────────────────────── */}
       {!contentLoading && (
-        <div style={{
-          margin: '0 16px 16px', padding: '14px 16px',
-          borderLeft: '2px solid #534AB7',
-          background: 'rgba(83,74,183,0.06)',
-          borderRadius: '0 14px 14px 0'
-        }}>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          style={{
+            margin: '0 16px 24px',
+            padding: '16px 0 16px 18px',
+            borderLeft: '3px solid #534AB7'
+          }}
+        >
           <p style={{
-            fontSize: 14, color: 'rgba(255,255,255,0.55)',
-            lineHeight: 1.6, fontStyle: 'italic', marginBottom: 6
+            fontSize: 15, color: 'rgba(255,255,255,0.8)',
+            lineHeight: 1.7, fontStyle: 'italic', margin: '0 0 8px'
           }}>
             "{dayContent?.quote_text || 'The secret of getting ahead is getting started.'}"
           </p>
-          <p style={{ fontSize: 12, color: '#9D92F8', margin: 0 }}>
-            {dayContent?.quote_author ? `— ${dayContent.quote_author}` : '— Mark Twain'}
+          <p style={{ fontSize: 12, color: '#9D92F8', margin: 0, fontStyle: 'normal' }}>
+            -- {dayContent?.quote_author || 'Mark Twain'}
           </p>
-        </div>
+        </motion.div>
       )}
 
       {/* ── Action buttons ────────────────────────────────────────────────── */}
-      <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.25 }}
+        style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}
+      >
         <motion.button
           whileTap={{ scale: completed ? 1 : 0.98 }}
+          whileHover={completed ? {} : { scale: 1.01, filter: 'brightness(1.1)' }}
           onClick={handleMarkComplete}
           disabled={completed}
           style={{
             width: '100%', height: 54, border: 'none', borderRadius: 27,
-            background: completed ? '#1D9E75' : '#534AB7',
-            color: 'white', fontSize: 15, fontWeight: 500,
+            background: completed
+              ? '#1D9E75'
+              : 'linear-gradient(135deg, #534AB7, #3d35a0)',
+            color: 'white', fontSize: 16, fontWeight: 700,
             cursor: completed ? 'default' : 'pointer',
             boxShadow: completed
               ? '0 0 30px rgba(29,158,117,0.3)'
-              : '0 0 30px rgba(83,74,183,0.3)',
-            transition: 'all 0.3s'
+              : '0 0 30px rgba(83,74,183,0.25)',
+            transition: 'background 0.3s'
           }}
         >
-          {completed ? `Day ${currentDay} Complete ✓` : `Mark Day ${currentDay} Complete`}
+          {completed ? `Day ${currentDay} Complete` : `Mark Day ${currentDay} Complete`}
         </motion.button>
 
         <motion.button
           whileTap={{ scale: 0.98 }}
           onClick={() => setShowLogModal(true)}
           style={{
-            width: '100%', height: 46, border: '1px solid rgba(255,255,255,0.1)',
+            width: '100%', height: 50,
+            border: '1px solid rgba(255,255,255,0.15)',
             borderRadius: 27, background: 'transparent',
-            color: 'rgba(255,255,255,0.45)', fontSize: 14, cursor: 'pointer'
+            color: 'rgba(255,255,255,0.6)', fontSize: 14, fontWeight: 400,
+            cursor: 'pointer'
           }}
         >
           Add to my log
         </motion.button>
-      </div>
+      </motion.div>
 
       {/* ── Community peek ────────────────────────────────────────────────── */}
-      <div style={{ padding: '0 16px 24px' }}>
-        <p style={{
-          fontSize: 11, fontWeight: 500, letterSpacing: '0.08em',
-          color: 'rgba(255,255,255,0.25)', marginBottom: 12
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
+        style={{ padding: '0 16px 24px' }}
+      >
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          marginBottom: 12
         }}>
-          YOUR SQUAD TODAY
-        </p>
-        {COMMUNITY.map(user => (
-          <div
-            key={user.initials}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10
-            }}
+          <span style={{
+            fontSize: 11, fontWeight: 500, letterSpacing: '0.1em',
+            textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)'
+          }}>
+            YOUR SQUAD TODAY
+          </span>
+          <span
+            onClick={() => navigate('/community')}
+            style={{ fontSize: 11, color: '#9D92F8', cursor: 'pointer' }}
           >
-            <div style={{
-              width: 32, height: 32, borderRadius: '50%',
-              background: user.bg,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 12, fontWeight: 500, color: user.color, flexShrink: 0
-            }}>
-              {user.initials}
+            View all
+          </span>
+        </div>
+
+        <div style={{
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: 16, overflow: 'hidden'
+        }}>
+          {COMMUNITY.map((user, idx) => (
+            <div key={user.initials}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                padding: '14px 16px'
+              }}>
+                <div style={{
+                  width: 36, height: 36, borderRadius: '50%',
+                  background: user.bg,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 12, fontWeight: 600, color: user.color, flexShrink: 0
+                }}>
+                  {user.initials}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: 14, color: 'white', fontWeight: 500, margin: 0 }}>{user.name}</p>
+                  <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', margin: 0 }}>Day {user.day}</p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#EF9F27' }}>{user.streak}</span>
+                  <FlameSvg size={13} color="#EF9F27" />
+                </div>
+              </div>
+              {idx < COMMUNITY.length - 1 && (
+                <div style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />
+              )}
             </div>
-            <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 14, color: 'white', fontWeight: 500, margin: 0 }}>{user.name}</p>
-              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', margin: 0 }}>Day {user.day}</p>
-            </div>
-            <span style={{ fontSize: 13, fontWeight: 600, color: '#EF9F27' }}>
-              {user.streak}d 🔥
-            </span>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </motion.div>
 
       {/* ── Testing tools ────────────────────────────────────────────────── */}
       <div style={{ textAlign: 'center', paddingBottom: 16 }}>
