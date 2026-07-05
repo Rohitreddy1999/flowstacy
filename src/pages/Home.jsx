@@ -145,7 +145,8 @@ export default function Home() {
       const subtracks_name = localStorage.getItem('flowstate_selected_subtrack')
       if (!subtracks_name) { setContentLoading(false); return }
 
-      const subtrackId = SUBTRACK_IDS[subtracks_name]
+      const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      const subtrackId = UUID_RE.test(subtracks_name) ? subtracks_name : SUBTRACK_IDS[subtracks_name]
       if (!subtrackId) { setContentLoading(false); return }
 
       const content = await getDayContent(subtrackId, currentDay)

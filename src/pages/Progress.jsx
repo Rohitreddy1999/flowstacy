@@ -134,9 +134,13 @@ export default function Progress() {
 
   useEffect(() => {
     if (!subtractId) { setLoading(false); return }
-    const subtrackId = SUBTRACK_IDS[subtractId]
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    const subtrackId = UUID_RE.test(subtractId) ? subtractId : SUBTRACK_IDS[subtractId]
     if (!subtrackId) { setLoading(false); return }
-    setSubtrack({ name: SUBTRACK_NAMES[subtractId] || subtractId, tracks: null })
+    const subtrackKey = UUID_RE.test(subtractId)
+      ? Object.keys(SUBTRACK_IDS).find(k => SUBTRACK_IDS[k] === subtractId) || subtractId
+      : subtractId
+    setSubtrack({ name: SUBTRACK_NAMES[subtrackKey] || subtractId, tracks: null })
     supabase
       .from('curriculum_days')
       .select('day_number, task_title, duration_minutes')
