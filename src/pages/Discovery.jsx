@@ -18,21 +18,11 @@ export default function Discovery() {
       subtext: "Select all that you feel.",
       multiSelect: true,
       options: [
-        { id: 'guilt', emoji: '😔',
-          text: "Guilt. I knew what I needed to do. I just didn't do it.",
-          tracks: ['discipline', 'journal'] },
-        { id: 'frustration', emoji: '😤',
-          text: "Frustration. I keep starting things and never following through.",
-          tracks: ['fitness', 'discipline'] },
-        { id: 'emptiness', emoji: '😶',
-          text: "Emptiness. I was busy but none of it actually mattered.",
-          tracks: ['journal', 'drawing'] },
-        { id: 'fear', emoji: '😰',
-          text: "Fear. Time is passing and I'm not becoming who I wanted to be.",
-          tracks: ['journal', 'instrument'] },
-        { id: 'numbness', emoji: '😴',
-          text: "Numbness. I've honestly stopped expecting things to change.",
-          tracks: ['discipline', 'journal'] }
+        { id: 'guilt', label: "Guilt. I knew what I needed to do. I just didn't do it.", tracks: ['discipline', 'journal'] },
+        { id: 'frustration', label: "Frustration. I keep starting things and never following through.", tracks: ['fitness', 'discipline'] },
+        { id: 'emptiness', label: "Emptiness. I was busy but none of it actually mattered.", tracks: ['journal', 'drawing'] },
+        { id: 'fear', label: "Fear. Time is passing and I'm not becoming who I wanted to be.", tracks: ['journal', 'instrument'] },
+        { id: 'numbness', label: "Numbness. I've stopped expecting anything from myself.", tracks: ['discipline', 'journal'] }
       ]
     },
     {
@@ -41,21 +31,11 @@ export default function Discovery() {
       subtext: "Select all that you feel.",
       multiSelect: true,
       options: [
-        { id: 'fitness', emoji: '💪',
-          text: "They move their body every day. No excuses, no negotiating.",
-          tracks: ['fitness'] },
-        { id: 'discipline', emoji: '☀️',
-          text: "Their mornings belong to them. Not their phone. Not their stress.",
-          tracks: ['discipline'] },
-        { id: 'instrument', emoji: '🎵',
-          text: "They play an instrument. They create music that is purely theirs.",
-          tracks: ['instrument'] },
-        { id: 'journal', emoji: '📓',
-          text: "They know themselves. They've done the work to understand what they want.",
-          tracks: ['journal'] },
-        { id: 'drawing', emoji: '✏️',
-          text: "They make things. They draw, sketch, create something from nothing.",
-          tracks: ['drawing'] }
+        { id: 'fitness', label: 'My body and fitness', tracks: ['fitness'] },
+        { id: 'discipline', label: 'My daily discipline and routine', tracks: ['discipline'] },
+        { id: 'instrument', label: 'Learning an instrument', tracks: ['instrument'] },
+        { id: 'journal', label: 'Journaling and self-reflection', tracks: ['journal'] },
+        { id: 'drawing', label: 'Drawing and sketching', tracks: ['drawing'] }
       ]
     },
     {
@@ -64,21 +44,11 @@ export default function Discovery() {
       subtext: "Select all that you feel.",
       multiSelect: true,
       options: [
-        { id: 'phone', emoji: '📱',
-          text: "Phone first. Scrolling before I've had a single thought of my own.",
-          tracks: ['discipline', 'journal'] },
-        { id: 'rush', emoji: '☕',
-          text: "Rush and survive. The day owns me before it's even started.",
-          tracks: ['fitness', 'discipline'] },
-        { id: 'tired', emoji: '😴',
-          text: "I wake up already tired. Like sleep didn't actually rest me.",
-          tracks: ['fitness', 'discipline'] },
-        { id: 'quiet', emoji: '🌅',
-          text: "I have quiet time but I waste it. I could be using it better.",
-          tracks: ['journal', 'drawing', 'instrument'] },
-        { id: 'move', emoji: '🏃',
-          text: "I already move or do something — but I want more structure.",
-          tracks: ['fitness'] }
+        { id: 'phone', label: "I reach for my phone before I'm fully awake", tracks: ['discipline', 'journal'] },
+        { id: 'rush', label: 'I rush through everything and feel behind immediately', tracks: ['fitness', 'discipline'] },
+        { id: 'tired', label: "I'm tired before the day even starts", tracks: ['fitness', 'discipline'] },
+        { id: 'quiet', label: 'I have a moment of quiet before the chaos starts', tracks: ['journal', 'drawing', 'instrument'] },
+        { id: 'move', label: 'I move my body first thing and it sets the tone', tracks: ['fitness'] }
       ]
     },
     {
@@ -87,21 +57,11 @@ export default function Discovery() {
       subtext: "Select all that you feel.",
       multiSelect: true,
       options: [
-        { id: 'time', emoji: '⏰',
-          text: "I told myself I didn't have time. Even though I did.",
-          tracks: ['discipline', 'journal'] },
-        { id: 'results', emoji: '😔',
-          text: "I didn't see results fast enough and convinced myself it wasn't working.",
-          tracks: ['fitness', 'drawing'] },
-        { id: 'identity', emoji: '🧠',
-          text: "I decided I just wasn't the kind of person who was good at that.",
-          tracks: ['instrument', 'drawing', 'journal'] },
-        { id: 'alone', emoji: '👥',
-          text: "I was doing it completely alone. Nobody around me cared.",
-          tracks: ['fitness', 'discipline'] },
-        { id: 'lost', emoji: '🌀',
-          text: "Honestly? Life just swallowed it. I don't even know when I stopped.",
-          tracks: ['discipline', 'journal'] }
+        { id: 'time', label: "I told myself I didn't have time", tracks: ['discipline', 'journal'] },
+        { id: 'results', label: "I didn't see results fast enough", tracks: ['fitness', 'drawing'] },
+        { id: 'identity', label: "I didn't believe I was the type of person who does this", tracks: ['instrument', 'drawing', 'journal'] },
+        { id: 'alone', label: 'I had nobody to do it with', tracks: ['fitness', 'discipline'] },
+        { id: 'lost', label: "I didn't know where to start or what to do", tracks: ['discipline', 'journal'] }
       ]
     },
     {

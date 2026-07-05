@@ -203,43 +203,45 @@ export default function QuestionScreen({
                       onClick={() => toggleOption(option.id)}
                       style={{
                         width: '100%',
-                        minHeight: '64px',
+                        minHeight: '60px',
                         display: 'flex',
                         alignItems: 'center',
-                        padding: '0 16px',
+                        padding: '0 20px',
                         background: isSelected
-                          ? 'rgba(83,74,183,0.12)'
-                          : 'rgba(255,255,255,0.04)',
+                          ? 'rgba(83,74,183,0.15)'
+                          : 'rgba(255,255,255,0.03)',
                         border: isSelected
-                          ? '1px solid rgba(157,146,248,0.5)'
+                          ? '1px solid rgba(147,138,248,0.5)'
                           : '1px solid rgba(255,255,255,0.07)',
                         borderRadius: '14px',
                         cursor: 'pointer',
                         textAlign: 'left',
                         transition: 'all 0.2s',
-                        gap: '12px'
+                        position: 'relative',
+                        overflow: 'hidden',
                       }}
                     >
-                      <span style={{
-                        fontSize: '20px',
-                        flexShrink: 0,
-                        width: '28px',
-                        textAlign: 'center'
-                      }}>
-                        {option.emoji}
-                      </span>
+                      {isSelected && (
+                        <div style={{
+                          position: 'absolute',
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          width: '3px',
+                          background: 'linear-gradient(180deg, #534AB7, #9D92F8)',
+                          borderRadius: '3px 0 0 3px',
+                        }} />
+                      )}
 
-                      <div style={{ flex: 1 }}>
-                        <p style={{
-                          fontSize: '14px',
-                          fontWeight: '500',
-                          color: 'white',
-                          margin: '0 0 2px',
-                          lineHeight: 1.3
-                        }}>
-                          {option.text}
-                        </p>
-                      </div>
+                      <span style={{
+                        fontSize: '14px',
+                        fontWeight: isSelected ? '500' : '400',
+                        color: isSelected ? 'white' : 'rgba(255,255,255,0.7)',
+                        lineHeight: 1.5,
+                        paddingLeft: '8px',
+                      }}>
+                        {option.label}
+                      </span>
 
                       {isSelected && (
                         <motion.div
@@ -258,7 +260,8 @@ export default function QuestionScreen({
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            flexShrink: 0
+                            flexShrink: 0,
+                            marginLeft: 'auto',
                           }}
                         >
                           <svg width="10" height="8"
