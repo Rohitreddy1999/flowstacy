@@ -796,13 +796,13 @@ export default function Home() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1 }}
-        style={{ margin: '0 16px 16px' }}
       >
         {contentLoading ? (
           <div style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: 20, overflow: 'hidden'
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: 20, overflow: 'hidden',
+            margin: '0 16px 16px'
           }}>
             <div style={{ height: 4, background: 'rgba(83,74,183,0.25)' }} />
             <div style={{ padding: 20 }}>
@@ -817,9 +817,10 @@ export default function Home() {
           </div>
         ) : (
           <div style={{
-            background: 'rgba(255,255,255,0.03)',
+            background: 'rgba(255,255,255,0.04)',
             border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 20, overflow: 'hidden'
+            borderRadius: 20, overflow: 'hidden',
+            margin: '0 16px 16px'
           }}>
             {/* Gradient accent strip */}
             <div style={{
@@ -963,70 +964,73 @@ export default function Home() {
 
           {/* Must watch */}
           {dayContent?.youtube_url && (
-            <motion.div
-              whileTap={{ scale: 0.98 }}
-              onClick={() => window.open(dayContent.youtube_url, '_blank')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 12,
-                padding: 14,
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.07)',
-                borderLeft: '3px solid #534AB7',
-                borderRadius: 14, marginBottom: 8, cursor: 'pointer'
-              }}
-            >
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%',
-                background: '#534AB7',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                <PlaySvg size={14} color="white" />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 14, color: 'white', fontWeight: 600, margin: 0, lineHeight: 1.3 }}>
-                  {dayContent.must_watch_label || "Watch today's guide"}
-                </p>
-                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', margin: '3px 0 0' }}>
-                  Must watch{dayContent.duration_minutes ? ` · ${dayContent.duration_minutes} min` : ''}
-                </p>
-              </div>
-              <ChevronRightSvg size={18} color="rgba(255,255,255,0.3)" />
-            </motion.div>
+            <div style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderLeft: '3px solid #534AB7',
+              borderRadius: 14,
+              padding: '14px 16px',
+              marginBottom: 8
+            }}>
+              <motion.div
+                whileTap={{ scale: 0.98 }}
+                onClick={() => window.open(dayContent.youtube_url, '_blank')}
+                style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
+              >
+                <div style={{
+                  width: 36, height: 36, borderRadius: '50%',
+                  background: '#534AB7',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <PlaySvg size={14} color="white" />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 14, color: 'white', fontWeight: 600, margin: 0, lineHeight: 1.3 }}>
+                    {dayContent.must_watch_label || "Watch today's guide"}
+                  </p>
+                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', margin: '3px 0 0' }}>
+                    Must watch{dayContent.duration_minutes ? ` · ${dayContent.duration_minutes} min` : ''}
+                  </p>
+                </div>
+                <ChevronRightSvg size={18} color="rgba(255,255,255,0.3)" />
+              </motion.div>
+            </div>
           )}
 
           {/* Reference links */}
           {refs.map((ref, i) => (
-            <motion.div
-              key={i}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => window.open(ref.url, '_blank')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 12,
-                padding: 14,
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.07)',
-                borderRadius: 14, marginBottom: 8, cursor: 'pointer'
-              }}
-            >
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.06)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                <PlaySvg size={14} color="rgba(255,255,255,0.5)" />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', fontWeight: 500, margin: 0, lineHeight: 1.3 }}>
-                  {ref.label}
-                </p>
-                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', margin: '3px 0 0' }}>
-                  Reference
-                </p>
-              </div>
-              <ChevronRightSvg size={18} color="rgba(255,255,255,0.25)" />
-            </motion.div>
+            <div key={i} style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 14,
+              padding: '14px 16px',
+              marginBottom: 8
+            }}>
+              <motion.div
+                whileTap={{ scale: 0.98 }}
+                onClick={() => window.open(ref.url, '_blank')}
+                style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
+              >
+                <div style={{
+                  width: 36, height: 36, borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.06)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <PlaySvg size={14} color="rgba(255,255,255,0.5)" />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', fontWeight: 500, margin: 0, lineHeight: 1.3 }}>
+                    {ref.label}
+                  </p>
+                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', margin: '3px 0 0' }}>
+                    Reference
+                  </p>
+                </div>
+                <ChevronRightSvg size={18} color="rgba(255,255,255,0.25)" />
+              </motion.div>
+            </div>
           ))}
         </motion.div>
       )}
