@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
@@ -163,6 +163,15 @@ export default function Home() {
   const [contentLoading, setContentLoading] = useState(true)
   const [allDays,        setAllDays]        = useState([])
 
+  // Hold-to-energize interaction state
+  const [holdProgress,  setHoldProgress]  = useState(0)
+  const [isHolding,     setIsHolding]     = useState(false)
+  const holdStartRef = useRef(null)
+  const rafRef       = useRef(null)
+
+  // Squad hover state
+  const [hoveredSquad, setHoveredSquad] = useState(null)
+
   // ── Fetch curriculum ───────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -188,7 +197,10 @@ export default function Home() {
 
   function handleMarkComplete() {
     if (completed) return
-    const newCompletedDays = [...completedDays, currentDay]
+    const newCompletedDays = [
+      ...completedDays,
+      { day: currentDay, completedAt: Date.now(), dayOfWeek: new Date().getDay() }
+    ]
     const newStreak        = streak + 1
     const newDay           = Math.min(currentDay + 1, 21)
     localStorage.setItem('flowstate_completed_days', JSON.stringify(newCompletedDays))
@@ -202,7 +214,7 @@ export default function Home() {
       particleCount: 120,
       spread: 70,
       origin: { y: 0.6 },
-      colors: [SURGE, GLACIAL, PLASMA, ARC_LIGHT, FATHOM],
+      colors: [SURGE, GLACIAL, PLASMA, ARC_LIGHT],
       disableForReducedMotion: true
     })
     setTimeout(() => setShowCelebrationCard(true), 400)
@@ -234,7 +246,9 @@ export default function Home() {
   }
 
   function jumpToDay(day) {
-    const done = Array.from({ length: day - 1 }, (_, i) => i + 1)
+    const done = Array.from({ length: day - 1 }, (_, i) => ({
+      day: i + 1, completedAt: Date.now(), dayOfWeek: new Date().getDay()
+    }))
     localStorage.setItem('flowstate_current_day',    String(day))
     localStorage.setItem('flowstate_streak',         String(day))
     localStorage.setItem('flowstate_completed_days', JSON.stringify(done))
@@ -258,7 +272,7 @@ export default function Home() {
   const phaseColor = getPhaseColor(currentDay)
 
   // Circuit ring math
-  const ringR           = 64
+  const ringR           = 80
   const ringCircum      = 2 * Math.PI * ringR
   const completedFrac   = completedDays.length / TOTAL
   const ringDashOffset  = ringCircum * (1 - completedFrac)
@@ -628,7 +642,7 @@ export default function Home() {
               <div style={{ padding: '16px 20px', overflowY: 'auto', flex: 1 }}>
                 {Array.from({ length: 21 }, (_, i) => {
                   const day     = i + 1
-                  const isDone  = completedDays.includes(day)
+                  const isDone  = completedDays.some(d => d.day === day)
                   const isToday = day === currentDay && !isDone
                   const content = allDays[i]
                   const dColor  = getPhaseColor(day)
@@ -690,18 +704,19 @@ export default function Home() {
         height: 56,
         padding: '0 20px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        background: `rgba(7,9,13,0.94)`,
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
+        background: 'rgba(7,9,13,0.85)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
+        borderLeft: `3px solid ${phaseColor}`,
         position: 'sticky', top: 0, zIndex: 100,
         maxWidth: 480, width: '100%', margin: '0 auto',
         boxSizing: 'border-box'
       }}>
         <span style={{
-          fontFamily: '"Space Grotesk", sans-serif',
-          fontWeight: 900, fontSize: 13,
-          letterSpacing: '0.1em',
+          fontFamily: '"Hanken Grotesk", sans-serif',
+          fontWeight: 700, fontSize: 11,
+          letterSpacing: '0.25em',
           color: phaseColor,
           textTransform: 'uppercase'
         }}>
@@ -710,14 +725,14 @@ export default function Home() {
 
         <div style={{
           display: 'flex', alignItems: 'center', gap: 6,
-          background: streak >= 14 ? 'rgba(255,79,216,0.1)' : 'rgba(61,245,166,0.1)',
-          border: `1px solid ${streak >= 14 ? 'rgba(255,79,216,0.3)' : 'rgba(61,245,166,0.25)'}`,
+          background: streak >= 7 ? 'rgba(255,79,216,0.1)' : 'rgba(61,245,166,0.1)',
+          border: `1px solid ${streak >= 7 ? 'rgba(255,79,216,0.3)' : 'rgba(61,245,166,0.25)'}`,
           borderRadius: 20, padding: '5px 12px'
         }}>
-          <DiamondSvg size={10} color={streak >= 14 ? PLASMA : SURGE} />
+          <DiamondSvg size={10} color={streak >= 7 ? PLASMA : SURGE} />
           <span style={{
             fontSize: 13, fontWeight: 700,
-            color: streak >= 14 ? PLASMA : SURGE,
+            color: streak >= 7 ? PLASMA : SURGE,
             fontFamily: '"Hanken Grotesk", sans-serif'
           }}>
             {streak}
@@ -730,47 +745,41 @@ export default function Home() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        style={{ padding: '28px 20px 20px', maxWidth: 480, margin: '0 auto' }}
+        style={{ padding: '20px 20px 12px', maxWidth: 480, margin: '0 auto' }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-          {/* Headline */}
-          <div style={{ flex: 1 }}>
-            <motion.h1
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.08, duration: 0.4 }}
-              style={{
-                fontFamily: '"Space Grotesk", sans-serif',
-                fontWeight: 900, fontSize: 26,
-                letterSpacing: '-0.02em', lineHeight: 1.2,
-                color: 'rgba(255,255,255,0.95)',
-                margin: '0 0 8px'
-              }}
-            >
-              {getPhaseHeadline(currentDay)}
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.14, duration: 0.4 }}
-              style={{
-                fontSize: 12, color: 'rgba(255,255,255,0.4)',
-                margin: 0, lineHeight: 1.4
-              }}
-            >
-              {subtrackName}
-            </motion.p>
-          </div>
+        {/* Headline above ring */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08, duration: 0.4 }}
+          style={{ textAlign: 'center', marginBottom: 20 }}
+        >
+          <h1 style={{
+            fontFamily: '"Space Grotesk", sans-serif',
+            fontWeight: 900, fontSize: 24,
+            letterSpacing: '-0.02em', lineHeight: 1.2,
+            color: 'rgba(255,255,255,0.95)',
+            margin: '0 0 5px'
+          }}>
+            {getPhaseHeadline(currentDay)}
+          </h1>
+          <p style={{
+            fontSize: 12, color: 'rgba(255,255,255,0.35)',
+            margin: 0, lineHeight: 1.4
+          }}>
+            {subtrackName}
+          </p>
+        </motion.div>
 
-          {/* Circuit ring */}
+        {/* Circuit ring — centered hero */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
           <motion.div
             initial={{ opacity: 0, scale: 0.85 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.12, duration: 0.5, ease: 'easeOut' }}
-            style={{ flexShrink: 0 }}
           >
             <svg
-              width="140" height="140"
+              width="240" height="240"
               viewBox="0 0 200 200"
               style={{ overflow: 'visible' }}
             >
@@ -804,7 +813,7 @@ export default function Home() {
                 <circle
                   cx="100" cy="100" r={ringR}
                   fill="none"
-                  stroke={SURGE}
+                  stroke={phaseColor}
                   strokeWidth="5"
                   strokeLinecap="round"
                   strokeDasharray={ringCircum}
@@ -821,7 +830,7 @@ export default function Home() {
                   cx={tipX} cy={tipY} r="5"
                   fill={ARC_LIGHT}
                   filter="url(#tip-glow)"
-                  animate={{ r: [5, 6.5, 5], opacity: [1, 0.7, 1] }}
+                  animate={{ r: [5, 8, 5], opacity: [1, 0.4, 1] }}
                   transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                 />
               )}
@@ -831,9 +840,9 @@ export default function Home() {
                 x="100" y="95"
                 textAnchor="middle"
                 style={{
-                  fontFamily: '"Space Grotesk", sans-serif',
-                  fontSize: 48, fontWeight: 900,
-                  fill: 'rgba(255,255,255,0.95)',
+                  fontFamily: '"Hanken Grotesk", sans-serif',
+                  fontSize: 52, fontWeight: 900,
+                  fill: ARC_LIGHT,
                   letterSpacing: '-2px'
                 }}
               >
@@ -857,26 +866,39 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* Days complete row */}
+        {/* Progress bar row */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}
         >
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>
-            {completedDays.length} of 21 days complete
-          </span>
-          <button
-            onClick={() => setShowFullPlan(true)}
-            style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              fontSize: 12, color: SURGE, padding: 0,
-              fontFamily: '"Hanken Grotesk", sans-serif'
-            }}
-          >
-            Full plan
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 7 }}>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.06em' }}>
+              {completedDays.length} / {TOTAL} days
+            </span>
+            <button
+              onClick={() => setShowFullPlan(true)}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                fontSize: 11, color: 'rgba(255,255,255,0.35)', padding: 0,
+                fontFamily: '"Hanken Grotesk", sans-serif'
+              }}
+            >
+              Full plan
+            </button>
+          </div>
+          <div style={{
+            height: 2, borderRadius: 2,
+            background: 'rgba(255,255,255,0.07)',
+            overflow: 'hidden'
+          }}>
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${completedFrac * 100}%` }}
+              transition={{ duration: 1.0, delay: 0.3, ease: 'easeOut' }}
+              style={{ height: '100%', background: phaseColor, borderRadius: 2 }}
+            />
+          </div>
         </motion.div>
       </motion.div>
 
@@ -906,9 +928,9 @@ export default function Home() {
         ) : (
           <div style={{
             background: FATHOM,
-            border: `1px solid rgba(61,245,166,0.25)`,
+            border: '1px solid rgba(255,255,255,0.10)',
             borderRadius: 20, overflow: 'hidden',
-            boxShadow: '0 0 40px rgba(61,245,166,0.04)'
+            boxShadow: '0 0 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)'
           }}>
             {/* Surge accent strip */}
             <div style={{ height: 3, background: `linear-gradient(90deg, ${SURGE}, rgba(61,245,166,0.4))` }} />
@@ -973,25 +995,16 @@ export default function Home() {
 
                 {steps.length > 0 ? (
                   steps.map((step, i) => (
-                    <div key={i}>
-                      <div style={{
-                        display: 'flex', alignItems: 'flex-start', gap: 14,
-                        paddingTop: 12, paddingBottom: 12
-                      }}>
-                        <span style={{
-                          fontFamily: '"Space Grotesk", sans-serif',
-                          fontSize: 13, fontWeight: 700, color: SURGE,
-                          minWidth: 20, lineHeight: 1.6, flexShrink: 0
-                        }}>
-                          {i + 1}
-                        </span>
-                        <span style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.82)', lineHeight: 1.6 }}>
-                          {step}
-                        </span>
-                      </div>
-                      {i < steps.length - 1 && (
-                        <div style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />
-                      )}
+                    <div key={i} style={{
+                      borderLeft: `2px solid ${phaseColor}`,
+                      paddingLeft: 12,
+                      paddingTop: 5, paddingBottom: 5,
+                      marginBottom: i < steps.length - 1 ? 12 : 0,
+                      marginTop: i === 0 ? 10 : 0,
+                    }}>
+                      <span style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.82)', lineHeight: 1.6 }}>
+                        {step}
+                      </span>
                     </div>
                   ))
                 ) : (
@@ -1017,10 +1030,12 @@ export default function Home() {
                     WHY THIS MATTERS
                   </p>
                   <p style={{
-                    fontSize: 13.5, color: 'rgba(255,255,255,0.6)',
+                    fontSize: 13.5, color: 'rgba(255,255,255,0.65)',
                     lineHeight: 1.7, margin: 0, fontStyle: 'italic',
-                    borderLeft: `3px solid rgba(130,212,255,0.35)`,
-                    paddingLeft: 14
+                    borderLeft: `3px solid ${phaseColor}`,
+                    paddingLeft: 14, paddingTop: 10, paddingBottom: 10,
+                    background: `${phaseColor}09`,
+                    borderRadius: '0 8px 8px 0',
                   }}>
                     {whyText}
                   </p>
@@ -1054,10 +1069,11 @@ export default function Home() {
               animate={{
                 boxShadow: [
                   '0 0 8px rgba(130,212,255,0.3)',
-                  '0 0 18px rgba(130,212,255,0.55)',
+                  '0 0 20px rgba(130,212,255,0.6)',
                   '0 0 8px rgba(130,212,255,0.3)',
                 ],
-                scale: [1, 1.1, 1]
+                scale: [1, 1.08, 1],
+                y: [0, -2, 0],
               }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
               style={{
@@ -1220,26 +1236,73 @@ export default function Home() {
         transition={{ duration: 0.4, delay: 0.22 }}
         style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 480, margin: '0 auto', boxSizing: 'border-box' }}
       >
-        <motion.button
-          whileTap={{ scale: completed ? 1 : 0.98 }}
-          onClick={handleMarkComplete}
-          disabled={completed}
-          style={{
-            width: '100%', height: 54, border: 'none', borderRadius: 27,
-            background: completed ? 'transparent' : SURGE,
-            border: completed ? `1px solid rgba(61,245,166,0.4)` : 'none',
-            color: completed ? SURGE : ABYSS,
-            fontSize: 15, fontWeight: 700,
-            cursor: completed ? 'default' : 'pointer',
-            boxShadow: completed ? 'none' : '0 0 32px rgba(61,245,166,0.2)',
-            transition: 'all 0.3s ease',
+        {completed ? (
+          <div style={{
+            width: '100%', height: 54, borderRadius: 27,
+            border: `1px solid rgba(61,245,166,0.4)`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             fontFamily: '"Hanken Grotesk", sans-serif',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
-          }}
-        >
-          {completed && <CheckSvg size={20} color={SURGE} />}
-          {completed ? `Day ${currentDay} complete` : `Complete Day ${dayLabel}`}
-        </motion.button>
+            fontSize: 15, fontWeight: 700, color: SURGE,
+          }}>
+            <CheckSvg size={20} color={SURGE} />
+            Day {currentDay} complete
+          </div>
+        ) : (
+          <div style={{ position: 'relative', borderRadius: 27, overflow: 'hidden' }}>
+            {holdProgress > 0 && (
+              <div style={{
+                position: 'absolute', top: 0, left: 0, bottom: 0,
+                width: `${holdProgress * 100}%`,
+                background: ARC_LIGHT,
+                zIndex: 0,
+              }} />
+            )}
+            <motion.button
+              onPointerDown={(e) => {
+                e.preventDefault()
+                holdStartRef.current = performance.now()
+                setIsHolding(true)
+                function tick(now) {
+                  const p = Math.min((now - holdStartRef.current) / 2000, 1)
+                  setHoldProgress(p)
+                  if (p < 1) {
+                    rafRef.current = requestAnimationFrame(tick)
+                  } else {
+                    setIsHolding(false)
+                    setHoldProgress(0)
+                    handleMarkComplete()
+                  }
+                }
+                rafRef.current = requestAnimationFrame(tick)
+              }}
+              onPointerUp={() => {
+                if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null }
+                setIsHolding(false); setHoldProgress(0)
+              }}
+              onPointerLeave={() => {
+                if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null }
+                setIsHolding(false); setHoldProgress(0)
+              }}
+              onPointerCancel={() => {
+                if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null }
+                setIsHolding(false); setHoldProgress(0)
+              }}
+              style={{
+                position: 'relative', zIndex: 1,
+                width: '100%', height: 54, border: 'none', borderRadius: 27,
+                background: holdProgress > 0 ? 'transparent' : SURGE,
+                color: ABYSS, fontSize: 15, fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 0 32px rgba(61,245,166,0.2)',
+                fontFamily: '"Hanken Grotesk", sans-serif',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                userSelect: 'none', WebkitUserSelect: 'none', touchAction: 'none',
+              }}
+            >
+              {isHolding ? `Hold to energize Day ${dayLabel}...` : `Hold to energize Day ${dayLabel}`}
+            </motion.button>
+          </div>
+        )}
 
         <motion.button
           whileTap={{ scale: 0.98 }}
@@ -1288,10 +1351,18 @@ export default function Home() {
         }}>
           {COMMUNITY.map((user, idx) => (
             <div key={user.initials}>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 12,
-                padding: '14px 16px'
-              }}>
+              <div
+                onMouseEnter={() => setHoveredSquad(user.initials)}
+                onMouseLeave={() => setHoveredSquad(null)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '14px 16px',
+                  transform: hoveredSquad === user.initials ? 'scale(1.02)' : 'scale(1)',
+                  transition: 'transform 200ms ease',
+                  borderLeft: hoveredSquad === user.initials ? `3px solid ${user.color}` : '3px solid transparent',
+                  cursor: 'pointer',
+                }}
+              >
                 <div style={{
                   width: 36, height: 36, borderRadius: '50%',
                   background: user.bg,

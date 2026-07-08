@@ -43,6 +43,7 @@ function AppRoutes() {
         <Route path="/home"       element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="/community"  element={<ProtectedRoute><Community /></ProtectedRoute>} />
         <Route path="/progress"   element={<ProtectedRoute><Progress /></ProtectedRoute>} />
+        <Route path="/progress-preview" element={<Progress />} />
         <Route path="/profile"    element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/graduation" element={<ProtectedRoute><Graduation /></ProtectedRoute>} />
         <Route path="/experts"    element={<ProtectedRoute><Experts /></ProtectedRoute>} />
