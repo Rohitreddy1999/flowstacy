@@ -193,9 +193,12 @@ export default function Progress() {
     const len = el.getTotalLength()
     setArcPathLength(len)
     setArcDashOffset(len)
-    const t1 = setTimeout(() => setArcDashOffset(0), 80)
+    // Only draw the arc up to where the user currently is
+    const progress = Math.max(0, Math.min(1, (currentDay - 1) / 20))
+    const targetOffset = len * (1 - progress)
+    const t1 = setTimeout(() => setArcDashOffset(targetOffset), 80)
     const t2 = setTimeout(() => setDotsVisible(true),  1700)
-    const t3 = setTimeout(() => setTempBarLeft(`${(completedDays.length / 21) * 100}%`), 600)
+    const t3 = setTimeout(() => setTempBarLeft(`${temperatureScore * 100}%`), 600)
     const t4 = setTimeout(() => setDnaVisible(true),   800)
     const t5 = setTimeout(() => setEnergyReady(true),  900)
     return () => [t1, t2, t3, t4, t5].forEach(clearTimeout)
@@ -206,6 +209,21 @@ export default function Progress() {
 
   const thisWeekDays   = completedDays.filter(d => d.day >= Math.max(1, currentDay - 6) && d.day <= currentDay)
   const thisWeekPoints = thisWeekDays.length * 4
+
+  // Temperature = recent consistency (50%) + streak rate (30%) + reflection rate (20%)
+  const recentRate   = thisWeekDays.length / Math.min(7, Math.max(1, currentDay - 1))
+  const streakRate   = streak / Math.max(1, Math.min(currentDay - 1, 21))
+  const reflCount    = Object.keys(reflections).length
+  const reflRate     = completedCount > 0 ? reflCount / completedCount : 0
+  const temperatureScore = Math.min(1, recentRate * 0.5 + streakRate * 0.3 + reflRate * 0.2)
+
+  const tempLabel = temperatureScore >= 0.8
+    ? 'You\'re on fire. Don\'t stop now.'
+    : temperatureScore >= 0.5
+    ? 'Solid momentum. Keep showing up.'
+    : temperatureScore >= 0.2
+    ? 'Starting to build. Stay consistent.'
+    : 'Light the spark. One day at a time.'
 
   const phases = [
     { name: 'Foundation', range: 'Days 1–7',   start: 1,  end: 7,  color: GLACIAL,
@@ -287,9 +305,10 @@ export default function Progress() {
           {/* ── HEADER ───────────────────────────────────────────────────────── */}
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            paddingTop: 'max(48px, env(safe-area-inset-top))',
-            padding: '16px 20px',
             paddingTop: 'max(48px, env(safe-area-inset-top, 48px))',
+            paddingBottom: 16,
+            paddingLeft: 20,
+            paddingRight: 20,
             position: 'sticky', top: 0, zIndex: 10,
             background: 'rgba(7,9,13,0.85)',
             backdropFilter: 'blur(12px)',
@@ -302,8 +321,8 @@ export default function Progress() {
               <BackArrow />
             </button>
 
-            <div style={{ flex: 1, paddingLeft: 8 }}>
-              <div style={{ ...sLabel, marginBottom: 2 }}>YOUR JOURNEY</div>
+            <div style={{ flex: 1, minWidth: 0, paddingLeft: 8, overflow: 'hidden' }}>
+              <div style={{ ...sLabel, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>YOUR JOURNEY</div>
               <div style={{ fontSize: 24, fontWeight: 700, color: 'rgba(255,255,255,0.95)', fontFamily: HK, lineHeight: 1.2 }}>
                 The Ascent
               </div>
@@ -334,6 +353,17 @@ export default function Progress() {
                 width="100%" height="260"
                 style={{ display: 'block', overflow: 'visible' }}
               >
+                <defs>
+                  {/* Phase gradient: GLACIAL → SURGE → PLASMA along the arc left→right */}
+                  <linearGradient id="arcGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%"    stopColor={GLACIAL} />
+                    <stop offset="33%"   stopColor={GLACIAL} />
+                    <stop offset="50%"   stopColor={SURGE} />
+                    <stop offset="66%"   stopColor={SURGE} />
+                    <stop offset="100%"  stopColor={PLASMA} />
+                  </linearGradient>
+                </defs>
+
                 {/* Faint track */}
                 <path
                   key="arc-track"
@@ -343,13 +373,13 @@ export default function Progress() {
                   fill="none"
                 />
 
-                {/* Animated arc */}
+                {/* Animated arc — phase-colored, draws to current day only */}
                 <path
                   key="arc-line"
                   ref={arcPathRef}
                   d="M 40 200 C 120 200, 160 80, 320 40"
-                  stroke={SURGE}
-                  strokeWidth="1.5"
+                  stroke="url(#arcGrad)"
+                  strokeWidth="2"
                   fill="none"
                   strokeLinecap="round"
                   strokeDasharray={arcPathLength || 2000}
@@ -497,7 +527,10 @@ export default function Progress() {
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               style={{ padding: '0 20px', marginBottom: 28 }}
             >
-              <div style={{ ...sLabel, marginBottom: 12 }}>MOMENTUM TEMPERATURE</div>
+              <div style={{ ...sLabel, marginBottom: 4 }}>MOMENTUM TEMPERATURE</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontFamily: HK, marginBottom: 14 }}>
+                {tempLabel}
+              </div>
               <div style={{
                 position: 'relative', height: 4, borderRadius: 2,
                 background: 'linear-gradient(to right, #82D4FF, #3DF5A6, #FF4FD8)',
@@ -513,9 +546,20 @@ export default function Progress() {
                   transition: 'left 1.2s ease',
                 }} />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                 <span style={{ fontSize: 10, color: GLACIAL, fontFamily: HK, fontWeight: 500 }}>GLACIAL</span>
                 <span style={{ fontSize: 10, color: PLASMA,  fontFamily: HK, fontWeight: 500 }}>PLASMA</span>
+              </div>
+              <div style={{ display: 'flex', gap: 16 }}>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', fontFamily: HK }}>
+                  Recent: <span style={{ color: 'rgba(255,255,255,0.55)' }}>{Math.round(recentRate * 100)}%</span>
+                </div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', fontFamily: HK }}>
+                  Streak: <span style={{ color: 'rgba(255,255,255,0.55)' }}>{Math.round(streakRate * 100)}%</span>
+                </div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', fontFamily: HK }}>
+                  Reflection: <span style={{ color: 'rgba(255,255,255,0.55)' }}>{Math.round(reflRate * 100)}%</span>
+                </div>
               </div>
             </motion.div>
 
