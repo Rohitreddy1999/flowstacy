@@ -12,27 +12,24 @@ export default function QuestionScreen({
   onBack,
   openText,
   openTextPlaceholder,
-  continueLabel
+  continueLabel,
 }) {
   const [selected, setSelected] = useState([])
   const [textValue, setTextValue] = useState('')
+  const [textFocused, setTextFocused] = useState(false)
 
   useEffect(() => {
     setSelected([])
     setTextValue('')
   }, [stepNumber])
 
-  const progress = (stepNumber / totalSteps) * 100
-
   const toggleOption = (id) => {
     if (multiSelect) {
-      if (selected.includes(id)) {
-        setSelected(selected.filter(s => s !== id))
-      } else {
-        if (selected.length < 2) {
-          setSelected([...selected, id])
-        }
-      }
+      setSelected(prev =>
+        prev.includes(id)
+          ? prev.filter(s => s !== id)
+          : prev.length < 2 ? [...prev, id] : prev
+      )
     } else {
       setSelected([id])
     }
@@ -47,40 +44,23 @@ export default function QuestionScreen({
     onContinue(openText ? textValue : selected)
   }
 
+  const ghostNum = String(stepNumber).padStart(2, '0')
+
   return (
     <div style={{
-      minHeight: '100vh',
-      background: '#0A0812',
+      minHeight: '100%',
+      background: '#07090D',
       display: 'flex',
       flexDirection: 'column',
-      maxWidth: '480px',
-      margin: '0 auto',
-      position: 'relative'
+      position: 'relative',
     }}>
-
-      {/* Progress bar */}
-      <div style={{
-        width: '100%',
-        height: '2px',
-        background: 'rgba(255,255,255,0.06)'
-      }}>
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
-          style={{
-            height: '2px',
-            background: '#534AB7'
-          }}
-        />
-      </div>
 
       {/* Top bar */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '16px 20px'
+        padding: '52px 24px 20px',
       }}>
         <motion.button
           whileTap={{ scale: 0.95 }}
@@ -88,55 +68,84 @@ export default function QuestionScreen({
           style={{
             background: 'none',
             border: 'none',
-            color: 'rgba(255,255,255,0.5)',
-            fontSize: '22px',
+            color: 'rgba(255,255,255,0.35)',
             cursor: 'pointer',
-            padding: '8px',
-            lineHeight: 1
+            padding: '4px',
+            display: 'flex',
+            alignItems: 'center',
           }}
         >
-          ←
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
         </motion.button>
-        <span style={{
-          fontSize: '12px',
-          color: 'rgba(255,255,255,0.25)',
-          letterSpacing: '0.05em'
-        }}>
-          {stepNumber} of {totalSteps}
-        </span>
+
+        {/* Step dots */}
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+          {Array.from({ length: totalSteps }).map((_, i) => (
+            <div
+              key={i}
+              style={{
+                width: i === stepNumber - 1 ? '16px' : '5px',
+                height: '5px',
+                borderRadius: '3px',
+                background: i < stepNumber ? '#EAFFF5' : 'rgba(255,255,255,0.15)',
+                transition: 'all 0.3s ease',
+              }}
+            />
+          ))}
+        </div>
+
+        <div style={{ width: '26px' }} />
       </div>
 
       {/* Content */}
-      <div style={{
-        flex: 1,
-        padding: '24px 28px 140px'
-      }}>
+      <div style={{ flex: 1, padding: '0 24px 160px', position: 'relative' }}>
         <AnimatePresence mode="wait">
           <motion.div
             key={stepNumber}
-            initial={{ opacity: 0, x: 30 }}
+            initial={{ opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -30 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
+            exit={{ opacity: 0, x: -24 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
           >
-            {/* Question heading */}
-            <div style={{ marginBottom: '36px' }}>
+            {/* Ghost number — sits behind question */}
+            <div style={{
+              position: 'absolute',
+              top: '-8px',
+              right: '16px',
+              fontFamily: '"Space Grotesk", sans-serif',
+              fontWeight: 900,
+              fontSize: '120px',
+              lineHeight: 1,
+              color: 'rgba(255,255,255,0.04)',
+              letterSpacing: '-0.04em',
+              userSelect: 'none',
+              pointerEvents: 'none',
+            }}>
+              {ghostNum}
+            </div>
+
+            {/* Question */}
+            <div style={{ marginBottom: '28px', position: 'relative' }}>
               <h1 style={{
-                fontSize: '26px',
-                fontWeight: '600',
-                color: 'white',
+                fontFamily: '"Space Grotesk", sans-serif',
+                fontWeight: 700,
+                fontSize: '22px',
+                color: 'rgba(255,255,255,0.95)',
                 lineHeight: 1.3,
                 margin: '0 0 10px',
-                letterSpacing: '-0.01em'
+                letterSpacing: '-0.02em',
               }}>
                 {question}
               </h1>
               {subtext && (
                 <p style={{
-                  fontSize: '14px',
-                  color: 'rgba(255,255,255,0.38)',
+                  fontFamily: '"Hanken Grotesk", sans-serif',
+                  fontSize: '13px',
+                  color: 'rgba(255,255,255,0.3)',
                   margin: 0,
-                  lineHeight: 1.5
+                  lineHeight: 1.5,
                 }}>
                   {subtext}
                 </p>
@@ -146,77 +155,72 @@ export default function QuestionScreen({
             {/* Options or open text */}
             {openText ? (
               <div>
-                <textarea
-                  value={textValue}
-                  onChange={e => setTextValue(e.target.value)}
-                  placeholder={openTextPlaceholder}
-                  style={{
-                    width: '100%',
-                    minHeight: '140px',
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: '16px',
-                    padding: '16px',
-                    color: 'white',
-                    fontSize: '16px',
-                    lineHeight: 1.6,
-                    resize: 'none',
-                    outline: 'none',
-                    fontFamily: 'system-ui',
-                    boxSizing: 'border-box',
-                    transition: 'border-color 0.2s'
-                  }}
-                  onFocus={e =>
-                    e.target.style.borderColor =
-                    'rgba(157,146,248,0.4)'}
-                  onBlur={e =>
-                    e.target.style.borderColor =
-                    'rgba(255,255,255,0.08)'}
-                />
+                <div style={{
+                  background: '#0F141A',
+                  border: textFocused
+                    ? '1px solid rgba(130,212,255,0.35)'
+                    : '1px solid rgba(255,255,255,0.07)',
+                  borderRadius: '16px',
+                  padding: '16px',
+                  transition: 'border-color 0.2s',
+                }}>
+                  <textarea
+                    value={textValue}
+                    onChange={e => setTextValue(e.target.value)}
+                    onFocus={() => setTextFocused(true)}
+                    onBlur={() => setTextFocused(false)}
+                    placeholder={openTextPlaceholder}
+                    rows={5}
+                    style={{
+                      width: '100%',
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'rgba(255,255,255,0.9)',
+                      fontFamily: '"Hanken Grotesk", sans-serif',
+                      fontSize: '15px',
+                      lineHeight: 1.65,
+                      resize: 'none',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
                 <p style={{
-                  fontSize: '12px',
-                  color: 'rgba(255,255,255,0.2)',
+                  fontFamily: '"Hanken Grotesk", sans-serif',
+                  fontSize: '11px',
+                  color: 'rgba(255,255,255,0.18)',
                   marginTop: '10px',
-                  fontStyle: 'italic'
+                  letterSpacing: '0.02em',
                 }}>
                   Nobody else sees this. Just be honest.
                 </p>
               </div>
             ) : (
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '10px'
-              }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
                 {options.map((option, i) => {
                   const isSelected = selected.includes(option.id)
                   return (
                     <motion.button
                       key={option.id}
-                      initial={{ opacity: 0, y: 16 }}
+                      initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        delay: i * 0.07,
-                        duration: 0.35
-                      }}
-                      whileTap={{ scale: 0.99 }}
+                      transition={{ delay: i * 0.055, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                      whileTap={{ scale: 0.985 }}
                       onClick={() => toggleOption(option.id)}
                       style={{
                         width: '100%',
-                        minHeight: '60px',
                         display: 'flex',
                         alignItems: 'center',
-                        padding: '0 20px',
-                        background: isSelected
-                          ? 'rgba(83,74,183,0.15)'
-                          : 'rgba(255,255,255,0.03)',
+                        padding: '14px 16px',
+                        background: isSelected ? 'rgba(61,245,166,0.06)' : '#0F141A',
                         border: isSelected
-                          ? '1px solid rgba(147,138,248,0.5)'
+                          ? '1px solid rgba(61,245,166,0.4)'
                           : '1px solid rgba(255,255,255,0.07)',
                         borderRadius: '14px',
                         cursor: 'pointer',
                         textAlign: 'left',
-                        transition: 'all 0.2s',
+                        transition: 'all 0.18s ease',
+                        gap: '12px',
                         position: 'relative',
                         overflow: 'hidden',
                       }}
@@ -224,68 +228,62 @@ export default function QuestionScreen({
                       {isSelected && (
                         <div style={{
                           position: 'absolute',
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          width: '3px',
-                          background: 'linear-gradient(180deg, #534AB7, #9D92F8)',
-                          borderRadius: '3px 0 0 3px',
+                          inset: 0,
+                          background: 'radial-gradient(ellipse at left center, rgba(61,245,166,0.06) 0%, transparent 70%)',
+                          pointerEvents: 'none',
                         }} />
                       )}
 
                       <span style={{
-                        fontSize: '14px',
-                        fontWeight: isSelected ? '500' : '400',
-                        color: isSelected ? 'white' : 'rgba(255,255,255,0.7)',
+                        fontFamily: '"Hanken Grotesk", sans-serif',
+                        fontSize: '13.5px',
+                        fontWeight: isSelected ? 500 : 400,
+                        color: isSelected ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.6)',
                         lineHeight: 1.5,
-                        paddingLeft: '8px',
+                        flex: 1,
+                        transition: 'color 0.18s',
                       }}>
                         {option.label}
                       </span>
 
-                      {isSelected && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{
-                            type: 'spring',
-                            stiffness: 400,
-                            damping: 20
-                          }}
-                          style={{
-                            width: '20px',
-                            height: '20px',
-                            borderRadius: '50%',
-                            background: '#534AB7',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0,
-                            marginLeft: 'auto',
-                          }}
-                        >
-                          <svg width="10" height="8"
-                            viewBox="0 0 10 8" fill="none">
-                            <path d="M1 4l3 3 5-6"
-                              stroke="white"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"/>
-                          </svg>
-                        </motion.div>
-                      )}
+                      <AnimatePresence>
+                        {isSelected && (
+                          <motion.div
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                            style={{
+                              width: '18px',
+                              height: '18px',
+                              borderRadius: '50%',
+                              background: '#3DF5A6',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0,
+                            }}
+                          >
+                            <svg width="9" height="7" viewBox="0 0 10 8" fill="none">
+                              <path d="M1 4l3 3 5-6" stroke="#07090D" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </motion.button>
                   )
                 })}
 
                 {multiSelect && (
                   <p style={{
-                    fontSize: '12px',
+                    fontFamily: '"Hanken Grotesk", sans-serif',
+                    fontSize: '11px',
                     color: 'rgba(255,255,255,0.2)',
                     textAlign: 'center',
-                    marginTop: '4px'
+                    marginTop: '4px',
+                    letterSpacing: '0.03em',
                   }}>
-                    Select all that you feel
+                    Pick up to 2
                   </p>
                 )}
               </div>
@@ -294,7 +292,7 @@ export default function QuestionScreen({
         </AnimatePresence>
       </div>
 
-      {/* Fixed bottom button */}
+      {/* Bottom CTA */}
       <div style={{
         position: 'fixed',
         bottom: 0,
@@ -302,30 +300,28 @@ export default function QuestionScreen({
         transform: 'translateX(-50%)',
         width: '100%',
         maxWidth: '480px',
-        padding: '16px 28px 40px',
-        background: 'linear-gradient(transparent, #0A0812 35%)'
+        padding: '16px 24px 44px',
+        background: 'linear-gradient(to bottom, transparent, #07090D 40%)',
+        pointerEvents: 'none',
       }}>
         <motion.button
-          whileTap={{ scale: canContinue ? 0.98 : 1 }}
+          whileTap={{ scale: canContinue ? 0.97 : 1 }}
           onClick={handleContinue}
+          animate={{ opacity: canContinue ? 1 : 0.2, y: canContinue ? 0 : 4 }}
+          transition={{ duration: 0.2 }}
           style={{
             width: '100%',
-            height: '54px',
-            background: canContinue
-              ? '#534AB7'
-              : 'rgba(255,255,255,0.06)',
+            height: '52px',
+            background: '#3DF5A6',
             border: 'none',
-            borderRadius: '27px',
-            color: canContinue
-              ? 'white'
-              : 'rgba(255,255,255,0.2)',
-            fontSize: '16px',
-            fontWeight: '500',
+            borderRadius: '26px',
+            color: '#07090D',
+            fontFamily: '"Hanken Grotesk", sans-serif',
+            fontSize: '15px',
+            fontWeight: 600,
             cursor: canContinue ? 'pointer' : 'not-allowed',
-            boxShadow: canContinue
-              ? '0 0 30px rgba(83,74,183,0.3)'
-              : 'none',
-            transition: 'all 0.3s'
+            pointerEvents: 'auto',
+            letterSpacing: '0.01em',
           }}
         >
           {continueLabel || 'Continue'}
