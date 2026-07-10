@@ -13,8 +13,8 @@ export default defineConfig({
         'masked-icon.svg'
       ],
       manifest: {
-        name: 'Flowstate — 21-Day Mantra',
-        short_name: 'Flowstate',
+        name: 'Flowstacy — 21-Day Mantra',
+        short_name: 'Flowstacy',
         description: 'The 21 days that change everything after them.',
         theme_color: '#0A0812',
         background_color: '#0A0812',

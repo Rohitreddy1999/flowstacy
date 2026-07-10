@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -60,7 +60,7 @@ export default function Onboarding() {
 
   const handleContinue = () => {
     if (!selected) return
-    localStorage.setItem('flowstate_life_stage', selected)
+    localStorage.setItem('flowstacy_life_stage', selected)
     navigate('/bridge')
   }
 
@@ -301,7 +301,7 @@ export default function Onboarding() {
 
         <button
           onClick={() => {
-            localStorage.setItem('flowstate_life_stage', 'skipped')
+            localStorage.setItem('flowstacy_life_stage', 'skipped')
             navigate('/bridge')
           }}
           style={{

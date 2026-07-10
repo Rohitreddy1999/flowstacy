@@ -1,9 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { SUBTRACK_NAMES, SUBTRACK_IDS } from '../lib/curriculum'
-import BottomNav from '../components/BottomNav'
 import PageTransition from '../components/PageTransition'
 
 // ── V2 Colors ──────────────────────────────────────────────────────────────────
@@ -90,16 +89,16 @@ export default function Progress() {
   const navigate = useNavigate()
 
   // ── Data reads ───────────────────────────────────────────────────────────────
-  const currentDay    = parseInt(localStorage.getItem('flowstate_current_day') || '1')
-  const subtractId    = localStorage.getItem('flowstate_selected_subtrack')
-  const _rawDays    = JSON.parse(localStorage.getItem('flowstate_completed_days') || '[]')
+  const currentDay    = parseInt(localStorage.getItem('flowstacy_current_day') || '1')
+  const subtractId    = localStorage.getItem('flowstacy_selected_subtrack')
+  const _rawDays    = JSON.parse(localStorage.getItem('flowstacy_completed_days') || '[]')
   const completedDays = _rawDays.map(d =>
     typeof d === 'number' ? { day: d, completedAt: 0, dayOfWeek: 0 } : d
   )
-  const streak        = parseInt(localStorage.getItem('flowstate_streak') || '0')
+  const streak        = parseInt(localStorage.getItem('flowstacy_streak') || '0')
 
   // Normalize reflections — Home stores as array, we key by day number
-  const _reflRaw   = JSON.parse(localStorage.getItem('flowstate_reflections') || '[]')
+  const _reflRaw   = JSON.parse(localStorage.getItem('flowstacy_reflections') || '[]')
   const reflections = Array.isArray(_reflRaw)
     ? _reflRaw.reduce((acc, r) => ({ ...acc, [r.day]: r }), {})
     : (_reflRaw || {})
@@ -844,7 +843,6 @@ export default function Progress() {
           </div>
         </div>
       </div>
-      <BottomNav />
     </PageTransition>
   )
 }

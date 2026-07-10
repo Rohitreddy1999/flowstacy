@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import QuestionScreen from '../components/QuestionScreen'
 import { supabase } from '../lib/supabase'
@@ -121,8 +121,8 @@ export default function Discovery() {
     } else if (q.openText) {
       // Last question — save everything and navigate
       const openAnswer = selected
-      localStorage.setItem('flowstate_scores', JSON.stringify(trackScores))
-      localStorage.setItem('flowstate_open_answer', openAnswer)
+      localStorage.setItem('flowstacy_scores', JSON.stringify(trackScores))
+      localStorage.setItem('flowstacy_open_answer', openAnswer)
 
       // Save to Supabase (non-blocking)
       saveDiscoveryToSupabase(updatedAnswers, trackScores, openAnswer)

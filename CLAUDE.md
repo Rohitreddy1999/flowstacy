@@ -1,252 +1,214 @@
-# Flowstate — Claude Code Project Context
+# Flowstacy — Claude Code Project Context
+<!-- Project renamed from flowstate → Flowstacy -->
 
-## What is Flowstate
-A 21-day habit and self-discovery web app.
-Users discover what they want to work on,
-commit to one track for 21 days, get daily
-progressive tasks, build community, and
-graduate to connect with verified experts.
+## Session Rules
+- Read this file first before touching any code.
+- Update this file last — only if you've confirmed a structural change.
+- Change only what the prompt says. Do not refactor, clean up, or add
+  features beyond the stated task.
+
+---
+
+## What Is Flowstacy
+
+A 21-day habit formation web app. Users:
+1. Answer 5 discovery questions → receive a track recommendation
+2. Pick a track + subtrack
+3. Complete one daily task for 21 days (content loaded from Supabase)
+4. Graduate at day 21 → connect with verified experts
+
+Target user: mobile-first, ages ~18-35, wants to build a new habit.
+Tone: motivational but honest — not hype.
+
+---
 
 ## Tech Stack
-- React + Vite + Tailwind CSS
-- Supabase (auth, database, storage)
-- Framer Motion (all animations)
-- React Hot Toast (notifications)
-- Canvas Confetti (celebrations)
-- Zustand (state management)
-- React Router (navigation)
-- PWA enabled (vite-plugin-pwa)
-- Deployed: Vercel (auto-deploy from GitHub)
-- Project: C:\Users\rohit\Projects\flowstate
 
-## Supabase
-Project ref: ejgxaejafzhywufiipij
-10 tables: profiles, tracks, subtracks,
-curriculum_days, user_journeys, 
-daily_completions, posts, experts,
-expert_offerings, bookings
+| Layer | Library | Version |
+|---|---|---|
+| UI | React | 19 |
+| Build | Vite | 8 |
+| Styling | Tailwind CSS | 3 (available but most styles are inline JS objects) |
+| Design system | `src/styles/flowstacy.css` | — |
+| Animation | Framer Motion | 12 |
+| Routing | React Router DOM | 7 |
+| Backend | Supabase (auth + DB) | 2 |
+| State | Zustand | 5 |
+| Toasts | react-hot-toast | 2 |
+| Confetti | canvas-confetti | 1 |
+| Icons | react-icons/hi2 | 5 |
+| Data fetching | @tanstack/react-query | 5 (installed, not yet used widely) |
+| PWA | vite-plugin-pwa | 1 |
+| Linter | oxlint | 1 |
 
-Gym & Weightlifting subtrack ID:
-029740fe-cc23-42f1-9719-59e028cfe510
+Fonts (loaded in index.html, referenced in inline styles):
+- **Space Grotesk** — hero headings, wordmarks, large numerals
+- **Hanken Grotesk** — body text, UI labels, buttons
 
-## Routes
-/ → LoadingScreen (splash, handles routing)
-/welcome → Welcome
-/login → Login
-/signup → Signup
-/onboarding → Onboarding (life stage)
-/bridge → Bridge (path choice)
-/discovery → Discovery (5 questions)
-/recommendation → Recommendation
-/track-select → TrackSelect
-/sub-track-select → SubTrackSelect
-/home → Home (daily screen)
-/community → Community
-/progress → Progress
-/settings → Settings
-/graduation → Graduation
-/experts → Experts
+Deploy: Vercel auto-deploy from `master` branch.
+Supabase project ref: `ejgxaejafzhywufiipij`
+
+---
+
+## Route Map
+
+All routes are in `src/App.jsx`. `AnimatePresence` wraps the whole
+route tree — every page transition animates automatically.
+
+| Path | Component file | Protected |
+|---|---|---|
+| `/` | `components/LoadingScreen` | No — self-routes after auth check |
+| `/welcome` | `pages/Welcome` | No |
+| `/onboarding` | `pages/Onboarding` | No |
+| `/bridge` | `pages/Bridge` | No |
+| `/track-select` | `pages/TrackSelect` | No |
+| `/login` | `pages/Login` | No |
+| `/signup` | `pages/Signup` | No |
+| `/discovery` | `pages/Discovery` | No |
+| `/recommendation` | `pages/Recommendation` | No |
+| `/sub-track-select` | `pages/SubTrackSelect` | No |
+| `/track/:trackId` | `pages/TrackDetail` | No |
+| `/home` | `pages/Home` | **Yes** |
+| `/community` | `pages/Community` | **Yes** |
+| `/progress` | `pages/Progress` | **Yes** |
+| `/progress-preview` | `pages/Progress` | No — dev preview |
+| `/graduation-preview` | `pages/Graduation` | No — dev preview |
+| `/profile` | `pages/Profile` | **Yes** — immediately redirects to `/settings` |
+| `/graduation` | `pages/Graduation` | **Yes** |
+| `/experts` | `pages/Experts` | **Yes** |
+| `/settings` | `pages/Settings` | **Yes** |
+
+Full per-route details → `docs/ROUTES.md`
+
+---
+
+## Key Components
+
+| File | Purpose |
+|---|---|
+| `components/ProtectedRoute.jsx` | Checks Supabase session; redirects to /login if missing |
+| `components/PhoneFrame.jsx` | On desktop (>480 px) renders a phone-shaped preview frame |
+| `components/LoadingScreen.jsx` | Splash screen with lightning animation; auto-routes after 3 s |
+| `components/AuroraBackground.jsx` | Fixed animated bg using `.fs-aurora` CSS class |
+| `components/BottomNav.jsx` | Fixed bottom nav: Home / Community / Progress / Settings |
+| `components/BackButton.jsx` | Simple ← Back button with hover styling |
+| `components/InstallPrompt.jsx` | PWA install banner; dismissable via `localStorage` |
+| `components/PageTransition.jsx` | Framer Motion page wrapper (opacity+y+scale, 0.4 s) |
+| `components/QuestionScreen.jsx` | Reusable question UI for Discovery and Onboarding |
+| `components/RootRedirect.jsx` | Legacy redirect helper — not currently mounted in App.jsx |
+| `components/SkeletonCard.jsx` | Pulsing placeholder, configurable `height` prop |
+
+Full details → `docs/COMPONENTS.md`
+
+---
+
+## Lib Files
+
+| File | Exports |
+|---|---|
+| `lib/supabase.js` | `supabase` client (reads `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`) |
+| `lib/curriculum.js` | `getDayContent()`, `getSubtrackByName()`, `getSubtracksByTrack()`, `resolveSubtrack()`, `SUBTRACK_IDS`, `SUBTRACK_NAMES` |
+| `lib/tracks.jsx` | `TRACKS` array — 5 tracks, subtracks, colors, SVG icons, `available` flags |
+
+---
+
+## LocalStorage Keys
+
+localStorage is the primary state store for the 21-day journey.
+Supabase is written to on subtrack selection and read on auth check.
+
+| Key | Value type | Written by |
+|---|---|---|
+| `flowstacy_life_stage` | string id | Onboarding |
+| `flowstacy_selected_track` | track id string | TrackSelect, Recommendation |
+| `flowstacy_selected_subtrack` | subtrack short-key or UUID | SubTrackSelect |
+| `flowstacy_current_day` | string number 1-21 | Home (on day complete) |
+| `flowstacy_streak` | string number | Home (on day complete) |
+| `flowstacy_completed_days` | JSON array `{day, completedAt, dayOfWeek}` | Home |
+| `flowstacy_reflections` | JSON array `{day, feeling, note, date}` | Home log modal |
+| `flowstacy_scores` | JSON object `{trackId: score}` | Discovery |
+| `pwa-install-dismissed` | `"true"` | InstallPrompt |
+
+---
 
 ## Design System
 
-### Colors
-Background: #0A0812
-Purple primary: #534AB7
-Purple light: #9D92F8
-Teal: #1D9E75
-Amber: #EF9F27
-Error: #E24B4A
+Two palettes exist in the codebase simultaneously:
 
-### Typography
-Font: Plus Jakarta Sans (Google Fonts)
-Sizes: 10px labels, 13px body small,
-15px body, 17px heading, 22px subheading,
-28px heading large, 48-56px hero
-Weights: 400 regular, 500 medium,
-600 semibold, 700 bold, 800 hero only
+**V1 — CSS variables** (`src/styles/flowstacy.css`)
+Used on: Welcome, Login, Signup, Onboarding, Bridge, Community, Experts, TrackDetail
+- Background: `#0A0812`
+- Card: `rgba(255,255,255,0.05)`
+- Purple primary: `#534AB7` / light: `#9D92F8`
+- Teal: `#1D9E75`
 
-### Cards
-background: rgba(255,255,255,0.03)
-border: 1px solid rgba(255,255,255,0.07)
-border-radius: 18-20px
-padding: 16-20px
+**V2 — inline constants**
+Used on: Home, Progress, Graduation, BottomNav
+- `ABYSS #07090D` — page background
+- `FATHOM #0F141A` — card background
+- `SURGE #3DF5A6` — primary action, BUILD phase
+- `GLACIAL #82D4FF` — FOUNDATION phase color
+- `PLASMA #FF4FD8` — COMMIT phase color
+- `ARC_LIGHT #EAFFF5` — near-white accent
 
-### Buttons
-Primary: #534AB7 background, white text,
-border-radius 26-28px, height 52-56px
-Secondary: transparent, border 1px solid
-rgba(255,255,255,0.1), same radius
+Phase system:
+| Days | Phase | V2 Color |
+|---|---|---|
+| 1-7 | FOUNDATION | GLACIAL |
+| 8-14 | BUILD | SURGE |
+| 15-21 | COMMIT | PLASMA |
 
-### Section Labels
-font-size: 10-11px
-font-weight: 500
-letter-spacing: 0.08-0.12em
-text-transform: uppercase
-color: rgba(255,255,255,0.25-0.3)
+Full design spec → `docs/DESIGN.md`
 
-### Inputs (forms)
-Underline style only — no border box
-border-bottom: 1px solid rgba(255,255,255,0.15)
-background: transparent
-color: white
-Focus: border-bottom rgba(157,146,248,0.6)
+---
 
-### Spacing
-Page padding: 20-28px horizontal
-Section gaps: 24-32px
-Card internal: 16-20px
-Between elements: 8-12px
-Bottom padding: 100px (clears nav)
+## Code Patterns
 
-### Animations (Framer Motion)
-Page entrance: opacity 0→1, y 20→0, 0.4s
-Stagger children: 0.06-0.08s delay each
-Button tap: scale 0.97-0.98
-Spring: stiffness 400, damping 20
-Always use AnimatePresence for unmounting
+### task_description parsing
+`curriculum_days.task_description` format:
+```
+What to do: [step sentences]. Why this matters: [why text]
+```
+Parser lives in `src/pages/Home.jsx:116` — duplicate it if needed in other pages.
 
-## UI/UX Rules — Follow Always
+### Hold-to-complete interaction
+Home's primary CTA uses a 2-second pointer-hold (requestAnimationFrame loop).
+`onPointerDown` starts the RAF; `onPointerUp / onPointerLeave / onPointerCancel`
+cancel it. `holdProgress` (0-1) drives a fill animation.
 
-### Layout
-- Mobile first: max-width 480px centered
-- All touch targets minimum 44px height
-- Sticky top bar on all main screens
-- Fixed bottom nav on main screens
-- Never overflow horizontally
-- Test mentally at 375px width
+### Page pattern
+Every main page (post-onboarding) uses:
+- `BottomNav` component (fixed)
+- Inline `maxWidth: 480` container centered
+- `paddingBottom: 100` to clear the nav
 
-### Visual hierarchy
-- ONE dominant element per screen
-- Hero screens: day number or question is huge
-- Supporting elements progressively smaller
-- Never two elements of equal visual weight
-  competing for attention
+---
 
-### Typography rules
-- Never use font-weight 700+ except hero moments
-- Line height: 1.5 for body, 1.2 for headings
-- Letter spacing: -0.02em for large text
-- Always readable on #0A0812 background
+## What NOT to Touch
 
-### What to avoid
-- No pure white #FFFFFF on dark bg
-- No box shadows on dark backgrounds
-- No more than 3 colors per card
-- No stacked primary buttons
-- No emojis in UI — use SVG line icons
-- No border-radius above 28px except circles
-- No font-size below 11px
-- No walls of text — always use structure
+- **`src/components/ProtectedRoute.jsx`** — auth gate; breaking it locks all protected routes
+- **`src/components/PhoneFrame.jsx`** — desktop preview shell
+- **`src/lib/supabase.js`** — single shared client; never create another
+- **`SUBTRACK_IDS` in `src/lib/curriculum.js`** — must match live Supabase UUIDs exactly
+- **`TRACKS` in `src/lib/tracks.jsx`** — canonical track/subtrack structure
+- **`src/styles/flowstacy.css`** — shared CSS variables; edit with care
 
-### Cards and sections
-- Every card has ONE clear purpose
-- Section labels always in small uppercase
-- Dividers: 1px solid rgba(255,255,255,0.06)
-- Numbered lists: purple numbers, white text
-- Quote sections: left purple border
+---
 
-### Loading states
-- Always show skeleton when fetching
-- Never show blank space while loading
-- Skeleton matches shape of content
+## Supabase Tables
 
-### Error states
-- Plain language, never raw error codes
-- Always give user a clear next action
-- Use toast for transient errors
-- Use inline for form validation
+Tables confirmed from code (not all columns are confirmed — see `docs/SUPABASE.md`):
+`profiles`, `tracks`, `subtracks`, `curriculum_days`, `user_journeys`,
+`daily_completions`, `posts`, `experts`, `expert_offerings`, `bookings`
 
-### Navigation
-- Every screen has back button except splash
-- Settings accessible from all main screens
-- Bottom nav: Home, Community, Progress, Settings
-- Gear icon top right on all main screens
+Full column reference → `docs/SUPABASE.md`
 
-## Component Patterns
+---
 
-### QuestionScreen component
-Reusable for all onboarding questions.
-Props: stepNumber, totalSteps, question,
-subtext, options, multiSelect, onContinue,
-onBack, openText, openTextPlaceholder,
-continueLabel
-
-### Task description parsing
-task_description from Supabase format:
-"What to do: [steps]. Why this matters: [why]"
-
-Parse with this function:
-function parseTaskDescription(text) {
-  if (!text) return { steps: [], why: '' }
-  const whyIndex = text.indexOf('Why this matters:')
-  let whatText = whyIndex > -1
-    ? text.substring(0, whyIndex).trim()
-    : text
-  let whyText = whyIndex > -1
-    ? text.substring(
-        whyIndex + 'Why this matters:'.length
-      ).trim()
-    : ''
-  whatText = whatText.replace('What to do:', '').trim()
-  const steps = whatText
-    .split(/\.\s+(?=[A-Z0-9])/)
-    .map(s => s.trim())
-    .filter(s => s.length > 15)
-    .map(s => s.replace(/\.$/, '').trim())
-  return { steps, why: whyText }
-}
-
-### AuroraBackground component
-Used on onboarding and auth screens.
-File: src/components/AuroraBackground.jsx
-
-### PageTransition component
-Wraps every page for smooth transitions.
-File: src/components/PageTransition.jsx
-
-### SkeletonCard component
-Used for loading states.
-File: src/components/SkeletonCard.jsx
-
-### InstallPrompt component
-PWA install prompt.
-File: src/components/InstallPrompt.jsx
-
-## Code Quality Rules
-
-### Always do this
-- Check if component already exists before creating
-- Import from existing lib files (supabase.js,
-  tracks.js, curriculum.js)
-- Use existing CSS classes from flowstate.css
-- Wrap pages in PageTransition component
-- Add loading and error states to all data fetches
-- Use toast for user feedback on actions
-- Commit to GitHub after every completed feature
-
-### Never do this
-- Duplicate logic that exists elsewhere
-- Hardcode data that should come from Supabase
-- Skip error handling on async operations
-- Use inline styles when CSS class exists
-- Create new files without checking if they exist
-- Leave console.log statements in production code
-
-### File structure
-src/
-  components/ — reusable components
-  pages/ — one file per route
-  lib/ — supabase.js, tracks.js, curriculum.js
-  styles/ — flowstate.css design system
-  store/ — zustand stores
-
-## Git Commit Convention
+## Git Convention
+```
 feat: new feature
 fix: bug fix
-style: visual/design changes only
-refactor: code restructure no behavior change
-
-Always commit after completing a feature:
-git add .
-git commit -m "type: description"
-git push
+style: visual/design only
+refactor: restructure, no behavior change
+```

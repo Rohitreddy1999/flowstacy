@@ -1,8 +1,7 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
-import BottomNav from '../components/BottomNav'
 import { getDayContent, SUBTRACK_NAMES, SUBTRACK_IDS } from '../lib/curriculum'
 
 // ── Palette ────────────────────────────────────────────────────────────────────
@@ -132,19 +131,19 @@ function parseTaskDescription(text) {
 export default function Home() {
   const navigate = useNavigate()
 
-  const subtrackKey  = localStorage.getItem('flowstate_selected_subtrack') || 'gym'
+  const subtrackKey  = localStorage.getItem('flowstacy_selected_subtrack') || 'gym'
   const subtrackName = SUBTRACK_NAMES[subtrackKey] || subtrackKey
 
   const [currentDay, setCurrentDay] = useState(() => {
-    const v = localStorage.getItem('flowstate_current_day')
+    const v = localStorage.getItem('flowstacy_current_day')
     return v ? Math.min(parseInt(v, 10), 21) : 1
   })
   const [streak, setStreak] = useState(() => {
-    const v = localStorage.getItem('flowstate_streak')
+    const v = localStorage.getItem('flowstacy_streak')
     return v ? parseInt(v, 10) : 1
   })
   const [completedDays, setCompletedDays] = useState(() => {
-    const v = localStorage.getItem('flowstate_completed_days')
+    const v = localStorage.getItem('flowstacy_completed_days')
     return v ? JSON.parse(v) : []
   })
 
@@ -203,9 +202,9 @@ export default function Home() {
     ]
     const newStreak        = streak + 1
     const newDay           = Math.min(currentDay + 1, 21)
-    localStorage.setItem('flowstate_completed_days', JSON.stringify(newCompletedDays))
-    localStorage.setItem('flowstate_streak',         String(newStreak))
-    localStorage.setItem('flowstate_current_day',    String(newDay))
+    localStorage.setItem('flowstacy_completed_days', JSON.stringify(newCompletedDays))
+    localStorage.setItem('flowstacy_streak',         String(newStreak))
+    localStorage.setItem('flowstacy_current_day',    String(newDay))
     setCompleted(true)
     setCompletedDays(newCompletedDays)
     setStreak(newStreak)
@@ -222,9 +221,9 @@ export default function Home() {
 
   function handleSaveReflection() {
     if (!feeling) return
-    const existing = JSON.parse(localStorage.getItem('flowstate_reflections') || '[]')
+    const existing = JSON.parse(localStorage.getItem('flowstacy_reflections') || '[]')
     existing.push({ day: currentDay, feeling, note: logNote, date: new Date().toISOString() })
-    localStorage.setItem('flowstate_reflections', JSON.stringify(existing))
+    localStorage.setItem('flowstacy_reflections', JSON.stringify(existing))
     setReflectionSaved(true)
     setTimeout(() => {
       setShowLogModal(false)
@@ -249,9 +248,9 @@ export default function Home() {
     const done = Array.from({ length: day - 1 }, (_, i) => ({
       day: i + 1, completedAt: Date.now(), dayOfWeek: new Date().getDay()
     }))
-    localStorage.setItem('flowstate_current_day',    String(day))
-    localStorage.setItem('flowstate_streak',         String(day))
-    localStorage.setItem('flowstate_completed_days', JSON.stringify(done))
+    localStorage.setItem('flowstacy_current_day',    String(day))
+    localStorage.setItem('flowstacy_streak',         String(day))
+    localStorage.setItem('flowstacy_completed_days', JSON.stringify(done))
     setCurrentDay(day)
     setStreak(day)
     setCompletedDays(done)
@@ -1410,7 +1409,6 @@ export default function Home() {
         </button>
       </div>
 
-      <BottomNav />
     </div>
   )
 }

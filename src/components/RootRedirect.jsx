@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import AuroraBackground from './AuroraBackground'
@@ -9,7 +9,7 @@ function WelcomeBackScreen() {
       <AuroraBackground />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
-          <p className="fs-logo" style={{ fontSize: 22, display: 'block', marginBottom: 24 }}>flowstate</p>
+          <p className="fs-logo" style={{ fontSize: 22, display: 'block', marginBottom: 24 }}>FLOWSTACY</p>
           <p className="fs-heading-sm" style={{ marginBottom: 8, fontWeight: 400 }}>Welcome back 👋</p>
           <p style={{ color: 'var(--fs-text-secondary)', fontSize: 'var(--fs-text-sm)', marginBottom: 24 }}>Continuing your journey...</p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 6 }}>
@@ -34,13 +34,13 @@ export default function RootRedirect() {
     async function checkUserState() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
-        const lifeStage = localStorage.getItem('flowstate_life_stage')
+        const lifeStage = localStorage.getItem('flowstacy_life_stage')
         navigate(lifeStage ? '/login?returning=true' : '/onboarding', { replace: true })
         return
       }
-      const subtrack = localStorage.getItem('flowstate_selected_subtrack')
+      const subtrack = localStorage.getItem('flowstacy_selected_subtrack')
       if (!subtrack) { navigate('/bridge', { replace: true }); return }
-      const currentDay = parseInt(localStorage.getItem('flowstate_current_day') || '1', 10)
+      const currentDay = parseInt(localStorage.getItem('flowstacy_current_day') || '1', 10)
       if (currentDay > 1) {
         setShowWelcomeBack(true)
         setTimeout(() => navigate('/home', { replace: true }), 2000)
@@ -58,7 +58,7 @@ export default function RootRedirect() {
       <AuroraBackground />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
-          <p className="fs-logo" style={{ fontSize: 22, display: 'block', marginBottom: 8 }}>flowstate</p>
+          <p className="fs-logo" style={{ fontSize: 22, display: 'block', marginBottom: 8 }}>FLOWSTACY</p>
           <p style={{ color: 'var(--fs-text-tertiary)', fontSize: 'var(--fs-text-sm)' }}>Loading your journey...</p>
         </div>
       </div>

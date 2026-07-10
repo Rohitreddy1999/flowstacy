@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { TRACKS } from '../lib/tracks'
@@ -9,7 +9,7 @@ export default function Recommendation() {
   const [recommended, setRecommended] = useState([])
 
   useEffect(() => {
-    const scoresRaw = localStorage.getItem('flowstate_scores')
+    const scoresRaw = localStorage.getItem('flowstacy_scores')
     if (scoresRaw) {
       const scores = JSON.parse(scoresRaw)
       const sorted = Object.entries(scores)
@@ -23,7 +23,7 @@ export default function Recommendation() {
 
   const handleContinue = () => {
     if (!selected) return
-    localStorage.setItem('flowstate_selected_track', selected)
+    localStorage.setItem('flowstacy_selected_track', selected)
     navigate('/sub-track-select')
   }
 

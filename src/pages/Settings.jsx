@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import toast from 'react-hot-toast'
@@ -92,10 +92,10 @@ export default function Settings() {
         },
         {
           icon: '◉',
-          label: 'About Flowstate',
+          label: 'About Flowstacy',
           desc: 'Version 1.0 — built for the ones who show up',
           color: '#9D92F8',
-          action: () => toast('Flowstate v1.0 — Built for the ones who show up every day.')
+          action: () => toast('Flowstacy v1.0 — Built for the ones who show up every day.')
         }
       ]
     }
@@ -110,7 +110,7 @@ export default function Settings() {
       maxWidth: '480px',
       margin: '0 auto',
       position: 'relative',
-      paddingBottom: '40px'
+      paddingBottom: 100
     }}>
       <AuroraBackground />
 
@@ -124,31 +124,13 @@ export default function Settings() {
         padding: '14px 20px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between'
+        justifyContent: 'center'
       }}>
-        <button
-          onClick={() => navigate(-1)}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: 'rgba(255,255,255,0.7)',
-            fontSize: '22px',
-            cursor: 'pointer',
-            padding: '8px',
-            lineHeight: 1,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}
-        >
-          ←
-        </button>
         <span style={{
           fontSize: '17px',
           fontWeight: '500',
           color: 'white'
-        }}>Settings</span>
-        <div style={{width: '40px'}} />
+        }}>You</span>
       </div>
 
       <div style={{
@@ -183,7 +165,7 @@ export default function Settings() {
             color: 'white',
             margin: '0 0 4px'
           }}>
-            {user?.user_metadata?.full_name || 'Flowstate User'}
+            {user?.user_metadata?.full_name || 'Flowstacy User'}
           </p>
           <p style={{
             fontSize: '13px',

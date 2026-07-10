@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, useAnimationControls } from 'framer-motion'
 import { supabase } from '../lib/supabase'
@@ -16,7 +16,7 @@ export default function LoadingScreen() {
     const navTimer = setTimeout(async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
-        navigate(localStorage.getItem('flowstate_life_stage') ? '/login' : '/welcome')
+        navigate(localStorage.getItem('flowstacy_life_stage') ? '/login' : '/welcome')
         return
       }
       const { data: journey } = await supabase

@@ -1,14 +1,14 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { HiHome, HiUserGroup, HiChartBar, HiCog6Tooth } from 'react-icons/hi2'
+import { HiHome, HiMap, HiUserGroup, HiUser } from 'react-icons/hi2'
 
 const TABS = [
-  { path: '/home',      Icon: HiHome,       label: 'Home'      },
-  { path: '/community', Icon: HiUserGroup,  label: 'Community' },
-  { path: '/progress',  Icon: HiChartBar,   label: 'Progress'  },
-  { path: '/settings',  Icon: HiCog6Tooth,  label: 'Settings'  },
+  { path: '/home',      Icon: HiHome,      label: 'Home'      },
+  { path: '/journey',   Icon: HiMap,       label: 'Journey'   },
+  { path: '/community', Icon: HiUserGroup, label: 'Community', locked: true },
+  { path: '/settings',  Icon: HiUser,      label: 'You'       },
 ]
 
-const SURGE    = '#3DF5A6'
+const SURGE     = '#3DF5A6'
 const ARC_LIGHT = '#EAFFF5'
 
 export default function BottomNav() {
@@ -27,12 +27,12 @@ export default function BottomNav() {
       padding: '8px 0 24px',
       zIndex: 100,
     }}>
-      {TABS.map(({ path, Icon, label }) => {
+      {TABS.map(({ path, Icon, label, locked }) => {
         const active = pathname === path
         return (
           <button
             key={path}
-            onClick={() => navigate(path)}
+            onClick={() => !locked && navigate(path)}
             style={{
               flex: 1,
               display: 'flex',
@@ -41,12 +41,13 @@ export default function BottomNav() {
               gap: 4,
               background: 'none',
               border: 'none',
-              cursor: 'pointer',
+              cursor: locked ? 'default' : 'pointer',
               padding: '4px 0',
               position: 'relative',
+              opacity: locked ? 0.35 : 1,
+              pointerEvents: locked ? 'none' : 'auto',
             }}
           >
-            {/* Surge-tinted well behind active icon */}
             {active && (
               <div style={{
                 position: 'absolute',
@@ -61,13 +62,13 @@ export default function BottomNav() {
 
             <Icon
               size={22}
-              color={active ? ARC_LIGHT : 'rgba(255,255,255,0.3)'}
+              color={active ? ARC_LIGHT : 'rgba(255,255,255,0.18)'}
               style={{ position: 'relative', zIndex: 1 }}
             />
             <span style={{
               fontSize: 10,
               fontFamily: '"Hanken Grotesk", sans-serif',
-              color: active ? SURGE : 'rgba(255,255,255,0.3)',
+              color: active ? SURGE : 'rgba(255,255,255,0.18)',
               fontWeight: active ? 600 : 400,
               letterSpacing: active ? '0.02em' : '0',
               position: 'relative', zIndex: 1,

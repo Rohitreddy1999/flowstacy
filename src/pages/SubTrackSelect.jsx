@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { TRACKS } from '../lib/tracks'
@@ -8,15 +8,15 @@ export default function SubTrackSelect() {
   const navigate = useNavigate()
   const [selected, setSelected] = useState(null)
 
-  const trackId = localStorage.getItem('flowstate_selected_track')
+  const trackId = localStorage.getItem('flowstacy_selected_track')
   const track = TRACKS.find(t => t.id === trackId) || TRACKS[0]
 
   const handleContinue = async () => {
     if (!selected) return
 
     // Write to localStorage as primary (existing behavior)
-    localStorage.setItem('flowstate_selected_subtrack', selected)
-    localStorage.setItem('flowstate_selected_track', trackId)
+    localStorage.setItem('flowstacy_selected_subtrack', selected)
+    localStorage.setItem('flowstacy_selected_track', trackId)
 
     // Write to Supabase as source of truth
     const { data: { session } } = await supabase.auth.getSession()

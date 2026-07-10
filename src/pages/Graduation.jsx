@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
@@ -86,15 +86,15 @@ export default function AwakeningScreen() {
   const [hoveredRow, setHoveredRow] = useState(null)
 
   // ── Data reads ───────────────────────────────────────────────────────────────
-  const _rawDays      = JSON.parse(localStorage.getItem('flowstate_completed_days') || '[]')
+  const _rawDays      = JSON.parse(localStorage.getItem('flowstacy_completed_days') || '[]')
   const completedDays = _rawDays.map(d =>
     typeof d === 'number' ? { day: d, completedAt: 0, dayOfWeek: 0 } : d
   )
-  const _rawRefl    = JSON.parse(localStorage.getItem('flowstate_reflections') || '{}')
+  const _rawRefl    = JSON.parse(localStorage.getItem('flowstacy_reflections') || '{}')
   const reflections = Array.isArray(_rawRefl)
     ? _rawRefl.reduce((acc, r) => ({ ...acc, [r.day]: r }), {})
     : (_rawRefl || {})
-  const subtrackKey = localStorage.getItem('flowstate_selected_subtrack')
+  const subtrackKey = localStorage.getItem('flowstacy_selected_subtrack')
 
   const hasAnyReflections    = Object.keys(reflections).filter(k => k !== 'journey').length > 0
   const hasJourneyReflection = reflections['journey'] !== undefined
@@ -291,9 +291,9 @@ export default function AwakeningScreen() {
       if (progress < 1) {
         holdRafRef.current = requestAnimationFrame(tick)
       } else {
-        const raw    = JSON.parse(localStorage.getItem('flowstate_reflections') || '{}')
+        const raw    = JSON.parse(localStorage.getItem('flowstacy_reflections') || '{}')
         const normed = Array.isArray(raw) ? raw.reduce((a, r) => ({ ...a, [r.day]: r }), {}) : (raw || {})
-        localStorage.setItem('flowstate_reflections', JSON.stringify({
+        localStorage.setItem('flowstacy_reflections', JSON.stringify({
           ...normed,
           journey: { feeling: selectedFeeling, note: journeyNoteRef.current, savedAt: Date.now() },
         }))

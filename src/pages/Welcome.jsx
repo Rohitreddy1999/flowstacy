@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+﻿import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
 export default function Welcome() {
@@ -46,7 +46,7 @@ export default function Welcome() {
             margin: 0
           }}
         >
-          flowstate
+          FLOWSTACY
         </motion.h1>
       </motion.div>
 
@@ -77,7 +77,7 @@ export default function Welcome() {
           marginRight: 'auto'
         }}>
           Most people know what they want to become.
-          Flowstate gives them the structure to
+          FLOWSTACY gives them the structure to
           actually get there.
         </p>
       </motion.div>

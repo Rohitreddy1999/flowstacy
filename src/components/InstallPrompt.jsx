@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 
 export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState(null)
@@ -83,7 +83,7 @@ export default function InstallPrompt() {
             color: 'rgba(255,255,255,0.4)',
             margin: 0
           }}>
-            Install Flowstate for the full experience
+            Install FLOWSTACY for the full experience
           </p>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { TRACKS } from '../lib/tracks'
@@ -12,7 +12,7 @@ export default function TrackSelect() {
 
   const handleContinue = () => {
     if (!selected) return
-    localStorage.setItem('flowstate_selected_track', selected)
+    localStorage.setItem('flowstacy_selected_track', selected)
     navigate('/sub-track-select')
   }
 

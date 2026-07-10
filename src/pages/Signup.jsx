@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
@@ -177,7 +177,7 @@ export default function Signup() {
             margin: '0 0 16px'
           }}
         >
-          flowstate
+          FLOWSTACY
         </motion.h1>
         <p style={{
           fontSize: '22px',
