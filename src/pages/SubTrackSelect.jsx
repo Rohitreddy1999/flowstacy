@@ -47,7 +47,7 @@ export default function SubTrackSelect() {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      minHeight: '100%',
       background: '#0A0812',
       display: 'flex',
       flexDirection: 'column',

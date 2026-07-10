@@ -156,7 +156,7 @@ export default function Experts() {
   return (
     <PageTransition>
       <AuroraBackground />
-      <div style={{ minHeight: '100vh', maxWidth: 480, margin: '0 auto' }}>
+      <div style={{ minHeight: '100%', maxWidth: 480, margin: '0 auto' }}>
         <nav className="fs-topbar">
           <button
             onClick={() => navigate('/home')}

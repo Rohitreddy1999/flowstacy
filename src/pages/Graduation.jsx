@@ -325,7 +325,7 @@ export default function AwakeningScreen() {
 
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
-    <div style={{ background: ABYSS, minHeight: '100vh', maxWidth: 480, margin: '0 auto', position: 'relative' }}>
+    <div style={{ background: ABYSS, minHeight: '100%', maxWidth: 480, margin: '0 auto', position: 'relative' }}>
 
       {/* Background drift particles */}
       <canvas
@@ -337,7 +337,7 @@ export default function AwakeningScreen() {
 
         {/* ── STAGE 1 — THE EXPLOSION ─────────────────────────────────────── */}
         <div style={{
-          minHeight: '100vh', display: 'flex', flexDirection: 'column',
+          minHeight: '100%', display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
           padding: '40px 28px', position: 'relative',
         }}>

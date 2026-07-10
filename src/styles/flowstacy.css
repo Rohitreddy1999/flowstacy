@@ -459,7 +459,7 @@
    ================================ */
 
 .fs-page {
-  min-height: 100vh;
+  min-height: 100%;
   background: var(--fs-bg-primary);
   color: var(--fs-text-primary);
   max-width: 480px;
@@ -469,7 +469,7 @@
 }
 
 .fs-page-full {
-  min-height: 100vh;
+  min-height: 100%;
   background: var(--fs-bg-primary);
   color: var(--fs-text-primary);
   position: relative;

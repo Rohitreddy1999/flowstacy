@@ -286,7 +286,7 @@ export default function Progress() {
     <PageTransition>
       <div
         onClick={() => selectedDot && setSelectedDot(null)}
-        style={{ minHeight: '100vh', maxWidth: 480, margin: '0 auto', position: 'relative', background: ABYSS }}
+        style={{ minHeight: '100%', maxWidth: 480, margin: '0 auto', position: 'relative', background: ABYSS }}
       >
         {/* ── Particle canvas ──────────────────────────────────────────────── */}
         <canvas

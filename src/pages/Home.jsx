@@ -284,7 +284,7 @@ export default function Home() {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div style={{ minHeight: '100vh', background: ABYSS, paddingBottom: 100, fontFamily: '"Hanken Grotesk", sans-serif' }}>
+    <div style={{ minHeight: '100%', background: ABYSS, paddingBottom: 100, fontFamily: '"Hanken Grotesk", sans-serif' }}>
 
       {/* ── Celebration overlay ──────────────────────────────────────────── */}
       <AnimatePresence>

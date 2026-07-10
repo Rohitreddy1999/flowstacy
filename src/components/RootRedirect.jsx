@@ -7,7 +7,7 @@ function WelcomeBackScreen() {
   return (
     <>
       <AuroraBackground />
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
         <div style={{ textAlign: 'center' }}>
           <p className="fs-logo" style={{ fontSize: 22, display: 'block', marginBottom: 24 }}>FLOWSTACY</p>
           <p className="fs-heading-sm" style={{ marginBottom: 8, fontWeight: 400 }}>Welcome back 👋</p>
@@ -56,7 +56,7 @@ export default function RootRedirect() {
   return (
     <>
       <AuroraBackground />
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
         <div style={{ textAlign: 'center' }}>
           <p className="fs-logo" style={{ fontSize: 22, display: 'block', marginBottom: 8 }}>FLOWSTACY</p>
           <p style={{ color: 'var(--fs-text-tertiary)', fontSize: 'var(--fs-text-sm)' }}>Loading your journey...</p>

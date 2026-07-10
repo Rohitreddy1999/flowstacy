@@ -20,7 +20,7 @@ export default function ProtectedRoute({ children }) {
     return (
       <>
         <AuroraBackground />
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
           <p style={{ color: 'var(--fs-purple-300)', fontSize: 'var(--fs-text-base)', fontWeight: 500 }}>Loading...</p>
         </div>
       </>

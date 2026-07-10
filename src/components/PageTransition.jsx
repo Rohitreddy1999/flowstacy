@@ -33,7 +33,7 @@ export default function PageTransition({ children }) {
       initial="initial"
       animate="animate"
       exit="exit"
-      style={{ width: '100%', minHeight: '100vh' }}
+      style={{ width: '100%', minHeight: '100%' }}
     >
       {children}
     </motion.div>

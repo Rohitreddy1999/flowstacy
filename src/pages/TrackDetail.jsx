@@ -7,7 +7,7 @@ export default function TrackDetail() {
   return (
     <>
       <AuroraBackground />
-      <div style={{ minHeight: '100vh', padding: '40px 24px' }}>
+      <div style={{ minHeight: '100%', padding: '40px 24px' }}>
         <div style={{ maxWidth: 480, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 20 }}>
           <Link to="/home" style={{ color: 'var(--fs-purple-300)', fontSize: 'var(--fs-text-sm)', textDecoration: 'none' }}>
             ← Back to Today

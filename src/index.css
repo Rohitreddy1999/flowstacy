@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.phone-frame-content > * {
+  height: 100%;
+}
