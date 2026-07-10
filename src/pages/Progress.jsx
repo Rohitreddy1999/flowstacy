@@ -313,14 +313,7 @@ export default function Progress() {
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
           }}>
-            <button
-              onClick={() => navigate(-1)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, display: 'flex', borderRadius: 8, flexShrink: 0 }}
-            >
-              <BackArrow />
-            </button>
-
-            <div style={{ flex: 1, minWidth: 0, paddingLeft: 8, overflow: 'hidden' }}>
+            <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
               <div style={{ ...sLabel, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>YOUR JOURNEY</div>
               <div style={{ fontSize: 24, fontWeight: 700, color: 'rgba(255,255,255,0.95)', fontFamily: HK, lineHeight: 1.2 }}>
                 The Ascent

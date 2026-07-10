@@ -1,6 +1,10 @@
 ﻿import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
+const SURGE   = '#3DF5A6'
+const ABYSS   = '#07090D'
+const HK      = '"Hanken Grotesk", sans-serif'
+
 export default function Welcome() {
   const navigate = useNavigate()
 
@@ -15,7 +19,8 @@ export default function Welcome() {
       padding: '80px 28px 48px',
       maxWidth: '480px',
       margin: '0 auto',
-      boxSizing: 'border-box'
+      boxSizing: 'border-box',
+      fontFamily: HK
     }}>
 
       {/* Top — logo */}
@@ -28,9 +33,9 @@ export default function Welcome() {
         <motion.h1
           animate={{
             textShadow: [
-              '0 0 20px rgba(157,146,248,0.4)',
-              '0 0 40px rgba(157,146,248,0.8)',
-              '0 0 20px rgba(157,146,248,0.4)'
+              '0 0 20px rgba(61,245,166,0.3)',
+              '0 0 40px rgba(61,245,166,0.6)',
+              '0 0 20px rgba(61,245,166,0.3)'
             ]
           }}
           transition={{
@@ -40,10 +45,11 @@ export default function Welcome() {
           }}
           style={{
             fontSize: '36px',
-            fontWeight: '600',
+            fontWeight: '700',
             color: 'white',
             letterSpacing: '-0.02em',
-            margin: 0
+            margin: 0,
+            fontFamily: HK
           }}
         >
           FLOWSTACY
@@ -63,7 +69,8 @@ export default function Welcome() {
           color: 'white',
           lineHeight: 1.2,
           margin: '0 0 16px',
-          letterSpacing: '-0.01em'
+          letterSpacing: '-0.01em',
+          fontFamily: HK
         }}>
           The 21 days that<br />change everything.
         </h2>
@@ -74,7 +81,8 @@ export default function Welcome() {
           margin: 0,
           maxWidth: '280px',
           marginLeft: 'auto',
-          marginRight: 'auto'
+          marginRight: 'auto',
+          fontFamily: HK
         }}>
           Most people know what they want to become.
           FLOWSTACY gives them the structure to
@@ -95,16 +103,17 @@ export default function Welcome() {
           style={{
             width: '100%',
             height: '56px',
-            background: '#534AB7',
+            background: SURGE,
             border: 'none',
             borderRadius: '28px',
-            color: 'white',
+            color: ABYSS,
             fontSize: '16px',
-            fontWeight: '500',
+            fontWeight: '700',
             cursor: 'pointer',
             marginBottom: '12px',
-            boxShadow: '0 0 30px rgba(83,74,183,0.35)',
-            letterSpacing: '0.01em'
+            boxShadow: '0 0 30px rgba(61,245,166,0.25)',
+            letterSpacing: '0.01em',
+            fontFamily: HK
           }}
         >
           Begin your journey →
@@ -122,7 +131,8 @@ export default function Welcome() {
             color: 'rgba(255,255,255,0.6)',
             fontSize: '15px',
             cursor: 'pointer',
-            marginBottom: '20px'
+            marginBottom: '20px',
+            fontFamily: HK
           }}
         >
           I already have an account
@@ -132,7 +142,8 @@ export default function Welcome() {
           textAlign: 'center',
           fontSize: '12px',
           color: 'rgba(255,255,255,0.2)',
-          margin: 0
+          margin: 0,
+          fontFamily: HK
         }}>
           Free to start · No credit card required
         </p>

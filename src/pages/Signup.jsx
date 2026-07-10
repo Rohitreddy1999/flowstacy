@@ -4,6 +4,10 @@ import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import toast from 'react-hot-toast'
 
+const SURGE = '#3DF5A6'
+const ABYSS = '#07090D'
+const HK    = '"Hanken Grotesk", sans-serif'
+
 export default function Signup() {
   const navigate = useNavigate()
   const [fullName, setFullName] = useState('')
@@ -88,17 +92,26 @@ export default function Signup() {
     navigate('/onboarding')
   }
 
+  const inputWrapStyle = {
+    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    position: 'relative',
+    transition: 'border-color 0.2s, background 0.2s',
+  }
+
   const inputStyle = {
     flex: 1,
     background: 'transparent',
     border: 'none',
-    borderBottom: '1px solid rgba(255,255,255,0.15)',
     color: 'white',
     fontSize: '16px',
-    padding: '10px 0',
+    padding: '14px 16px',
     outline: 'none',
-    transition: 'border-color 0.2s',
-    width: '100%'
+    width: '100%',
+    fontFamily: HK,
   }
 
   const labelStyle = {
@@ -108,7 +121,8 @@ export default function Signup() {
     letterSpacing: '0.08em',
     textTransform: 'uppercase',
     color: 'rgba(255,255,255,0.35)',
-    marginBottom: '10px'
+    marginBottom: '8px',
+    fontFamily: HK,
   }
 
   return (
@@ -120,7 +134,8 @@ export default function Signup() {
       padding: '0 28px',
       maxWidth: '480px',
       margin: '0 auto',
-      position: 'relative'
+      position: 'relative',
+      fontFamily: HK
     }}>
 
       {/* Back button */}
@@ -159,9 +174,9 @@ export default function Signup() {
         <motion.h1
           animate={{
             textShadow: [
-              '0 0 20px rgba(157,146,248,0.4)',
-              '0 0 40px rgba(157,146,248,0.8)',
-              '0 0 20px rgba(157,146,248,0.4)'
+              '0 0 20px rgba(61,245,166,0.3)',
+              '0 0 40px rgba(61,245,166,0.6)',
+              '0 0 20px rgba(61,245,166,0.3)'
             ]
           }}
           transition={{
@@ -171,10 +186,11 @@ export default function Signup() {
           }}
           style={{
             fontSize: '40px',
-            fontWeight: '600',
+            fontWeight: '700',
             color: 'white',
             letterSpacing: '-0.02em',
-            margin: '0 0 16px'
+            margin: '0 0 16px',
+            fontFamily: HK
           }}
         >
           FLOWSTACY
@@ -183,14 +199,16 @@ export default function Signup() {
           fontSize: '22px',
           fontWeight: '500',
           color: 'white',
-          margin: '0 0 8px'
+          margin: '0 0 8px',
+          fontFamily: HK
         }}>
           Start your journey
         </p>
         <p style={{
           fontSize: '14px',
           color: 'rgba(255,255,255,0.4)',
-          margin: 0
+          margin: 0,
+          fontFamily: HK
         }}>
           Create your free account
         </p>
@@ -203,73 +221,66 @@ export default function Signup() {
         transition={{ delay: 0.2, duration: 0.6 }}
       >
         {/* Full name */}
-        <div style={{ marginBottom: '28px' }}>
+        <div style={{ marginBottom: '16px' }}>
           <label style={labelStyle}>Full name</label>
-          <input
-            type="text"
-            value={fullName}
-            onChange={e => setFullName(e.target.value)}
-            placeholder="Your name"
-            style={inputStyle}
-            onFocus={e =>
-              e.target.style.borderBottomColor =
-              'rgba(157,146,248,0.6)'}
-            onBlur={e =>
-              e.target.style.borderBottomColor =
-              'rgba(255,255,255,0.15)'}
-          />
+          <div
+            style={inputWrapStyle}
+            onFocus={e => e.currentTarget.style.borderColor = 'rgba(61,245,166,0.5)'}
+            onBlur={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
+          >
+            <input
+              type="text"
+              value={fullName}
+              onChange={e => setFullName(e.target.value)}
+              placeholder="Your name"
+              style={inputStyle}
+            />
+          </div>
         </div>
 
         {/* Email */}
-        <div style={{ marginBottom: '28px' }}>
+        <div style={{ marginBottom: '16px' }}>
           <label style={labelStyle}>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            placeholder="your@email.com"
-            style={inputStyle}
-            onFocus={e =>
-              e.target.style.borderBottomColor =
-              'rgba(157,146,248,0.6)'}
-            onBlur={e =>
-              e.target.style.borderBottomColor =
-              'rgba(255,255,255,0.15)'}
-          />
+          <div
+            style={inputWrapStyle}
+            onFocus={e => e.currentTarget.style.borderColor = 'rgba(61,245,166,0.5)'}
+            onBlur={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
+          >
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              style={inputStyle}
+            />
+          </div>
         </div>
 
         {/* Password */}
         <div style={{ marginBottom: '8px' }}>
           <label style={labelStyle}>Password</label>
-          <div style={{
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center'
-          }}>
+          <div
+            style={inputWrapStyle}
+            onFocus={e => e.currentTarget.style.borderColor = 'rgba(61,245,166,0.5)'}
+            onBlur={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
+          >
             <input
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="Min 6 characters"
               style={inputStyle}
-              onFocus={e =>
-                e.target.style.borderBottomColor =
-                'rgba(157,146,248,0.6)'}
-              onBlur={e =>
-                e.target.style.borderBottomColor =
-                'rgba(255,255,255,0.15)'}
             />
             <button
               onClick={() => setShowPassword(!showPassword)}
               style={{
-                position: 'absolute',
-                right: 0,
                 background: 'none',
                 border: 'none',
                 color: 'rgba(255,255,255,0.4)',
                 cursor: 'pointer',
-                padding: '8px',
-                fontSize: '16px'
+                padding: '8px 12px',
+                fontSize: '16px',
+                flexShrink: 0
               }}
             >
               {showPassword ? '👁' : '👁‍🗨'}
@@ -312,13 +323,19 @@ export default function Signup() {
         )}
 
         {/* Confirm password */}
-        <div style={{ marginBottom: '36px' }}>
+        <div style={{ marginBottom: '28px' }}>
           <label style={labelStyle}>Confirm password</label>
-          <div style={{
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center'
-          }}>
+          <div
+            style={{
+              ...inputWrapStyle,
+              borderColor: confirmPassword && confirmPassword !== password
+                ? '#E24B4A'
+                : 'rgba(255,255,255,0.08)'
+            }}
+            onFocus={e => e.currentTarget.style.borderColor = 'rgba(61,245,166,0.5)'}
+            onBlur={e => e.currentTarget.style.borderColor =
+              confirmPassword !== password ? '#E24B4A' : 'rgba(255,255,255,0.08)'}
+          >
             <input
               type={showConfirm ? 'text' : 'password'}
               value={confirmPassword}
@@ -326,33 +343,18 @@ export default function Signup() {
               onKeyDown={e =>
                 e.key === 'Enter' && handleSignup()}
               placeholder="Repeat password"
-              style={{
-                ...inputStyle,
-                borderBottomColor: confirmPassword &&
-                  confirmPassword !== password
-                  ? '#E24B4A'
-                  : 'rgba(255,255,255,0.15)'
-              }}
-              onFocus={e =>
-                e.target.style.borderBottomColor =
-                'rgba(157,146,248,0.6)'}
-              onBlur={e =>
-                e.target.style.borderBottomColor =
-                confirmPassword !== password
-                ? '#E24B4A'
-                : 'rgba(255,255,255,0.15)'}
+              style={inputStyle}
             />
             <button
               onClick={() => setShowConfirm(!showConfirm)}
               style={{
-                position: 'absolute',
-                right: 0,
                 background: 'none',
                 border: 'none',
                 color: 'rgba(255,255,255,0.4)',
                 cursor: 'pointer',
-                padding: '8px',
-                fontSize: '16px'
+                padding: '8px 12px',
+                fontSize: '16px',
+                flexShrink: 0
               }}
             >
               {showConfirm ? '👁' : '👁‍🗨'}
@@ -365,7 +367,8 @@ export default function Signup() {
               style={{
                 fontSize: '12px',
                 color: '#E24B4A',
-                margin: '6px 0 0'
+                margin: '6px 0 0',
+                fontFamily: HK
               }}
             >
               Passwords do not match
@@ -382,17 +385,18 @@ export default function Signup() {
             width: '100%',
             height: '56px',
             background: loading
-              ? 'rgba(83,74,183,0.5)'
-              : '#534AB7',
+              ? 'rgba(61,245,166,0.4)'
+              : SURGE,
             border: 'none',
             borderRadius: '28px',
-            color: 'white',
+            color: ABYSS,
             fontSize: '16px',
-            fontWeight: '500',
+            fontWeight: '700',
             cursor: loading ? 'not-allowed' : 'pointer',
             marginBottom: '16px',
-            boxShadow: '0 0 30px rgba(83,74,183,0.3)',
-            transition: 'all 0.2s'
+            boxShadow: '0 0 30px rgba(61,245,166,0.2)',
+            transition: 'all 0.2s',
+            fontFamily: HK
           }}
         >
           {loading ? 'Creating account...' : 'Create account'}
@@ -404,14 +408,15 @@ export default function Signup() {
           color: 'rgba(255,255,255,0.25)',
           textAlign: 'center',
           lineHeight: 1.5,
-          marginBottom: '32px'
+          marginBottom: '32px',
+          fontFamily: HK
         }}>
           By creating an account you agree to our{' '}
-          <span style={{ color: '#9D92F8' }}>
+          <span style={{ color: SURGE }}>
             Terms of Service
           </span>
           {' '}and{' '}
-          <span style={{ color: '#9D92F8' }}>
+          <span style={{ color: SURGE }}>
             Privacy Policy
           </span>
         </p>
@@ -438,11 +443,12 @@ export default function Signup() {
           style={{
             background: 'none',
             border: 'none',
-            color: '#9D92F8',
+            color: SURGE,
             fontSize: '14px',
             fontWeight: '500',
             cursor: 'pointer',
-            padding: 0
+            padding: 0,
+            fontFamily: HK
           }}
         >
           Sign in
