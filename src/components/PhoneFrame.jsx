@@ -38,7 +38,7 @@ export default function PhoneFrame({ children }) {
       <div style={{
         position: 'relative',
         width: '393px',
-        height: '852px',
+        height: 'min(852px, calc(100vh - 80px))',
         background: '#0A0812',
         borderRadius: '48px',
         border: '1px solid rgba(255,255,255,0.1)',
@@ -50,6 +50,7 @@ export default function PhoneFrame({ children }) {
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
+        transform: 'translateZ(0)',
       }}>
         {/* Notch */}
         <div style={{

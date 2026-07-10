@@ -131,9 +131,9 @@ export default function QuestionScreen({
               <h1 style={{
                 fontFamily: '"Space Grotesk", sans-serif',
                 fontWeight: 700,
-                fontSize: '22px',
+                fontSize: '26px',
                 color: 'rgba(255,255,255,0.95)',
-                lineHeight: 1.3,
+                lineHeight: 1.25,
                 margin: '0 0 10px',
                 letterSpacing: '-0.02em',
               }}>
@@ -142,8 +142,8 @@ export default function QuestionScreen({
               {subtext && (
                 <p style={{
                   fontFamily: '"Hanken Grotesk", sans-serif',
-                  fontSize: '13px',
-                  color: 'rgba(255,255,255,0.3)',
+                  fontSize: '13.5px',
+                  color: 'rgba(255,255,255,0.35)',
                   margin: 0,
                   lineHeight: 1.5,
                 }}>
@@ -237,8 +237,8 @@ export default function QuestionScreen({
                       <span style={{
                         fontFamily: '"Hanken Grotesk", sans-serif',
                         fontSize: '13.5px',
-                        fontWeight: isSelected ? 500 : 400,
-                        color: isSelected ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.6)',
+                        fontWeight: 500,
+                        color: isSelected ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.75)',
                         lineHeight: 1.5,
                         flex: 1,
                         transition: 'color 0.18s',
