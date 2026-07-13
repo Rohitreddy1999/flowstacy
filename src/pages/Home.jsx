@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import { getDayContent, SUBTRACK_NAMES, SUBTRACK_IDS } from '../lib/curriculum'
+import DayView from '../components/DayView'
 
 // ── Palette ────────────────────────────────────────────────────────────────────
 const ABYSS    = '#07090D'
@@ -147,7 +148,7 @@ export default function Home() {
     return v ? JSON.parse(v) : []
   })
 
-  const [completed,           setCompleted]           = useState(false)
+  const completed = completedDays.some(d => d.day === currentDay)
   const [celebrating,         setCelebrating]         = useState(false)
   const [showCelebrationCard, setShowCelebrationCard] = useState(false)
   const [showLogModal,        setShowLogModal]        = useState(false)
@@ -205,7 +206,6 @@ export default function Home() {
     localStorage.setItem('flowstacy_completed_days', JSON.stringify(newCompletedDays))
     localStorage.setItem('flowstacy_streak',         String(newStreak))
     localStorage.setItem('flowstacy_current_day',    String(newDay))
-    setCompleted(true)
     setCompletedDays(newCompletedDays)
     setStreak(newStreak)
     setCelebrating(true)
@@ -239,6 +239,34 @@ export default function Home() {
     setLogNote('')
   }
 
+  function handleDayViewComplete(feeling, note) {
+    const reflections = JSON.parse(localStorage.getItem('flowstacy_reflections') || '[]')
+    reflections.push({ day: currentDay, feeling, note, date: new Date().toISOString() })
+    localStorage.setItem('flowstacy_reflections', JSON.stringify(reflections))
+
+    if (completed) return
+
+    const newCompletedDays = [
+      ...completedDays,
+      { day: currentDay, completedAt: Date.now(), dayOfWeek: new Date().getDay() }
+    ]
+    const newStreak = streak + 1
+    const newDay    = Math.min(currentDay + 1, 21)
+
+    localStorage.setItem('flowstacy_completed_days', JSON.stringify(newCompletedDays))
+    localStorage.setItem('flowstacy_streak',         String(newStreak))
+    localStorage.setItem('flowstacy_current_day',    String(newDay))
+
+    setCompletedDays(newCompletedDays)
+    setStreak(newStreak)
+
+    if (currentDay === 21) {
+      navigate('/graduation')
+    } else {
+      setCurrentDay(prev => Math.min(prev + 1, 21))
+    }
+  }
+
   function resetApp() {
     localStorage.clear()
     navigate('/')
@@ -254,7 +282,6 @@ export default function Home() {
     setCurrentDay(day)
     setStreak(day)
     setCompletedDays(done)
-    setCompleted(false)
     setCelebrating(false)
     setShowDevMenu(false)
   }
@@ -401,7 +428,6 @@ export default function Home() {
                     navigate('/graduation')
                   } else {
                     setCurrentDay(prev => Math.min(prev + 1, 21))
-                    setCompleted(false)
                     setCelebrating(false)
                   }
                 }}
@@ -698,223 +724,16 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* ── Sticky header ───────────────────────────────────────────────── */}
-      <div style={{
-        height: 56,
-        padding: '0 20px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        background: 'rgba(7,9,13,0.85)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-        borderLeft: `3px solid ${phaseColor}`,
-        position: 'sticky', top: 0, zIndex: 100,
-        maxWidth: 480, width: '100%', margin: '0 auto',
-        boxSizing: 'border-box'
-      }}>
-        <span style={{
-          fontFamily: '"Hanken Grotesk", sans-serif',
-          fontWeight: 700, fontSize: 11,
-          letterSpacing: '0.25em',
-          color: phaseColor,
-          textTransform: 'uppercase'
-        }}>
-          DAY {dayLabel} · {getPhaseLabel(currentDay)}
-        </span>
 
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 6,
-          background: streak >= 7 ? 'rgba(255,79,216,0.1)' : 'rgba(61,245,166,0.1)',
-          border: `1px solid ${streak >= 7 ? 'rgba(255,79,216,0.3)' : 'rgba(61,245,166,0.25)'}`,
-          borderRadius: 20, padding: '5px 12px'
-        }}>
-          <DiamondSvg size={10} color={streak >= 7 ? PLASMA : SURGE} />
-          <span style={{
-            fontSize: 13, fontWeight: 700,
-            color: streak >= 7 ? PLASMA : SURGE,
-            fontFamily: '"Hanken Grotesk", sans-serif'
-          }}>
-            {streak}
-          </span>
-        </div>
-      </div>
-
-      {/* ── Hero + Ring section ──────────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        style={{ padding: '20px 20px 12px', maxWidth: 480, margin: '0 auto' }}
-      >
-        {/* Headline above ring */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.08, duration: 0.4 }}
-          style={{ textAlign: 'center', marginBottom: 20 }}
-        >
-          <h1 style={{
-            fontFamily: '"Space Grotesk", sans-serif',
-            fontWeight: 900, fontSize: 24,
-            letterSpacing: '-0.02em', lineHeight: 1.2,
-            color: 'rgba(255,255,255,0.95)',
-            margin: '0 0 5px'
-          }}>
-            {getPhaseHeadline(currentDay)}
-          </h1>
-          <p style={{
-            fontSize: 12, color: 'rgba(255,255,255,0.35)',
-            margin: 0, lineHeight: 1.4
-          }}>
-            {subtrackName}
-          </p>
-        </motion.div>
-
-        {/* Circuit ring — centered hero */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.85 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.12, duration: 0.5, ease: 'easeOut' }}
-          >
-            <svg
-              width="240" height="240"
-              viewBox="0 0 200 200"
-              style={{ overflow: 'visible' }}
-            >
-              <defs>
-                <filter id="surge-glow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-                <filter id="tip-glow" x="-100%" y="-100%" width="300%" height="300%">
-                  <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
-
-              {/* Track */}
-              <circle
-                cx="100" cy="100" r={ringR}
-                fill="none"
-                stroke="rgba(255,255,255,0.07)"
-                strokeWidth="5"
-              />
-
-              {/* Progress arc */}
-              {completedFrac > 0 && (
-                <circle
-                  cx="100" cy="100" r={ringR}
-                  fill="none"
-                  stroke={phaseColor}
-                  strokeWidth="5"
-                  strokeLinecap="round"
-                  strokeDasharray={ringCircum}
-                  strokeDashoffset={ringDashOffset}
-                  transform="rotate(-90 100 100)"
-                  filter="url(#surge-glow)"
-                  style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)' }}
-                />
-              )}
-
-              {/* Arc-Light tip dot */}
-              {completedFrac > 0 && (
-                <motion.circle
-                  cx={tipX} cy={tipY} r="5"
-                  fill={ARC_LIGHT}
-                  filter="url(#tip-glow)"
-                  animate={{ r: [5, 8, 5], opacity: [1, 0.4, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                />
-              )}
-
-              {/* Day number */}
-              <text
-                x="100" y="95"
-                textAnchor="middle"
-                style={{
-                  fontFamily: '"Hanken Grotesk", sans-serif',
-                  fontSize: 52, fontWeight: 900,
-                  fill: ARC_LIGHT,
-                  letterSpacing: '-2px'
-                }}
-              >
-                {currentDay}
-              </text>
-
-              {/* /21 label */}
-              <text
-                x="100" y="118"
-                textAnchor="middle"
-                style={{
-                  fontFamily: '"Hanken Grotesk", sans-serif',
-                  fontSize: 13,
-                  fill: 'rgba(255,255,255,0.35)',
-                  fontWeight: 500
-                }}
-              >
-                /{TOTAL}
-              </text>
-            </svg>
-          </motion.div>
-        </div>
-
-        {/* Progress bar row */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 7 }}>
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.06em' }}>
-              {completedDays.length} / {TOTAL} days
-            </span>
-            <button
-              onClick={() => setShowFullPlan(true)}
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                fontSize: 11, color: 'rgba(255,255,255,0.35)', padding: 0,
-                fontFamily: '"Hanken Grotesk", sans-serif'
-              }}
-            >
-              Full plan
-            </button>
-          </div>
-          <div style={{
-            height: 2, borderRadius: 2,
-            background: 'rgba(255,255,255,0.07)',
-            overflow: 'hidden'
-          }}>
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${completedFrac * 100}%` }}
-              transition={{ duration: 1.0, delay: 0.3, ease: 'easeOut' }}
-              style={{ height: '100%', background: phaseColor, borderRadius: 2 }}
-            />
-          </div>
-        </motion.div>
-      </motion.div>
-
-      {/* ── Today's task card ─────────────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        style={{ padding: '0 16px 16px', maxWidth: 480, margin: '0 auto', boxSizing: 'border-box' }}
-      >
-        {contentLoading ? (
+      {/* ── Day content (DayView) ──────────────────────────────────────────── */}
+      {contentLoading ? (
+        <div style={{ padding: '0 16px 16px', maxWidth: 480, margin: '0 auto', boxSizing: 'border-box' }}>
           <div style={{
             background: FATHOM,
             border: '1px solid rgba(255,255,255,0.07)',
             borderRadius: 20, overflow: 'hidden'
           }}>
-            <div style={{ height: 3, background: `rgba(61,245,166,0.2)` }} />
+            <div style={{ height: 3, background: 'rgba(61,245,166,0.2)' }} />
             <div style={{ padding: 20 }}>
               {[80, 120, 60].map((h, i) => (
                 <div key={i} style={{
@@ -924,476 +743,27 @@ export default function Home() {
               ))}
             </div>
           </div>
-        ) : (
-          <div style={{
-            background: FATHOM,
-            border: '1px solid rgba(255,255,255,0.10)',
-            borderRadius: 20, overflow: 'hidden',
-            boxShadow: '0 0 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)'
-          }}>
-            {/* Surge accent strip */}
-            <div style={{ height: 3, background: `linear-gradient(90deg, ${SURGE}, rgba(61,245,166,0.4))` }} />
-
-            <div style={{ padding: 20 }}>
-              {/* Header row */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{
-                  fontSize: 10, fontWeight: 500, letterSpacing: '0.1em',
-                  textTransform: 'uppercase', color: SURGE
-                }}>
-                  TODAY · {subtrackName.toUpperCase()}
-                </span>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {dayContent?.duration_minutes && (
-                    <span style={{
-                      fontSize: 11, padding: '4px 10px', borderRadius: 20,
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      color: 'rgba(255,255,255,0.45)'
-                    }}>
-                      {dayContent.duration_minutes} min
-                    </span>
-                  )}
-                  {dayContent?.difficulty && (
-                    <span style={{
-                      fontSize: 11, padding: '4px 10px', borderRadius: 20,
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      color: 'rgba(255,255,255,0.45)'
-                    }}>
-                      {dayContent.difficulty}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Task title */}
-              {dayContent?.task_title && (
-                <p style={{
-                  fontFamily: '"Space Grotesk", sans-serif',
-                  fontSize: 20, fontWeight: 700,
-                  color: 'rgba(255,255,255,0.95)',
-                  margin: '10px 0 0', lineHeight: 1.25,
-                  letterSpacing: '-0.01em'
-                }}>
-                  {dayContent.task_title}
-                </p>
-              )}
-
-              <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '14px 0 0' }} />
-
-              {/* WHAT TO DO */}
-              <div style={{ paddingTop: 14 }}>
-                <p style={{
-                  fontSize: 10, fontWeight: 500, letterSpacing: '0.12em',
-                  textTransform: 'uppercase', color: SURGE,
-                  margin: '0 0 2px'
-                }}>
-                  WHAT TO DO
-                </p>
-
-                {steps.length > 0 ? (
-                  steps.map((step, i) => (
-                    <div key={i} style={{
-                      borderLeft: `2px solid ${phaseColor}`,
-                      paddingLeft: 12,
-                      paddingTop: 5, paddingBottom: 5,
-                      marginBottom: i < steps.length - 1 ? 12 : 0,
-                      marginTop: i === 0 ? 10 : 0,
-                    }}>
-                      <span style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.82)', lineHeight: 1.6 }}>
-                        {step}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <p style={{
-                    fontSize: 13.5, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6,
-                    margin: 0, paddingTop: 12
-                  }}>
-                    {dayContent?.task_description ||
-                      `Day ${currentDay} of your ${subtrackName} journey. Show up. That's all that's required.`}
-                  </p>
-                )}
-              </div>
-
-              {/* WHY THIS MATTERS */}
-              {whyText && (
-                <>
-                  <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '16px 0 14px' }} />
-                  <p style={{
-                    fontSize: 10, fontWeight: 500, letterSpacing: '0.12em',
-                    textTransform: 'uppercase', color: GLACIAL,
-                    margin: '0 0 10px'
-                  }}>
-                    WHY THIS MATTERS
-                  </p>
-                  <p style={{
-                    fontSize: 13.5, color: 'rgba(255,255,255,0.65)',
-                    lineHeight: 1.7, margin: 0, fontStyle: 'italic',
-                    borderLeft: `3px solid ${phaseColor}`,
-                    paddingLeft: 14, paddingTop: 10, paddingBottom: 10,
-                    background: `${phaseColor}09`,
-                    borderRadius: '0 8px 8px 0',
-                  }}>
-                    {whyText}
-                  </p>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-      </motion.div>
-
-      {/* ── Jammy strip ──────────────────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.15 }}
-        style={{ padding: '0 16px 16px', maxWidth: 480, margin: '0 auto', boxSizing: 'border-box' }}
-      >
-        <motion.div
-          style={{
-            background: FATHOM,
-            border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: 18, overflow: 'hidden', cursor: 'pointer'
-          }}
-          onClick={() => setJammyExpanded(prev => !prev)}
-          whileTap={{ scale: 0.99 }}
-        >
-          {/* Main row */}
-          <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14 }}>
-            {/* Glacial orb */}
-            <motion.div
-              animate={{
-                boxShadow: [
-                  '0 0 8px rgba(130,212,255,0.3)',
-                  '0 0 20px rgba(130,212,255,0.6)',
-                  '0 0 8px rgba(130,212,255,0.3)',
-                ],
-                scale: [1, 1.08, 1],
-                y: [0, -2, 0],
-              }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              style={{
-                width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
-                background: 'radial-gradient(circle at 35% 30%, rgba(130,212,255,0.75), rgba(130,212,255,0.2))',
-                border: '1px solid rgba(130,212,255,0.4)'
-              }}
-            />
-            <p style={{ flex: 1, fontSize: 13, color: GLACIAL, margin: 0, lineHeight: 1.5 }}>
-              {getJammyLine(currentDay)}
-            </p>
-            <motion.div
-              animate={{ rotate: jammyExpanded ? 180 : 0 }}
-              transition={{ duration: 0.25 }}
-            >
-              <ChevronDownSvg size={16} color={`rgba(130,212,255,0.5)`} />
-            </motion.div>
-          </div>
-
-          {/* Expanded content */}
-          <AnimatePresence>
-            {jammyExpanded && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.25, ease: 'easeInOut' }}
-                style={{ overflow: 'hidden' }}
-              >
-                <div style={{
-                  padding: '0 16px 16px',
-                  borderTop: '1px solid rgba(255,255,255,0.06)'
-                }}>
-                  <p style={{
-                    fontSize: 13.5, color: 'rgba(255,255,255,0.55)',
-                    lineHeight: 1.65, margin: '12px 0 0'
-                  }}>
-                    {getJammyExpanded(currentDay, subtrackName)}
-                  </p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </motion.div>
-
-      {/* ── Watch & Learn ─────────────────────────────────────────────────── */}
-      {!contentLoading && (dayContent?.youtube_url || refs.length > 0) && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.18 }}
-          style={{ padding: '0 16px 16px', maxWidth: 480, margin: '0 auto', boxSizing: 'border-box' }}
-        >
-          <p style={{
-            fontSize: 10, fontWeight: 500, letterSpacing: '0.12em',
-            textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)',
-            margin: '0 0 10px'
-          }}>
-            WATCH &amp; LEARN
-          </p>
-
-          {dayContent?.youtube_url && (
-            <motion.div
-              whileTap={{ scale: 0.99 }}
-              onClick={() => window.open(dayContent.youtube_url, '_blank')}
-              style={{
-                background: FATHOM,
-                border: `1px solid rgba(61,245,166,0.15)`,
-                borderLeft: `3px solid ${SURGE}`,
-                borderRadius: 14,
-                padding: '14px 16px',
-                marginBottom: 8, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: 12
-              }}
-            >
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%',
-                background: `rgba(61,245,166,0.12)`,
-                border: `1px solid rgba(61,245,166,0.25)`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-              }}>
-                <PlaySvg size={13} color={SURGE} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.9)', fontWeight: 600, margin: 0, lineHeight: 1.3 }}>
-                  {dayContent.must_watch_label || "Watch today's guide"}
-                </p>
-                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', margin: '3px 0 0' }}>
-                  Must watch{dayContent.duration_minutes ? ` · ${dayContent.duration_minutes} min` : ''}
-                </p>
-              </div>
-              <ChevronRightSvg size={16} />
-            </motion.div>
-          )}
-
-          {refs.map((ref, i) => (
-            <motion.div
-              key={i}
-              whileTap={{ scale: 0.99 }}
-              onClick={() => window.open(ref.url, '_blank')}
-              style={{
-                background: FATHOM,
-                border: '1px solid rgba(255,255,255,0.07)',
-                borderRadius: 14, padding: '14px 16px',
-                marginBottom: 8, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: 12
-              }}
-            >
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.05)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-              }}>
-                <LinkSvg size={14} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.7)', fontWeight: 500, margin: 0, lineHeight: 1.3 }}>
-                  {ref.label}
-                </p>
-                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', margin: '3px 0 0' }}>
-                  Reference
-                </p>
-              </div>
-              <ChevronRightSvg size={16} />
-            </motion.div>
-          ))}
-        </motion.div>
+        </div>
+      ) : (
+        <DayView
+          day={currentDay}
+          streak={streak}
+          completed={completed}
+          taskTitle={dayContent?.task_title}
+          subtrackName={subtrackName}
+          durationMinutes={dayContent?.duration_minutes}
+          difficulty={dayContent?.difficulty}
+          steps={steps}
+          whyText={whyText}
+          quoteText={dayContent?.quote_text}
+          quoteAuthor={dayContent?.quote_author}
+          youtubeUrl={dayContent?.youtube_url}
+          youtubeLabel={dayContent?.must_watch_label}
+          refs={refs}
+          onComplete={handleDayViewComplete}
+        />
       )}
 
-      {/* ── Daily quote ───────────────────────────────────────────────────── */}
-      {!contentLoading && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          style={{
-            margin: '0 16px 20px',
-            padding: '14px 0 14px 18px',
-            borderLeft: `3px solid rgba(130,212,255,0.35)`,
-            maxWidth: 448
-          }}
-        >
-          <p style={{
-            fontSize: 14, color: 'rgba(255,255,255,0.7)',
-            lineHeight: 1.65, fontStyle: 'italic', margin: '0 0 8px'
-          }}>
-            "{dayContent?.quote_text || 'The secret of getting ahead is getting started.'}"
-          </p>
-          <p style={{ fontSize: 12, color: GLACIAL, margin: 0, fontStyle: 'normal' }}>
-            — {dayContent?.quote_author || 'Mark Twain'}
-          </p>
-        </motion.div>
-      )}
-
-      {/* ── Action buttons ────────────────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.22 }}
-        style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 480, margin: '0 auto', boxSizing: 'border-box' }}
-      >
-        {completed ? (
-          <div style={{
-            width: '100%', height: 54, borderRadius: 27,
-            border: `1px solid rgba(61,245,166,0.4)`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            fontFamily: '"Hanken Grotesk", sans-serif',
-            fontSize: 15, fontWeight: 700, color: SURGE,
-          }}>
-            <CheckSvg size={20} color={SURGE} />
-            Day {currentDay} complete
-          </div>
-        ) : (
-          <div style={{ position: 'relative', borderRadius: 27, overflow: 'hidden' }}>
-            {holdProgress > 0 && (
-              <div style={{
-                position: 'absolute', top: 0, left: 0, bottom: 0,
-                width: `${holdProgress * 100}%`,
-                background: ARC_LIGHT,
-                zIndex: 0,
-              }} />
-            )}
-            <motion.button
-              onPointerDown={(e) => {
-                e.preventDefault()
-                holdStartRef.current = performance.now()
-                setIsHolding(true)
-                function tick(now) {
-                  const p = Math.min((now - holdStartRef.current) / 2000, 1)
-                  setHoldProgress(p)
-                  if (p < 1) {
-                    rafRef.current = requestAnimationFrame(tick)
-                  } else {
-                    setIsHolding(false)
-                    setHoldProgress(0)
-                    handleMarkComplete()
-                  }
-                }
-                rafRef.current = requestAnimationFrame(tick)
-              }}
-              onPointerUp={() => {
-                if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null }
-                setIsHolding(false); setHoldProgress(0)
-              }}
-              onPointerLeave={() => {
-                if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null }
-                setIsHolding(false); setHoldProgress(0)
-              }}
-              onPointerCancel={() => {
-                if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null }
-                setIsHolding(false); setHoldProgress(0)
-              }}
-              style={{
-                position: 'relative', zIndex: 1,
-                width: '100%', height: 54, border: 'none', borderRadius: 27,
-                background: holdProgress > 0 ? 'transparent' : SURGE,
-                color: ABYSS, fontSize: 15, fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 0 32px rgba(61,245,166,0.2)',
-                fontFamily: '"Hanken Grotesk", sans-serif',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                userSelect: 'none', WebkitUserSelect: 'none', touchAction: 'none',
-              }}
-            >
-              {isHolding ? `Hold to energize Day ${dayLabel}...` : `Hold to energize Day ${dayLabel}`}
-            </motion.button>
-          </div>
-        )}
-
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setShowLogModal(true)}
-          style={{
-            width: '100%', height: 50,
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: 27, background: 'transparent',
-            color: 'rgba(255,255,255,0.5)', fontSize: 14, fontWeight: 500,
-            cursor: 'pointer', fontFamily: '"Hanken Grotesk", sans-serif'
-          }}
-        >
-          Add to my log
-        </motion.button>
-      </motion.div>
-
-      {/* ── Squad peek ────────────────────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.26 }}
-        style={{ padding: '0 16px 24px', maxWidth: 480, margin: '0 auto', boxSizing: 'border-box' }}
-      >
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          marginBottom: 10
-        }}>
-          <span style={{
-            fontSize: 10, fontWeight: 500, letterSpacing: '0.12em',
-            textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)'
-          }}>
-            YOUR SQUAD TODAY
-          </span>
-          <span
-            onClick={() => navigate('/community')}
-            style={{ fontSize: 12, color: SURGE, cursor: 'pointer' }}
-          >
-            View all
-          </span>
-        </div>
-
-        <div style={{
-          background: FATHOM,
-          border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: 18, overflow: 'hidden'
-        }}>
-          {COMMUNITY.map((user, idx) => (
-            <div key={user.initials}>
-              <div
-                onMouseEnter={() => setHoveredSquad(user.initials)}
-                onMouseLeave={() => setHoveredSquad(null)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '14px 16px',
-                  transform: hoveredSquad === user.initials ? 'scale(1.02)' : 'scale(1)',
-                  transition: 'transform 200ms ease',
-                  borderLeft: hoveredSquad === user.initials ? `3px solid ${user.color}` : '3px solid transparent',
-                  cursor: 'pointer',
-                }}
-              >
-                <div style={{
-                  width: 36, height: 36, borderRadius: '50%',
-                  background: user.bg,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 12, fontWeight: 700,
-                  color: user.color, flexShrink: 0,
-                  fontFamily: '"Space Grotesk", sans-serif'
-                }}>
-                  {user.initials}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.9)', fontWeight: 600, margin: 0 }}>
-                    {user.name}
-                  </p>
-                  <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', margin: 0 }}>
-                    Day {user.day}
-                  </p>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <DiamondSvg size={9} color={user.streak >= 14 ? PLASMA : SURGE} />
-                  <span style={{ fontSize: 13, fontWeight: 700, color: user.streak >= 14 ? PLASMA : SURGE }}>
-                    {user.streak}
-                  </span>
-                </div>
-              </div>
-              {idx < COMMUNITY.length - 1 && (
-                <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', margin: '0 16px' }} />
-              )}
-            </div>
-          ))}
-        </div>
-      </motion.div>
 
       {/* ── Dev tools ────────────────────────────────────────────────────── */}
       <div style={{ textAlign: 'center', paddingBottom: 16 }}>

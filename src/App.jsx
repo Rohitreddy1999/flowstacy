@@ -24,7 +24,7 @@ import BottomNav from './components/BottomNav'
 
 function AppShell({ children }) {
   return (
-    <div style={{ position: 'relative', height: '100%' }}>
+    <div style={{ position: 'relative', minHeight: '100%' }}>
       {children}
       <BottomNav />
     </div>
