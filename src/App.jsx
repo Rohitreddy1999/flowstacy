@@ -24,8 +24,14 @@ import BottomNav from './components/BottomNav'
 
 function AppShell({ children }) {
   return (
-    <div style={{ position: 'relative', minHeight: '100%' }}>
-      {children}
+    <div style={{ position: 'relative', height: '100dvh' }}>
+      <div className="hide-scrollbar" style={{
+        height: 'calc(100dvh - 80px)',
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch',
+      }}>
+        {children}
+      </div>
       <BottomNav />
     </div>
   )
