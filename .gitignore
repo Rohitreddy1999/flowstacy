@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 
 .vercel
+
+# Local config files with secrets — never commit
+claude_desktop_config.json
+SESSION_START.md
