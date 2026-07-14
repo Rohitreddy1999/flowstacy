@@ -34,16 +34,18 @@ export default function SubTrackSelect() {
       const subtractId = selected
       console.log('SubTrackSelect — userId:', userId, 'subtrack_id:', subtractId)
 
-      // Deactivate any existing active journeys before creating a new one
+      // Deactivate any other active journeys first (one active at a time)
       await supabase
         .from('user_journeys')
         .update({ is_active: false })
         .eq('user_id', userId)
         .eq('is_active', true)
+        .neq('subtrack_id', subtractId)
 
+      // Upsert: inserts fresh or reactivates + resets an existing row for this subtrack
       const { data: newJourney, error } = await supabase
         .from('user_journeys')
-        .insert({
+        .upsert({
           user_id: userId,
           subtrack_id: subtractId,
           current_day: 1,
@@ -52,7 +54,7 @@ export default function SubTrackSelect() {
           grace_used: false,
           graduated: false,
           started_at: new Date().toISOString(),
-        })
+        }, { onConflict: 'user_id,subtrack_id' })
         .select()
         .single()
 
@@ -60,7 +62,7 @@ export default function SubTrackSelect() {
         console.error('createJourney failed:', error.message, error.details, error.hint)
         return
       }
-      console.log('Journey created — id:', newJourney?.id, newJourney)
+      console.log('Journey created/resumed — id:', newJourney?.id, newJourney)
 
       await useJourneyStore.getState().hydrate(userId)
     }
