@@ -1,5 +1,5 @@
 # FLOWSTACY — Claude Code Context
-Last updated: July 2026 | Last session: 2026-07-14 — Progress screen Zustand migration + localStorage cleanup
+Last updated: July 2026 | Last session: 2026-07-14 — Inserted 3 new 21-day curricula into Supabase; updated SUBTRACK_IDS/NAMES in curriculum.js
 
 ---
 
@@ -43,6 +43,10 @@ A 21-day habit formation PWA. Users answer discovery questions, pick a track and
 - BottomNav, PhoneFrame (desktop), LoadingScreen, AuroraBackground
 - PWA install prompt
 - Gym & Weightlifting 21-day curriculum in Supabase (Foundation / Build / Commit phases)
+- Music Theory Fundamentals 21-day curriculum in Supabase (Rhythm path)
+- Art & Sketching Fundamentals 21-day curriculum in Supabase (Express path)
+- Gratitude & Reflection Practice 21-day curriculum in Supabase (Mindful path)
+- curriculum_days table now has 105 rows total (5 subtracks × 21 days)
 - Supabase as source of truth for journey state (migration complete — localStorage keys removed)
 - src/lib/journeyService.js — getActiveJourney, createJourney, completeDay, calculateStreak
 - src/lib/journeyStore.js — Zustand store: journey, currentDay, streak, completedDays, hydrate, markDayComplete, reset
@@ -70,6 +74,15 @@ TBD next session.
 
 ## DEFINITION OF DONE
 TBD next session.
+
+## SUBTRACK REGISTRY (as of 2026-07-14)
+| Key | UUID | Path |
+|---|---|---|
+| gym | e50741ee-e792-4220-8e68-4f231dc44bc3 | Move |
+| breathwork | 5e2368f6-0d47-4722-b0df-5a1478ca0cee | Calm |
+| music_theory | db822e9e-24d6-46dc-8cd7-b59a8811f9b0 | Rhythm |
+| art_sketching | eb55db2d-7766-41b0-bac5-070bb3bc8efe | Express |
+| gratitude_reflection | c111d349-7be4-4898-b85d-1779c8452371 | Mindful |
 
 ---
 
