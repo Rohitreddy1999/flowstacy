@@ -10,7 +10,9 @@ export const useJourneyStore = create((set) => ({
 
   hydrate: async (userId) => {
     set({ isLoading: true })
+    console.log('journeyStore hydrate — userId:', userId)
     const journey = await getActiveJourney(userId)
+    console.log('journeyStore hydrate — getActiveJourney result:', journey)
     if (!journey) {
       set({ journey: null, isLoading: false })
       return

@@ -29,23 +29,41 @@ export default function SubTrackSelect() {
     const { data: { session } } = await supabase.auth.getSession()
 
     if (session) {
-      const { error } = await supabase
-        .from('user_journeys')
-        .upsert({
-          user_id: session.user.id,
-          subtrack_id: SUBTRACK_IDS[selected],
-          current_day: 1,
-          is_active: true,
-          streak_count: 0,
-          grace_used: false,
-          graduated: false,
-          started_at: new Date().toISOString()
-        }, { onConflict: 'user_id' })
+      const userId = session.user.id
+      const subtractId = SUBTRACK_IDS[selected]
+      console.log('SubTrackSelect — userId:', userId, 'subtrack slug:', selected, 'subtrack_id:', subtractId)
 
-      if (error) {
-        console.error('Journey upsert failed:', error)
+      const { data: existing } = await supabase
+        .from('user_journeys')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('subtrack_id', subtractId)
+        .eq('is_active', true)
+        .single()
+
+      if (existing) {
+        console.log('Journey already exists — id:', existing.id)
       } else {
-        console.log('Journey written to Supabase successfully')
+        const { data: newJourney, error } = await supabase
+          .from('user_journeys')
+          .insert({
+            user_id: userId,
+            subtrack_id: subtractId,
+            current_day: 1,
+            is_active: true,
+            streak_count: 0,
+            grace_used: false,
+            graduated: false,
+            started_at: new Date().toISOString(),
+          })
+          .select()
+          .single()
+
+        if (error) {
+          console.error('createJourney failed:', error.message, error.details, error.hint)
+          return
+        }
+        console.log('Journey created — id:', newJourney?.id, newJourney)
       }
     }
 

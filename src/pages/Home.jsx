@@ -90,9 +90,17 @@ export default function Home() {
     if (completed || !journey) return
     // Optimistic store update so UI advances immediately
     markDayComplete(currentDay)
-    // Fire-and-forget Supabase write
     const { data: { session } } = await supabase.auth.getSession()
-    if (session) completeDay(journey.id, session.user.id, currentDay, feeling, note)
+    if (session) {
+      const result = await completeDay(journey.id, session.user.id, currentDay, feeling, note)
+      if (!result) {
+        console.error('completeDay failed — check journeyService logs above')
+      } else {
+        console.log('completeDay succeeded for day', currentDay, 'journey', journey.id)
+      }
+    } else {
+      console.error('completeDay skipped — no active session')
+    }
     if (currentDay === 21) navigate('/graduation')
   }
 

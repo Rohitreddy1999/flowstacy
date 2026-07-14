@@ -8,7 +8,10 @@ export async function getActiveJourney(userId) {
     .eq('is_active', true)
     .single()
 
-  if (error) return null
+  if (error) {
+    console.error('getActiveJourney error:', error.message, error.details, error.hint)
+    return null
+  }
   return data
 }
 
@@ -29,7 +32,7 @@ export async function createJourney(userId, subtractId) {
     .single()
 
   if (error) {
-    console.error('createJourney error:', error)
+    console.error('createJourney error:', error.message, error.details, error.hint)
     return null
   }
   return data
@@ -48,7 +51,7 @@ export async function completeDay(journeyId, userId, dayNumber, feeling, reflect
     })
 
   if (insertError) {
-    console.error('completeDay insert error:', insertError)
+    console.error('completeDay insert error:', insertError.message, insertError.details, insertError.hint)
     return false
   }
 
@@ -60,7 +63,7 @@ export async function completeDay(journeyId, userId, dayNumber, feeling, reflect
     .eq('id', journeyId)
 
   if (updateError) {
-    console.error('completeDay update error:', updateError)
+    console.error('completeDay update error:', updateError.message, updateError.details, updateError.hint)
     return false
   }
 
