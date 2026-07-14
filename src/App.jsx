@@ -104,6 +104,8 @@ const STALE_KEYS = [
   'flowstacy_reflections',
   'flowstacy_selected_track',
   'flowstacy_selected_subtrack',
+  'flowstacy_scores',
+  'flowstacy_open_answer',
 ]
 
 function App() {

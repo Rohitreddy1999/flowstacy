@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { SUBTRACK_NAMES, SUBTRACK_IDS } from '../lib/curriculum'
 import PageTransition from '../components/PageTransition'
+import { useJourneyStore } from '../lib/journeyStore'
 
 // ── V2 Colors ──────────────────────────────────────────────────────────────────
 const ABYSS    = '#07090D'
@@ -89,13 +90,8 @@ export default function Progress() {
   const navigate = useNavigate()
 
   // ── Data reads ───────────────────────────────────────────────────────────────
-  const currentDay    = parseInt(localStorage.getItem('flowstacy_current_day') || '1')
-  const subtractId    = localStorage.getItem('flowstacy_selected_subtrack')
-  const _rawDays    = JSON.parse(localStorage.getItem('flowstacy_completed_days') || '[]')
-  const completedDays = _rawDays.map(d =>
-    typeof d === 'number' ? { day: d, completedAt: 0, dayOfWeek: 0 } : d
-  )
-  const streak        = parseInt(localStorage.getItem('flowstacy_streak') || '0')
+  const { journey, currentDay, streak, completedDays } = useJourneyStore()
+  const subtractId = journey?.subtrack_id ?? null
 
   // Normalize reflections — Home stores as array, we key by day number
   const _reflRaw   = JSON.parse(localStorage.getItem('flowstacy_reflections') || '[]')
@@ -206,7 +202,7 @@ export default function Progress() {
   // ── Computed values ───────────────────────────────────────────────────────────
   const completedCount = completedDays.length
 
-  const thisWeekDays   = completedDays.filter(d => d.day >= Math.max(1, currentDay - 6) && d.day <= currentDay)
+  const thisWeekDays   = completedDays.filter(d => d >= Math.max(1, currentDay - 6) && d <= currentDay)
   const thisWeekPoints = thisWeekDays.length * 4
 
   // Temperature = recent consistency (50%) + streak rate (30%) + reflection rate (20%)
@@ -256,7 +252,7 @@ export default function Progress() {
   const toY = v => chartH - chartPad - (v / 100) * (chartH - chartPad * 2)
 
   const chartPts = Array.from({ length: 21 }, (_, i) => {
-    const done = completedDays.filter(d => d.day <= i + 1).length
+    const done = completedDays.filter(d => d <= i + 1).length
     return Math.min(done * 4, 100)
   })
   const linePath = `M ${toX(0)} ${toY(chartPts[0])} ` +
@@ -265,7 +261,7 @@ export default function Progress() {
     ` L ${toX(20)} ${chartH} L ${toX(0)} ${chartH} Z`
 
   // Sorted completed days for Reflection Replay
-  const sortedCompleted = [...completedDays].sort((a, b) => a.day - b.day)
+  const sortedCompleted = [...completedDays].sort((a, b) => a - b)
 
   // ── Section label style ───────────────────────────────────────────────────────
   const sLabel = {
@@ -398,7 +394,7 @@ export default function Progress() {
                   const t         = i / 20
                   const { x, y }  = getCubicPoint(t)
                   const dayNum    = i + 1
-                  const isDone    = completedDays.some(d => d.day === dayNum)
+                  const isDone    = completedDays.includes(dayNum)
                   const isCurrent = dayNum === currentDay
                   const dotColor  = getPhaseColor(dayNum)
                   const dayData   = curriculumDays.find(d => d.day_number === dayNum)
@@ -472,7 +468,7 @@ export default function Progress() {
             <div style={{ padding: '0 16px', marginBottom: 20 }}>
               <div style={{ display: 'flex', gap: 8 }}>
                 {phases.map((ph, i) => {
-                  const done     = completedDays.filter(d => d.day >= ph.start && d.day <= ph.end).length
+                  const done     = completedDays.filter(d => d >= ph.start && d <= ph.end).length
                   const pct      = Math.round((done / 7) * 100)
                   const isActive = currentDay >= ph.start && currentDay <= ph.end
 
@@ -576,11 +572,10 @@ export default function Progress() {
                     const segSpan    = 360 / 21
                     const startDeg   = i * segSpan
                     const endDeg     = startDeg + segSpan - 2
-                    const dObj       = completedDays.find(d => d.day === dayNum)
-                    const isDone     = !!dObj
+                    const isDone     = completedDays.includes(dayNum)
                     const isCurrent  = dayNum === currentDay
                     const phColor    = getPhaseColor(dayNum)
-                    const wdCount    = dObj ? wdCounts[dObj.dayOfWeek] : 0
+                    const wdCount    = 0
                     const segOpacity = isCurrent ? 1 : isDone ? (wdCount > 1 ? 0.9 : 0.7) : 1
                     const segFill    = isCurrent ? ARC_LIGHT : isDone ? phColor : 'rgba(255,255,255,0.06)'
                     const segPath    = ringSegPath(100, 100, 90, 68, startDeg, endDeg)
@@ -690,8 +685,7 @@ export default function Progress() {
                   scrollbarWidth: 'none',
                   msOverflowStyle: 'none',
                 }}>
-                  {sortedCompleted.map((dayObj, i) => {
-                    const dayNum  = dayObj.day
+                  {sortedCompleted.map((dayNum, i) => {
                     const phColor = getPhaseColor(dayNum)
                     const dayData = curriculumDays.find(d => d.day_number === dayNum)
                     const refl    = reflections[dayNum]
