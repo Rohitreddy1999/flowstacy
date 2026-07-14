@@ -288,7 +288,8 @@ export default function Home() {
 
   // ── Derived ────────────────────────────────────────────────────────────────
 
-  const { steps, why: whyText } = parseTaskDescription(dayContent?.task_description)
+  const steps = dayContent?.steps ?? parseTaskDescription(dayContent?.task_description).steps
+  const whyText = dayContent?.why_text ?? parseTaskDescription(dayContent?.task_description).why
   const refs = [
     { url: dayContent?.reference_url_1, label: dayContent?.ref_label_1 },
     { url: dayContent?.reference_url_2, label: dayContent?.ref_label_2 },
