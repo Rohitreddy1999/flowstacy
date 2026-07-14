@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { TRACKS } from '../lib/tracks'
 import { getSubtracksByTrack } from '../lib/curriculum'
 import { supabase } from '../lib/supabase'
+import { useJourneyStore } from '../lib/journeyStore'
 
 export default function SubTrackSelect() {
   const navigate = useNavigate()
@@ -65,6 +66,8 @@ export default function SubTrackSelect() {
         }
         console.log('Journey created — id:', newJourney?.id, newJourney)
       }
+
+      await useJourneyStore.getState().hydrate(userId)
     }
 
     navigate('/home', { replace: true })
