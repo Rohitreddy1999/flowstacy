@@ -34,38 +34,33 @@ export default function SubTrackSelect() {
       const subtractId = selected
       console.log('SubTrackSelect — userId:', userId, 'subtrack_id:', subtractId)
 
-      const { data: existing } = await supabase
+      // Deactivate any existing active journeys before creating a new one
+      await supabase
         .from('user_journeys')
-        .select('id')
+        .update({ is_active: false })
         .eq('user_id', userId)
-        .eq('subtrack_id', subtractId)
         .eq('is_active', true)
+
+      const { data: newJourney, error } = await supabase
+        .from('user_journeys')
+        .insert({
+          user_id: userId,
+          subtrack_id: subtractId,
+          current_day: 1,
+          is_active: true,
+          streak_count: 0,
+          grace_used: false,
+          graduated: false,
+          started_at: new Date().toISOString(),
+        })
+        .select()
         .single()
 
-      if (existing) {
-        console.log('Journey already exists — id:', existing.id)
-      } else {
-        const { data: newJourney, error } = await supabase
-          .from('user_journeys')
-          .insert({
-            user_id: userId,
-            subtrack_id: subtractId,
-            current_day: 1,
-            is_active: true,
-            streak_count: 0,
-            grace_used: false,
-            graduated: false,
-            started_at: new Date().toISOString(),
-          })
-          .select()
-          .single()
-
-        if (error) {
-          console.error('createJourney failed:', error.message, error.details, error.hint)
-          return
-        }
-        console.log('Journey created — id:', newJourney?.id, newJourney)
+      if (error) {
+        console.error('createJourney failed:', error.message, error.details, error.hint)
+        return
       }
+      console.log('Journey created — id:', newJourney?.id, newJourney)
 
       await useJourneyStore.getState().hydrate(userId)
     }

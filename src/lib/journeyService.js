@@ -6,7 +6,9 @@ export async function getActiveJourney(userId) {
     .select('*, subtracks(*, tracks(*))')
     .eq('user_id', userId)
     .eq('is_active', true)
-    .single()
+    .order('started_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   if (error) {
     console.error('getActiveJourney error:', error.message, error.details, error.hint)
