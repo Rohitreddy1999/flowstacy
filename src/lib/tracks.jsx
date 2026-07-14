@@ -1,6 +1,6 @@
 export const TRACKS = [
   {
-    id: 'fitness',
+    id: 'move',
     name: 'Move',
     label: 'MOVE',
     tagline: 'Show up. Move. Become someone who never stops.',
@@ -36,42 +36,7 @@ export const TRACKS = [
     ]
   },
   {
-    id: 'discipline',
-    name: 'Focus',
-    label: 'FOCUS',
-    tagline: 'Master the small things. That\'s where everything compounds.',
-    color: '#3DF5A6',
-    lightColor: 'rgba(61,245,166,0.08)',
-    borderColor: 'rgba(61,245,166,0.5)',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24"
-        fill="none" stroke="currentColor"
-        strokeWidth="1.8" strokeLinecap="round"
-        strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <polyline points="12 6 12 12 16 14"/>
-      </svg>
-    ),
-    subtracks: [
-      { id: 'morning', name: 'Morning Routine',
-        desc: 'Design a powerful morning ritual',
-        available: false },
-      { id: 'reading', name: 'Daily Reading',
-        desc: 'Read 10 pages every single day',
-        available: false },
-      { id: 'steps', name: '10,000 Steps',
-        desc: 'Walk your way to clarity',
-        available: false },
-      { id: 'meditation', name: 'Meditation',
-        desc: '5 minutes of stillness that compounds',
-        available: false },
-      { id: 'detox', name: 'Digital Detox',
-        desc: 'Take back control from your phone',
-        available: false }
-    ]
-  },
-  {
-    id: 'instrument',
+    id: 'rhythm',
     name: 'Rhythm',
     label: 'RHYTHM',
     tagline: "You don't need talent. Just 21 days and one song.",
@@ -104,7 +69,7 @@ export const TRACKS = [
     ]
   },
   {
-    id: 'journal',
+    id: 'express',
     name: 'Express',
     label: 'EXPRESS',
     tagline: 'Write it down. Find out who you actually are.',
@@ -138,13 +103,13 @@ export const TRACKS = [
     ]
   },
   {
-    id: 'drawing',
+    id: 'calm',
     name: 'Calm',
     label: 'CALM',
     tagline: 'Slow down deliberately. Everything gets clearer.',
-    color: '#3DF5A6',
-    lightColor: 'rgba(61,245,166,0.08)',
-    borderColor: 'rgba(61,245,166,0.5)',
+    color: '#82D4FF',
+    lightColor: 'rgba(130,212,255,0.08)',
+    borderColor: 'rgba(130,212,255,0.5)',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24"
         fill="none" stroke="currentColor"
@@ -155,17 +120,40 @@ export const TRACKS = [
       </svg>
     ),
     subtracks: [
-      { id: 'sketching', name: 'Sketching Fundamentals',
-        desc: 'Lines, shapes, shading basics',
+      { id: 'breathwork', name: 'Breathwork Fundamentals',
+        desc: 'Build a daily breath practice that changes your nervous system',
+        available: true },
+      { id: 'meditation', name: 'Meditation',
+        desc: '5 minutes of stillness that compounds',
         available: false },
-      { id: 'portrait', name: 'Portrait Drawing',
-        desc: 'Learn to draw faces',
+      { id: 'yoga', name: 'Yoga & Flexibility',
+        desc: 'Move better, feel better',
+        available: false }
+    ]
+  },
+  {
+    id: 'mindful',
+    name: 'Mindful',
+    label: 'MINDFUL',
+    tagline: "Go inward. That's where everything changes.",
+    color: '#FF4FD8',
+    lightColor: 'rgba(255,79,216,0.08)',
+    borderColor: 'rgba(255,79,216,0.5)',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor"
+        strokeWidth="1.8" strokeLinecap="round"
+        strokeLinejoin="round">
+        <path d="M12 2a7 7 0 017 7c0 5-7 13-7 13S5 14 5 9a7 7 0 017-7z"/>
+        <circle cx="12" cy="9" r="2.5"/>
+      </svg>
+    ),
+    subtracks: [
+      { id: 'focus', name: 'Deep Focus',
+        desc: 'Train your attention like a muscle',
         available: false },
-      { id: 'urban', name: 'Urban Sketching',
-        desc: 'Draw buildings and streets',
-        available: false },
-      { id: 'nature', name: 'Nature & Animals',
-        desc: 'Bring the natural world to life',
+      { id: 'journaling', name: 'Daily Journaling',
+        desc: 'Write your way to clarity',
         available: false }
     ]
   }
