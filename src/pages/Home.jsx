@@ -120,7 +120,10 @@ export default function Home() {
 
   // ── Derived ────────────────────────────────────────────────────────────────
 
-  const steps   = dayContent?.steps   ?? parseTaskDescription(dayContent?.task_description).steps
+  const rawSteps = dayContent?.steps ?? parseTaskDescription(dayContent?.task_description).steps
+  const steps = Array.isArray(rawSteps) && rawSteps.length > 0 && typeof rawSteps[0] === 'object'
+    ? [...rawSteps].sort((a, b) => a.order - b.order).map(s => s.instruction)
+    : rawSteps
   const whyText = dayContent?.why_text ?? parseTaskDescription(dayContent?.task_description).why
   const refs = [
     { url: dayContent?.reference_url_1, label: dayContent?.ref_label_1 },
