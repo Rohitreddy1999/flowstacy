@@ -1,5 +1,5 @@
 # FLOWSTACY — Claude Code Context
-Last updated: July 2026 | Last session: [update this after every session]
+Last updated: July 2026 | Last session: 2026-07-14 — Supabase data layer migration (Tasks 1–5)
 
 ---
 
@@ -43,7 +43,12 @@ A 21-day habit formation PWA. Users answer discovery questions, pick a track and
 - BottomNav, PhoneFrame (desktop), LoadingScreen, AuroraBackground
 - PWA install prompt
 - Gym & Weightlifting 21-day curriculum in Supabase (Foundation / Build / Commit phases)
-- LocalStorage as primary journey state store
+- Supabase as source of truth for journey state (migration complete — localStorage keys removed)
+- src/lib/journeyService.js — getActiveJourney, createJourney, completeDay, calculateStreak
+- src/lib/journeyStore.js — Zustand store: journey, currentDay, streak, completedDays, hydrate, markDayComplete, reset
+- TrackSelect and SubTrackSelect fetch data from Supabase (tracks/subtracks tables)
+- App.jsx hydrates store on login + clears stale localStorage keys on boot
+- Home.jsx reads from journeyStore, calls completeDay() on hold-to-complete
 
 ---
 
@@ -60,10 +65,10 @@ A 21-day habit formation PWA. Users answer discovery questions, pick a track and
 ---
 
 ## WHAT TO BUILD THIS SESSION
-[REPLACE THIS before starting — one sentence describing exactly what you are building]
+Migrate data layer from localStorage to Supabase: dynamic track/subtrack fetching + journeyService.js.
 
 ## DEFINITION OF DONE
-[REPLACE THIS before starting — one sentence describing what done looks like visually or functionally]
+TrackSelect and SubTrackSelect fetch from Supabase; journeyService.js exports getActiveJourney, createJourney, completeDay, calculateStreak.
 
 ---
 

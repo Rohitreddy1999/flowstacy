@@ -1,23 +1,29 @@
-﻿import { useState } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { TRACKS } from '../lib/tracks'
-import { SUBTRACK_IDS } from '../lib/curriculum'
+import { SUBTRACK_IDS, getSubtracksByTrack } from '../lib/curriculum'
 import { supabase } from '../lib/supabase'
 
 export default function SubTrackSelect() {
   const navigate = useNavigate()
   const [selected, setSelected] = useState(null)
+  const [subtracks, setSubtracks] = useState([])
 
-  const trackId = localStorage.getItem('flowstacy_selected_track')
-  const track = TRACKS.find(t => t.id === trackId) || TRACKS[0]
+  const trackSlug = localStorage.getItem('flowstacy_selected_track')
+  const track = TRACKS.find(t => t.id === trackSlug) || TRACKS[0]
+
+  useEffect(() => {
+    if (!trackSlug) return
+    getSubtracksByTrack(trackSlug).then(data => { if (data) setSubtracks(data) })
+  }, [trackSlug])
 
   const handleContinue = async () => {
     if (!selected) return
 
     // Write to localStorage as primary (existing behavior)
     localStorage.setItem('flowstacy_selected_subtrack', selected)
-    localStorage.setItem('flowstacy_selected_track', trackId)
+    localStorage.setItem('flowstacy_selected_track', trackSlug)
 
     // Write to Supabase as source of truth
     const { data: { session } } = await supabase.auth.getSession()
@@ -143,9 +149,8 @@ export default function SubTrackSelect() {
           flexDirection: 'column',
           gap: '10px'
         }}>
-          {track.subtracks.map((sub, i) => {
-            const isSelected = selected === sub.id
-            const isAvailable = sub.available
+          {subtracks.map((sub, i) => {
+            const isSelected = selected === sub.slug
 
             return (
               <motion.button
@@ -153,8 +158,8 @@ export default function SubTrackSelect() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.07, duration: 0.4 }}
-                whileTap={isAvailable ? { scale: 0.99 } : {}}
-                onClick={() => isAvailable && setSelected(sub.id)}
+                whileTap={{ scale: 0.99 }}
+                onClick={() => setSelected(sub.slug)}
                 style={{
                   width: '100%',
                   minHeight: '68px',
@@ -163,71 +168,43 @@ export default function SubTrackSelect() {
                   padding: '0 16px',
                   background: isSelected
                     ? track.lightColor
-                    : isAvailable
-                    ? 'rgba(255,255,255,0.04)'
-                    : 'rgba(255,255,255,0.02)',
+                    : 'rgba(255,255,255,0.04)',
                   border: isSelected
                     ? `1px solid ${track.borderColor}`
                     : '1px solid rgba(255,255,255,0.07)',
                   borderRadius: '14px',
-                  cursor: isAvailable ? 'pointer' : 'default',
+                  cursor: 'pointer',
                   textAlign: 'left',
                   transition: 'all 0.2s',
-                  opacity: isAvailable ? 1 : 0.45,
                   gap: '12px'
                 }}
               >
-                {/* Available dot indicator */}
+                {/* Dot indicator */}
                 <div style={{
                   width: '8px',
                   height: '8px',
                   borderRadius: '50%',
-                  background: isAvailable
-                    ? isSelected
-                      ? track.color
-                      : 'rgba(255,255,255,0.2)'
-                    : 'rgba(255,255,255,0.1)',
+                  background: isSelected ? track.color : 'rgba(255,255,255,0.2)',
                   flexShrink: 0,
                   transition: 'all 0.2s'
                 }} />
 
                 {/* Text */}
                 <div style={{ flex: 1 }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    marginBottom: '3px'
+                  <p style={{
+                    fontSize: '15px',
+                    fontWeight: '500',
+                    color: 'white',
+                    margin: '0 0 3px'
                   }}>
-                    <p style={{
-                      fontSize: '15px',
-                      fontWeight: '500',
-                      color: isAvailable
-                        ? 'white'
-                        : 'rgba(255,255,255,0.4)',
-                      margin: 0
-                    }}>
-                      {sub.name}
-                    </p>
-                    {!isAvailable && (
-                      <span style={{
-                        fontSize: '10px',
-                        color: 'rgba(255,255,255,0.25)',
-                        background: 'rgba(255,255,255,0.06)',
-                        padding: '2px 7px',
-                        borderRadius: '10px',
-                        letterSpacing: '0.05em'
-                      }}>
-                        SOON
-                      </span>
-                    )}
-                  </div>
+                    {sub.name}
+                  </p>
                   <p style={{
                     fontSize: '12px',
                     color: 'rgba(255,255,255,0.3)',
                     margin: 0
                   }}>
-                    {sub.desc}
+                    {sub.description}
                   </p>
                 </div>
 

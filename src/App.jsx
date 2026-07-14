@@ -1,5 +1,8 @@
+import { useEffect } from 'react'
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
+import { supabase } from './lib/supabase'
+import { useJourneyStore } from './lib/journeyStore'
 import LoadingScreen from './components/LoadingScreen'
 import Welcome from './pages/Welcome'
 import InstallPrompt from './components/InstallPrompt'
@@ -94,7 +97,38 @@ function AppRoutes() {
   )
 }
 
+const STALE_KEYS = [
+  'flowstacy_current_day',
+  'flowstacy_completed_days',
+  'flowstacy_streak',
+  'flowstacy_reflections',
+  'flowstacy_selected_track',
+  'flowstacy_selected_subtrack',
+]
+
 function App() {
+  useEffect(() => {
+    // Task 4: clear stale localStorage keys once on app load
+    STALE_KEYS.forEach(k => localStorage.removeItem(k))
+
+    // Hydrate store if a session already exists (returning user)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) useJourneyStore.getState().hydrate(session.user.id)
+    })
+
+    // Keep store in sync with auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        useJourneyStore.getState().hydrate(session.user.id)
+      }
+      if (event === 'SIGNED_OUT') {
+        useJourneyStore.getState().reset()
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
   return (
     <PhoneFrame>
       <InstallPrompt />

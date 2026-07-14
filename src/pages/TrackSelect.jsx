@@ -1,7 +1,11 @@
-﻿import { useState } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { TRACKS } from '../lib/tracks'
+import { supabase } from '../lib/supabase'
+
+// Icon lookup by slug — keeps SVG icons local, data from Supabase
+const TRACK_ICONS = TRACKS.reduce((acc, t) => ({ ...acc, [t.id]: t.icon }), {})
 
 const TOTAL_STEPS = 5
 const CURRENT_STEP = 4
@@ -9,6 +13,15 @@ const CURRENT_STEP = 4
 export default function TrackSelect() {
   const navigate = useNavigate()
   const [selected, setSelected] = useState(null)
+  const [tracks, setTracks] = useState([])
+
+  useEffect(() => {
+    supabase
+      .from('tracks')
+      .select('id, name, slug, emoji, tagline')
+      .order('name')
+      .then(({ data }) => { if (data) setTracks(data) })
+  }, [])
 
   const handleContinue = () => {
     if (!selected) return
@@ -102,8 +115,8 @@ export default function TrackSelect() {
 
         {/* Track cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {TRACKS.map((track, i) => {
-            const isSelected = selected === track.id
+          {tracks.map((track, i) => {
+            const isSelected = selected === track.slug
             return (
               <motion.button
                 key={track.id}
@@ -111,7 +124,7 @@ export default function TrackSelect() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + i * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                 whileTap={{ scale: 0.985 }}
-                onClick={() => setSelected(track.id)}
+                onClick={() => setSelected(track.slug)}
                 style={{
                   width: '100%',
                   display: 'flex',
@@ -153,7 +166,7 @@ export default function TrackSelect() {
                   flexShrink: 0,
                   transition: 'all 0.2s',
                 }}>
-                  {track.icon}
+                  {TRACK_ICONS[track.slug] ?? <span style={{ fontSize: 20 }}>{track.emoji}</span>}
                 </div>
 
                 {/* Text */}
@@ -167,7 +180,7 @@ export default function TrackSelect() {
                     margin: '0 0 3px',
                     transition: 'color 0.2s',
                   }}>
-                    {track.label}
+                    {track.name.toUpperCase()}
                   </p>
                   <p style={{
                     fontFamily: '"Hanken Grotesk", sans-serif',
