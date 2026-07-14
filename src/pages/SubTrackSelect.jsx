@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { TRACKS } from '../lib/tracks'
-import { SUBTRACK_IDS, getSubtracksByTrack } from '../lib/curriculum'
+import { getSubtracksByTrack } from '../lib/curriculum'
 import { supabase } from '../lib/supabase'
 
 export default function SubTrackSelect() {
@@ -30,8 +30,8 @@ export default function SubTrackSelect() {
 
     if (session) {
       const userId = session.user.id
-      const subtractId = SUBTRACK_IDS[selected]
-      console.log('SubTrackSelect — userId:', userId, 'subtrack slug:', selected, 'subtrack_id:', subtractId)
+      const subtractId = selected
+      console.log('SubTrackSelect — userId:', userId, 'subtrack_id:', subtractId)
 
       const { data: existing } = await supabase
         .from('user_journeys')
@@ -168,7 +168,7 @@ export default function SubTrackSelect() {
           gap: '10px'
         }}>
           {subtracks.map((sub, i) => {
-            const isSelected = selected === sub.slug
+            const isSelected = selected === sub.id
 
             return (
               <motion.button
@@ -177,7 +177,7 @@ export default function SubTrackSelect() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.07, duration: 0.4 }}
                 whileTap={{ scale: 0.99 }}
-                onClick={() => setSelected(sub.slug)}
+                onClick={() => { console.log('subtrack selected:', sub.id, sub.name); setSelected(sub.id) }}
                 style={{
                   width: '100%',
                   minHeight: '68px',
