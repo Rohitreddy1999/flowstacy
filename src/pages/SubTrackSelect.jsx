@@ -2,6 +2,7 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { TRACKS } from '../lib/tracks'
+import { SUBTRACK_IDS } from '../lib/curriculum'
 import { supabase } from '../lib/supabase'
 
 export default function SubTrackSelect() {
@@ -26,7 +27,7 @@ export default function SubTrackSelect() {
         .from('user_journeys')
         .upsert({
           user_id: session.user.id,
-          subtrack_id: selected,
+          subtrack_id: SUBTRACK_IDS[selected],
           current_day: 1,
           is_active: true,
           streak_count: 0,
