@@ -1,58 +1,18 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const LIFE_STAGES = [
-  {
-    id: 'student',
-    title: 'Still studying',
-    description: 'Figuring out who I am and what I want',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-        <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'career',
-    title: 'Building my career',
-    description: 'Finding my footing in the real world',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="7" width="20" height="14" rx="2"/>
-        <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
-        <line x1="12" y1="12" x2="12" y2="16"/>
-        <line x1="10" y1="14" x2="14" y2="14"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'family',
-    title: 'Juggling family life',
-    description: 'Carving out time for myself',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-        <polyline points="9 22 9 12 15 12 15 22"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'reinventing',
-    title: 'Reinventing myself',
-    description: 'Starting a fresh new chapter',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="23 4 23 10 17 10"/>
-        <polyline points="1 20 1 14 7 14"/>
-        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-      </svg>
-    ),
-  },
-]
+const ABYSS = '#07090D'
+const FATHOM = '#0F141A'
+const SURGE = '#3DF5A6'
+const ARC_LIGHT = '#EAFFF5'
 
-const TOTAL_STEPS = 5
+const LIFE_STAGES = [
+  { id: 'student',     title: 'Still studying' },
+  { id: 'career',      title: 'Building my career' },
+  { id: 'family',      title: 'Juggling family life' },
+  { id: 'reinventing', title: 'Reinventing myself' },
+]
 
 export default function Onboarding() {
   const navigate = useNavigate()
@@ -65,13 +25,41 @@ export default function Onboarding() {
   }
 
   return (
-    <div style={{
-      minHeight: '100%',
-      background: '#07090D',
-      display: 'flex',
-      flexDirection: 'column',
-      position: 'relative',
-    }}>
+    <motion.div
+      initial={{ x: '100%', filter: 'blur(6px)' }}
+      animate={{ x: 0, filter: 'blur(0px)' }}
+      exit={{ x: '-100%', filter: 'blur(6px)' }}
+      transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+      style={{
+        minHeight: '100%',
+        background: ABYSS,
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Background question number */}
+      <motion.div
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: -10, opacity: 0.15 }}
+        transition={{ duration: 5, ease: 'easeOut' }}
+        style={{
+          position: 'absolute',
+          right: '-16px',
+          top: '30px',
+          fontFamily: '"Hanken Grotesk", sans-serif',
+          fontWeight: 800,
+          fontSize: '200px',
+          color: ARC_LIGHT,
+          lineHeight: 1,
+          pointerEvents: 'none',
+          userSelect: 'none',
+          zIndex: 0,
+        }}
+      >
+        01
+      </motion.div>
 
       {/* Top bar */}
       <div style={{
@@ -79,14 +67,16 @@ export default function Onboarding() {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '52px 24px 20px',
+        position: 'relative',
+        zIndex: 1,
       }}>
         <motion.button
-          whileTap={{ scale: 0.95 }}
+          whileTap={{ scale: 0.9 }}
           onClick={() => navigate('/welcome')}
           style={{
             background: 'none',
             border: 'none',
-            color: 'rgba(255,255,255,0.35)',
+            color: 'rgba(255,255,255,0.3)',
             cursor: 'pointer',
             padding: '4px',
             display: 'flex',
@@ -98,42 +88,27 @@ export default function Onboarding() {
           </svg>
         </motion.button>
 
-        {/* Step dots */}
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-          {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                width: i === 0 ? '16px' : '5px',
-                height: '5px',
-                borderRadius: '3px',
-                background: i === 0 ? '#EAFFF5' : 'rgba(255,255,255,0.15)',
-                transition: 'all 0.3s',
-              }}
-            />
-          ))}
-        </div>
-
         <div style={{ width: '26px' }} />
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, padding: '8px 24px 160px' }}>
+      <div style={{ flex: 1, padding: '8px 24px 180px', position: 'relative', zIndex: 1 }}>
 
+        {/* Heading block */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          style={{ marginBottom: '32px' }}
+          initial={{ opacity: 0, y: 20, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          style={{ marginBottom: '36px' }}
         >
           <h1 style={{
-            fontFamily: '"Space Grotesk", sans-serif',
+            fontFamily: '"Hanken Grotesk", sans-serif',
             fontWeight: 700,
             fontSize: '26px',
             color: 'rgba(255,255,255,0.95)',
-            lineHeight: 1.25,
+            lineHeight: 1.28,
             margin: '0 0 10px',
-            letterSpacing: '-0.02em',
+            letterSpacing: '-0.022em',
           }}>
             Before we begin —<br />
             where are you in<br />
@@ -141,7 +116,7 @@ export default function Onboarding() {
           </h1>
           <p style={{
             fontFamily: '"Hanken Grotesk", sans-serif',
-            fontSize: '13.5px',
+            fontSize: '14px',
             color: 'rgba(255,255,255,0.35)',
             margin: 0,
             lineHeight: 1.5,
@@ -157,99 +132,88 @@ export default function Onboarding() {
             return (
               <motion.button
                 key={option.id}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + i * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                whileTap={{ scale: 0.985 }}
+                initial={{ opacity: 0, y: 16, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{
+                  delay: 0.08 + i * 0.08,
+                  type: 'spring',
+                  stiffness: 320,
+                  damping: 26,
+                }}
+                whileTap={{ scale: 0.983 }}
                 onClick={() => setSelected(option.id)}
                 style={{
                   width: '100%',
                   display: 'flex',
                   alignItems: 'center',
-                  padding: '14px 16px',
-                  background: isSelected ? 'rgba(61,245,166,0.06)' : '#0F141A',
+                  justifyContent: 'space-between',
+                  padding: '20px 20px',
+                  background: isSelected ? 'rgba(61,245,166,0.04)' : FATHOM,
                   border: isSelected
-                    ? '1px solid rgba(61,245,166,0.45)'
-                    : '1px solid rgba(255,255,255,0.07)',
+                    ? `1.5px solid ${SURGE}`
+                    : '1.5px solid rgba(255,255,255,0.07)',
                   borderRadius: '16px',
                   cursor: 'pointer',
                   textAlign: 'left',
-                  transition: 'all 0.2s ease',
-                  gap: '14px',
                   position: 'relative',
                   overflow: 'hidden',
+                  transition: 'background 150ms ease',
+                  outline: 'none',
                 }}
               >
-                {/* Surge glow on selected */}
-                {isSelected && (
-                  <div style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'radial-gradient(ellipse at left center, rgba(61,245,166,0.07) 0%, transparent 70%)',
-                    pointerEvents: 'none',
-                  }} />
-                )}
+                {/* Surge radial glow */}
+                <AnimatePresence>
+                  {isSelected && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'radial-gradient(ellipse at 0% 50%, rgba(61,245,166,0.08) 0%, transparent 65%)',
+                        pointerEvents: 'none',
+                      }}
+                    />
+                  )}
+                </AnimatePresence>
 
-                {/* Icon well */}
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '10px',
-                  background: isSelected ? 'rgba(61,245,166,0.12)' : 'rgba(255,255,255,0.05)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: isSelected ? '#3DF5A6' : 'rgba(255,255,255,0.4)',
-                  flexShrink: 0,
-                  transition: 'all 0.2s',
+                <span style={{
+                  fontFamily: '"Hanken Grotesk", sans-serif',
+                  fontSize: '15px',
+                  fontWeight: isSelected ? 600 : 400,
+                  color: isSelected ? ARC_LIGHT : 'rgba(255,255,255,0.6)',
+                  transition: 'color 150ms ease',
+                  position: 'relative',
+                  zIndex: 1,
                 }}>
-                  {option.icon}
-                </div>
+                  {option.title}
+                </span>
 
-                {/* Text */}
-                <div style={{ flex: 1 }}>
-                  <p style={{
-                    fontFamily: '"Hanken Grotesk", sans-serif',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    color: isSelected ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.75)',
-                    margin: '0 0 2px',
-                    transition: 'color 0.2s',
-                  }}>
-                    {option.title}
-                  </p>
-                  <p style={{
-                    fontFamily: '"Hanken Grotesk", sans-serif',
-                    fontSize: '12px',
-                    color: 'rgba(255,255,255,0.35)',
-                    margin: 0,
-                    lineHeight: 1.4,
-                  }}>
-                    {option.description}
-                  </p>
-                </div>
-
-                {/* Checkmark */}
+                {/* Checkmark — spring in/out */}
                 <AnimatePresence>
                   {isSelected && (
                     <motion.div
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0, opacity: 0 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                      transition={{ type: 'spring', stiffness: 520, damping: 20 }}
                       style={{
-                        width: '20px',
-                        height: '20px',
+                        width: '22px',
+                        height: '22px',
                         borderRadius: '50%',
-                        background: '#3DF5A6',
+                        background: SURGE,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         flexShrink: 0,
+                        position: 'relative',
+                        zIndex: 1,
                       }}
                     >
                       <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                        <path d="M1 4l3 3 5-6" stroke="#07090D" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M1 4l3 3 5-6" stroke={ABYSS} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </motion.div>
                   )}
@@ -269,35 +233,65 @@ export default function Onboarding() {
         width: '100%',
         maxWidth: '480px',
         padding: '16px 24px 44px',
-        background: 'linear-gradient(to bottom, transparent, #07090D 40%)',
+        background: `linear-gradient(to bottom, transparent, ${ABYSS} 38%)`,
         pointerEvents: 'none',
+        zIndex: 10,
       }}>
-        <motion.button
-          whileTap={{ scale: selected ? 0.97 : 1 }}
-          onClick={handleContinue}
-          animate={{
-            opacity: selected ? 1 : 0.2,
-            y: selected ? 0 : 4,
-          }}
-          transition={{ duration: 0.25 }}
-          style={{
+        {/* Disabled placeholder — 40% opacity, no interaction */}
+        {!selected && (
+          <div style={{
             width: '100%',
-            height: '52px',
-            background: '#3DF5A6',
-            border: 'none',
-            borderRadius: '26px',
-            color: '#07090D',
-            fontFamily: '"Hanken Grotesk", sans-serif',
-            fontSize: '15px',
-            fontWeight: 600,
-            cursor: selected ? 'pointer' : 'not-allowed',
+            height: '54px',
+            background: SURGE,
+            borderRadius: '27px',
+            opacity: 0.4,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             marginBottom: '10px',
-            pointerEvents: 'auto',
-            letterSpacing: '0.01em',
-          }}
-        >
-          Continue
-        </motion.button>
+          }}>
+            <span style={{
+              fontFamily: '"Hanken Grotesk", sans-serif',
+              fontSize: '15px',
+              fontWeight: 700,
+              color: ABYSS,
+            }}>
+              Continue
+            </span>
+          </div>
+        )}
+
+        {/* Active CTA — slides up from below */}
+        <AnimatePresence>
+          {selected && (
+            <motion.button
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 10, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 30 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={handleContinue}
+              style={{
+                width: '100%',
+                height: '54px',
+                background: SURGE,
+                border: 'none',
+                borderRadius: '27px',
+                color: ABYSS,
+                fontFamily: '"Hanken Grotesk", sans-serif',
+                fontSize: '15px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                marginBottom: '10px',
+                pointerEvents: 'auto',
+                letterSpacing: '0.01em',
+                display: 'block',
+              }}
+            >
+              Continue
+            </motion.button>
+          )}
+        </AnimatePresence>
 
         <button
           onClick={() => {
@@ -319,6 +313,6 @@ export default function Onboarding() {
           Skip for now
         </button>
       </div>
-    </div>
+    </motion.div>
   )
 }

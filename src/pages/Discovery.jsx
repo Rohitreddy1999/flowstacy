@@ -1,5 +1,6 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { AnimatePresence } from 'framer-motion'
 import QuestionScreen from '../components/QuestionScreen'
 import { supabase } from '../lib/supabase'
 
@@ -9,58 +10,59 @@ const QUESTIONS = [
     question: "There's a version of you that doesn't exist yet. What does that person do that you don't?",
     subtext: 'Pick up to 2.',
     multiSelect: true,
+    maxSelect: 2,
     options: [
-      { id: 'move',      label: "They move their body without negotiating with themselves.",     tracks: ['fitness'] },
-      { id: 'rituals',   label: "They have rituals they never skip. Not once.",                 tracks: ['discipline'] },
-      { id: 'create',    label: "They create or make something every single day.",               tracks: ['instrument', 'journal'] },
-      { id: 'write',     label: "They write down what they're thinking instead of just carrying it.", tracks: ['journal'] },
-      { id: 'stillness', label: "They've found stillness. They don't need noise to feel okay.", tracks: ['drawing'] },
+      { id: 'move',    label: "They move their body without negotiating with themselves", scores: { Move: 3 } },
+      { id: 'rituals', label: "They have rituals they never skip. Not once.",              scores: { Calm: 2, Mindful: 1 } },
+      { id: 'create',  label: "They create or make something every single day",            scores: { Express: 2, Rhythm: 1 } },
+      { id: 'write',   label: "They write down what they're thinking instead of carrying it", scores: { Mindful: 3 } },
     ],
   },
   {
     id: 'q2',
-    question: "The voice that talks you out of it — what does it actually say?",
-    subtext: 'Pick up to 2.',
-    multiSelect: true,
+    question: "Honestly — where are you running on right now?",
+    multiSelect: false,
     options: [
-      { id: 'tired',     label: "I'm too tired right now. I'll start tomorrow.",                tracks: ['fitness', 'discipline'] },
-      { id: 'order',     label: "I need to get my life in order first. Then I'll start.",       tracks: ['discipline'] },
-      { id: 'creative',  label: "I'm probably not creative or talented enough for this.",       tracks: ['instrument', 'drawing'] },
-      { id: 'point',     label: "What's even the point. I've tried before.",                    tracks: ['journal', 'drawing'] },
-      { id: 'time',      label: "I don't have time. That's just the truth.",                    tracks: ['fitness', 'discipline'] },
+      { id: 'fumes',    label: "Running on fumes. I'm more tired than I let on.",              scores: { Calm: 3 } },
+      { id: 'restless', label: "Restless. I have energy but nowhere to put it.",               scores: { Move: 3 } },
+      { id: 'numb',     label: "Numb. Not low, not high. Just flat.",                          scores: { Mindful: 2, Express: 1 } },
+      { id: 'anxious',  label: "Anxious. My mind doesn't stop even when my body does.",       scores: { Mindful: 3, Calm: 1 } },
+      { id: 'okay',     label: "Actually okay. I just want to build something real.",          scores: { Express: 2, Rhythm: 2 } },
     ],
   },
   {
     id: 'q3',
-    question: "How many times have you started over?",
-    subtext: 'Be honest. Nobody is counting.',
-    multiSelect: false,
+    question: "What actually stops you — be honest.",
+    subtext: 'Pick up to 2.',
+    multiSelect: true,
+    maxSelect: 2,
     options: [
-      { id: 'tenth',     label: "This might be my 10th attempt at something like this.",        tracks: ['discipline', 'journal'] },
-      { id: 'lost',      label: "I stopped counting a while ago.",                              tracks: ['discipline', 'drawing'] },
-      { id: 'few',       label: "A few times. But I feel genuinely different now.",             tracks: ['fitness', 'instrument'] },
-      { id: 'never',     label: "Honestly — I've never really started. Just planned.",         tracks: ['journal', 'drawing'] },
-      { id: 'scared',    label: "Too many. That's why I'm scared to try again.",               tracks: ['fitness', 'discipline'] },
+      { id: 'thread',    label: "I start strong then lose the thread after a few days.",        scores: { Calm: 2 } },
+      { id: 'begin',     label: "I don't know where to begin so I don't begin.",               scores: { Move: 2 } },
+      { id: 'wrong',     label: "I pick the wrong thing and quit when it doesn't feel right.", scores: { Mindful: 2 } },
+      { id: 'interrupt', label: "Life interrupts and I never restart after.",                   scores: { Rhythm: 2 } },
+      { id: 'afraid',    label: "I'm afraid of finding out I can't stick to anything.",        scores: { Express: 2 } },
     ],
   },
   {
     id: 'q4',
-    question: "When you see someone who has what you want — your very first honest reaction?",
-    subtext: "The real one. Not the one you'd say out loud.",
-    multiSelect: false,
+    question: "Which of these feels most like something you secretly believe about yourself?",
+    subtext: 'Pick up to 2.',
+    multiSelect: true,
+    maxSelect: 2,
     options: [
-      { id: 'inspired',  label: "Inspired. Then I close the app and forget about it.",          tracks: ['fitness', 'instrument'] },
-      { id: 'envy',      label: "Something I don't want to name. Maybe envy.",                  tracks: ['journal', 'drawing'] },
-      { id: 'explain',   label: "I immediately explain to myself why it's easier for them.",    tracks: ['discipline', 'journal'] },
-      { id: 'numb',      label: "Nothing. I think I've gone numb to it.",                       tracks: ['drawing', 'journal'] },
-      { id: 'good',      label: "'Good for them.' But I don't really feel it.",                 tracks: ['instrument', 'drawing'] },
+      { id: 'creative', label: "I'm not really a creative person. That's just not me.",                     scores: { Express: 3 } },
+      { id: 'lazy',     label: "I'm lazy by nature. I've accepted it.",                                      scores: { Move: 2 } },
+      { id: 'think',    label: "I care too much what people think to really commit.",                        scores: { Mindful: 2, Express: 1 } },
+      { id: 'lost',     label: "I've lost touch with what I actually want.",                                 scores: { Mindful: 3 } },
+      { id: 'capable',  label: "I'm capable of more than I'm currently doing. Just haven't proven it yet.", scores: { Move: 2, Rhythm: 1 } },
     ],
   },
   {
     id: 'q5',
     question: "What's the one thing you keep saying you'll start — when life calms down, when you're ready, when the time is right?",
     openText: true,
-    openTextPlaceholder: 'The thing you\'ve been putting off the longest...',
+    openTextPlaceholder: "The thing you've been putting off the longest...",
   },
 ]
 
@@ -92,8 +94,9 @@ async function saveDiscoveryToSupabase(answers, trackScores, openAnswer) {
 export default function Discovery() {
   const navigate = useNavigate()
   const [currentQ, setCurrentQ] = useState(0)
+  const [slideDir, setSlideDir] = useState(1)
   const [trackScores, setTrackScores] = useState({
-    fitness: 0, discipline: 0, instrument: 0, journal: 0, drawing: 0,
+    Move: 0, Calm: 0, Mindful: 0, Express: 0, Rhythm: 0,
   })
   const [answers, setAnswers] = useState({})
 
@@ -104,34 +107,33 @@ export default function Discovery() {
     const updatedAnswers = { ...answers, [q.id]: selectedArr }
     setAnswers(updatedAnswers)
 
-    // Accumulate track scores from option mappings
     if (!q.openText && q.options) {
       const newScores = { ...trackScores }
       selectedArr.forEach(id => {
         const option = q.options.find(o => o.id === id)
-        option?.tracks?.forEach(track => {
-          newScores[track] = (newScores[track] || 0) + 1
-        })
+        if (option?.scores) {
+          Object.entries(option.scores).forEach(([track, pts]) => {
+            newScores[track] = (newScores[track] || 0) + pts
+          })
+        }
       })
       setTrackScores(newScores)
 
       if (currentQ < QUESTIONS.length - 1) {
+        setSlideDir(1)
         setCurrentQ(currentQ + 1)
       }
     } else if (q.openText) {
-      // Last question — save everything and navigate
       const openAnswer = selected
       localStorage.setItem('flowstacy_scores', JSON.stringify(trackScores))
       localStorage.setItem('flowstacy_open_answer', openAnswer)
-
-      // Save to Supabase (non-blocking)
       saveDiscoveryToSupabase(updatedAnswers, trackScores, openAnswer)
-
       navigate('/recommendation')
     }
   }
 
   const handleBack = () => {
+    setSlideDir(-1)
     if (currentQ === 0) navigate('/bridge')
     else setCurrentQ(currentQ - 1)
   }
@@ -139,19 +141,23 @@ export default function Discovery() {
   const q = QUESTIONS[currentQ]
 
   return (
-    <QuestionScreen
-      key={currentQ}
-      stepNumber={currentQ + 1}
-      totalSteps={QUESTIONS.length}
-      question={q.question}
-      subtext={q.subtext}
-      options={q.options}
-      multiSelect={q.multiSelect}
-      openText={q.openText}
-      openTextPlaceholder={q.openTextPlaceholder}
-      onContinue={handleContinue}
-      onBack={handleBack}
-      continueLabel={currentQ === QUESTIONS.length - 1 ? 'Show my match' : 'Continue'}
-    />
+    <AnimatePresence mode="wait">
+      <QuestionScreen
+        key={currentQ}
+        stepNumber={currentQ + 1}
+        totalSteps={QUESTIONS.length}
+        question={q.question}
+        subtext={q.subtext}
+        options={q.options}
+        multiSelect={q.multiSelect}
+        maxSelect={q.maxSelect ?? 2}
+        openText={q.openText}
+        openTextPlaceholder={q.openTextPlaceholder}
+        onContinue={handleContinue}
+        onBack={handleBack}
+        slideDir={slideDir}
+        continueLabel={currentQ === QUESTIONS.length - 1 ? 'Show my match →' : 'Continue'}
+      />
+    </AnimatePresence>
   )
 }

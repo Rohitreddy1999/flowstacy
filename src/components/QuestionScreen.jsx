@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
+const ABYSS = '#07090D'
+const FATHOM = '#0F141A'
+const SURGE = '#3DF5A6'
+const ARC_LIGHT = '#EAFFF5'
+
 export default function QuestionScreen({
   stepNumber,
   totalSteps,
@@ -8,15 +13,18 @@ export default function QuestionScreen({
   subtext,
   options,
   multiSelect,
+  maxSelect = 2,
   onContinue,
   onBack,
   openText,
   openTextPlaceholder,
   continueLabel,
+  slideDir = 1,
 }) {
   const [selected, setSelected] = useState([])
   const [textValue, setTextValue] = useState('')
   const [textFocused, setTextFocused] = useState(false)
+  const [shake, setShake] = useState(false)
 
   useEffect(() => {
     setSelected([])
@@ -25,11 +33,14 @@ export default function QuestionScreen({
 
   const toggleOption = (id) => {
     if (multiSelect) {
-      setSelected(prev =>
-        prev.includes(id)
-          ? prev.filter(s => s !== id)
-          : prev.length < 2 ? [...prev, id] : prev
-      )
+      if (selected.includes(id)) {
+        setSelected(selected.filter(s => s !== id))
+      } else if (selected.length < maxSelect) {
+        setSelected([...selected, id])
+      } else {
+        setShake(true)
+        setTimeout(() => setShake(false), 500)
+      }
     } else {
       setSelected([id])
     }
@@ -47,13 +58,41 @@ export default function QuestionScreen({
   const ghostNum = String(stepNumber).padStart(2, '0')
 
   return (
-    <div style={{
-      minHeight: '100%',
-      background: '#07090D',
-      display: 'flex',
-      flexDirection: 'column',
-      position: 'relative',
-    }}>
+    <motion.div
+      initial={{ x: slideDir * 100 + '%', filter: 'blur(6px)' }}
+      animate={{ x: 0, filter: 'blur(0px)' }}
+      exit={{ x: slideDir * -100 + '%', filter: 'blur(6px)' }}
+      transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+      style={{
+        minHeight: '100%',
+        background: ABYSS,
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Background ghost number — drifts upward on mount */}
+      <motion.div
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: -10, opacity: 0.15 }}
+        transition={{ duration: 5, ease: 'easeOut' }}
+        style={{
+          position: 'absolute',
+          right: '-16px',
+          top: '24px',
+          fontFamily: '"Hanken Grotesk", sans-serif',
+          fontWeight: 800,
+          fontSize: '200px',
+          color: ARC_LIGHT,
+          lineHeight: 1,
+          pointerEvents: 'none',
+          userSelect: 'none',
+          zIndex: 0,
+        }}
+      >
+        {ghostNum}
+      </motion.div>
 
       {/* Top bar */}
       <div style={{
@@ -61,14 +100,16 @@ export default function QuestionScreen({
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '52px 24px 20px',
+        position: 'relative',
+        zIndex: 1,
       }}>
         <motion.button
-          whileTap={{ scale: 0.95 }}
+          whileTap={{ scale: 0.9 }}
           onClick={onBack}
           style={{
             background: 'none',
             border: 'none',
-            color: 'rgba(255,255,255,0.35)',
+            color: 'rgba(255,255,255,0.3)',
             cursor: 'pointer',
             padding: '4px',
             display: 'flex',
@@ -80,18 +121,17 @@ export default function QuestionScreen({
           </svg>
         </motion.button>
 
-        {/* Step dots */}
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+        {/* Progress dots — active pill stretches via spring */}
+        <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
           {Array.from({ length: totalSteps }).map((_, i) => (
-            <div
+            <motion.div
               key={i}
-              style={{
-                width: i === stepNumber - 1 ? '16px' : '5px',
-                height: '5px',
-                borderRadius: '3px',
-                background: i < stepNumber ? '#EAFFF5' : 'rgba(255,255,255,0.15)',
-                transition: 'all 0.3s ease',
+              animate={{
+                width: i === stepNumber - 1 ? 20 : 5,
+                background: i < stepNumber ? SURGE : 'rgba(255,255,255,0.15)',
               }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              style={{ height: '5px', borderRadius: '3px' }}
             />
           ))}
         </div>
@@ -100,196 +140,215 @@ export default function QuestionScreen({
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, padding: '0 24px 160px', position: 'relative' }}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={stepNumber}
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -24 }}
-            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {/* Ghost number — sits behind question */}
-            <div style={{
-              position: 'absolute',
-              top: '-8px',
-              right: '16px',
-              fontFamily: '"Space Grotesk", sans-serif',
-              fontWeight: 900,
-              fontSize: '120px',
-              lineHeight: 1,
-              color: 'rgba(255,255,255,0.04)',
-              letterSpacing: '-0.04em',
-              userSelect: 'none',
-              pointerEvents: 'none',
+      <div style={{ flex: 1, padding: '0 24px 180px', position: 'relative', zIndex: 1 }}>
+
+        {/* Question heading — fades in on mount */}
+        <motion.div
+          initial={{ opacity: 0, y: 18, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          style={{ marginBottom: '28px' }}
+        >
+          <h1 style={{
+            fontFamily: '"Hanken Grotesk", sans-serif',
+            fontWeight: 700,
+            fontSize: '24px',
+            color: 'rgba(255,255,255,0.95)',
+            lineHeight: 1.32,
+            margin: '0 0 10px',
+            letterSpacing: '-0.022em',
+          }}>
+            {question}
+          </h1>
+          {subtext && (
+            <p style={{
+              fontFamily: '"Hanken Grotesk", sans-serif',
+              fontSize: '13px',
+              color: 'rgba(255,255,255,0.3)',
+              margin: 0,
+              lineHeight: 1.5,
             }}>
-              {ghostNum}
-            </div>
+              {subtext}
+            </p>
+          )}
+        </motion.div>
 
-            {/* Question */}
-            <div style={{ marginBottom: '28px', position: 'relative' }}>
-              <h1 style={{
-                fontFamily: '"Space Grotesk", sans-serif',
-                fontWeight: 700,
-                fontSize: '26px',
-                color: 'rgba(255,255,255,0.95)',
-                lineHeight: 1.25,
-                margin: '0 0 10px',
-                letterSpacing: '-0.02em',
-              }}>
-                {question}
-              </h1>
-              {subtext && (
-                <p style={{
+        {/* Open text — Q6 */}
+        {openText ? (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <motion.div
+              animate={{
+                borderColor: textFocused
+                  ? 'rgba(61,245,166,0.4)'
+                  : 'rgba(255,255,255,0.07)',
+              }}
+              transition={{ duration: 0.2 }}
+              style={{
+                background: FATHOM,
+                border: '1.5px solid rgba(255,255,255,0.07)',
+                borderRadius: '16px',
+                padding: '16px 18px',
+              }}
+            >
+              <textarea
+                value={textValue}
+                onChange={e => setTextValue(e.target.value)}
+                onFocus={() => setTextFocused(true)}
+                onBlur={() => setTextFocused(false)}
+                placeholder={openTextPlaceholder}
+                rows={5}
+                style={{
+                  width: '100%',
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'rgba(255,255,255,0.9)',
                   fontFamily: '"Hanken Grotesk", sans-serif',
-                  fontSize: '13.5px',
-                  color: 'rgba(255,255,255,0.35)',
-                  margin: 0,
-                  lineHeight: 1.5,
-                }}>
-                  {subtext}
-                </p>
-              )}
-            </div>
+                  fontSize: '15px',
+                  lineHeight: 1.65,
+                  resize: 'none',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </motion.div>
+            <p style={{
+              fontFamily: '"Hanken Grotesk", sans-serif',
+              fontSize: '11.5px',
+              color: 'rgba(255,255,255,0.18)',
+              marginTop: '12px',
+              letterSpacing: '0.02em',
+              textAlign: 'center',
+            }}>
+              Nobody else sees this. Just be honest.
+            </p>
+          </motion.div>
+        ) : (
+          /* Option cards — shake container when max exceeded */
+          <motion.div
+            animate={shake ? { x: [0, -9, 9, -7, 7, -4, 4, 0] } : { x: 0 }}
+            transition={{ duration: 0.45, ease: 'easeInOut' }}
+            style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}
+          >
+            {options.map((option, i) => {
+              const isSelected = selected.includes(option.id)
+              return (
+                <motion.button
+                  key={option.id}
+                  initial={{ opacity: 0, y: 16, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{
+                    delay: i * 0.08,
+                    type: 'spring',
+                    stiffness: 320,
+                    damping: 26,
+                  }}
+                  whileTap={{ scale: 0.984 }}
+                  onClick={() => toggleOption(option.id)}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '16px 18px',
+                    background: isSelected ? 'rgba(61,245,166,0.04)' : FATHOM,
+                    border: isSelected
+                      ? `1.5px solid ${SURGE}`
+                      : '1.5px solid rgba(255,255,255,0.07)',
+                    borderRadius: '14px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    gap: '12px',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    outline: 'none',
+                    transition: 'background 150ms ease',
+                  }}
+                >
+                  {/* Surge left-glow on selected */}
+                  <AnimatePresence>
+                    {isSelected && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          background: 'radial-gradient(ellipse at 0% 50%, rgba(61,245,166,0.07) 0%, transparent 70%)',
+                          pointerEvents: 'none',
+                        }}
+                      />
+                    )}
+                  </AnimatePresence>
 
-            {/* Options or open text */}
-            {openText ? (
-              <div>
-                <div style={{
-                  background: '#0F141A',
-                  border: textFocused
-                    ? '1px solid rgba(130,212,255,0.35)'
-                    : '1px solid rgba(255,255,255,0.07)',
-                  borderRadius: '16px',
-                  padding: '16px',
-                  transition: 'border-color 0.2s',
-                }}>
-                  <textarea
-                    value={textValue}
-                    onChange={e => setTextValue(e.target.value)}
-                    onFocus={() => setTextFocused(true)}
-                    onBlur={() => setTextFocused(false)}
-                    placeholder={openTextPlaceholder}
-                    rows={5}
-                    style={{
-                      width: '100%',
-                      background: 'transparent',
-                      border: 'none',
-                      color: 'rgba(255,255,255,0.9)',
-                      fontFamily: '"Hanken Grotesk", sans-serif',
-                      fontSize: '15px',
-                      lineHeight: 1.65,
-                      resize: 'none',
-                      outline: 'none',
-                      boxSizing: 'border-box',
-                    }}
-                  />
-                </div>
-                <p style={{
+                  <span style={{
+                    fontFamily: '"Hanken Grotesk", sans-serif',
+                    fontSize: '14px',
+                    fontWeight: isSelected ? 500 : 400,
+                    color: isSelected ? ARC_LIGHT : 'rgba(255,255,255,0.58)',
+                    lineHeight: 1.5,
+                    flex: 1,
+                    position: 'relative',
+                    zIndex: 1,
+                    transition: 'color 150ms ease',
+                  }}>
+                    {option.label}
+                  </span>
+
+                  {/* Checkmark — springs in */}
+                  <AnimatePresence>
+                    {isSelected && (
+                      <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        transition={{ type: 'spring', stiffness: 520, damping: 20 }}
+                        style={{
+                          width: '20px',
+                          height: '20px',
+                          borderRadius: '50%',
+                          background: SURGE,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                          position: 'relative',
+                          zIndex: 1,
+                        }}
+                      >
+                        <svg width="9" height="7" viewBox="0 0 10 8" fill="none">
+                          <path d="M1 4l3 3 5-6" stroke={ABYSS} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+              )
+            })}
+
+            {multiSelect && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: (options?.length ?? 0) * 0.08 + 0.1 }}
+                style={{
                   fontFamily: '"Hanken Grotesk", sans-serif',
                   fontSize: '11px',
                   color: 'rgba(255,255,255,0.18)',
-                  marginTop: '10px',
-                  letterSpacing: '0.02em',
-                }}>
-                  Nobody else sees this. Just be honest.
-                </p>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
-                {options.map((option, i) => {
-                  const isSelected = selected.includes(option.id)
-                  return (
-                    <motion.button
-                      key={option.id}
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.055, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                      whileTap={{ scale: 0.985 }}
-                      onClick={() => toggleOption(option.id)}
-                      style={{
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: '14px 16px',
-                        background: isSelected ? 'rgba(61,245,166,0.06)' : '#0F141A',
-                        border: isSelected
-                          ? '1px solid rgba(61,245,166,0.4)'
-                          : '1px solid rgba(255,255,255,0.07)',
-                        borderRadius: '14px',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                        transition: 'all 0.18s ease',
-                        gap: '12px',
-                        position: 'relative',
-                        overflow: 'hidden',
-                      }}
-                    >
-                      {isSelected && (
-                        <div style={{
-                          position: 'absolute',
-                          inset: 0,
-                          background: 'radial-gradient(ellipse at left center, rgba(61,245,166,0.06) 0%, transparent 70%)',
-                          pointerEvents: 'none',
-                        }} />
-                      )}
-
-                      <span style={{
-                        fontFamily: '"Hanken Grotesk", sans-serif',
-                        fontSize: '13.5px',
-                        fontWeight: 500,
-                        color: isSelected ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.75)',
-                        lineHeight: 1.5,
-                        flex: 1,
-                        transition: 'color 0.18s',
-                      }}>
-                        {option.label}
-                      </span>
-
-                      <AnimatePresence>
-                        {isSelected && (
-                          <motion.div
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0, opacity: 0 }}
-                            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                            style={{
-                              width: '18px',
-                              height: '18px',
-                              borderRadius: '50%',
-                              background: '#3DF5A6',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              flexShrink: 0,
-                            }}
-                          >
-                            <svg width="9" height="7" viewBox="0 0 10 8" fill="none">
-                              <path d="M1 4l3 3 5-6" stroke="#07090D" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </motion.button>
-                  )
-                })}
-
-                {multiSelect && (
-                  <p style={{
-                    fontFamily: '"Hanken Grotesk", sans-serif',
-                    fontSize: '11px',
-                    color: 'rgba(255,255,255,0.2)',
-                    textAlign: 'center',
-                    marginTop: '4px',
-                    letterSpacing: '0.03em',
-                  }}>
-                    Pick up to 2
-                  </p>
-                )}
-              </div>
+                  textAlign: 'center',
+                  marginTop: '4px',
+                  letterSpacing: '0.03em',
+                }}
+              >
+                Pick up to {maxSelect}
+              </motion.p>
             )}
           </motion.div>
-        </AnimatePresence>
+        )}
       </div>
 
       {/* Bottom CTA */}
@@ -301,32 +360,63 @@ export default function QuestionScreen({
         width: '100%',
         maxWidth: '480px',
         padding: '16px 24px 44px',
-        background: 'linear-gradient(to bottom, transparent, #07090D 40%)',
+        background: `linear-gradient(to bottom, transparent, ${ABYSS} 38%)`,
         pointerEvents: 'none',
+        zIndex: 10,
       }}>
-        <motion.button
-          whileTap={{ scale: canContinue ? 0.97 : 1 }}
-          onClick={handleContinue}
-          animate={{ opacity: canContinue ? 1 : 0.2, y: canContinue ? 0 : 4 }}
-          transition={{ duration: 0.2 }}
-          style={{
+        {/* Disabled placeholder — 40% opacity, no interaction */}
+        {!canContinue && (
+          <div style={{
             width: '100%',
-            height: '52px',
-            background: '#3DF5A6',
-            border: 'none',
-            borderRadius: '26px',
-            color: '#07090D',
-            fontFamily: '"Hanken Grotesk", sans-serif',
-            fontSize: '15px',
-            fontWeight: 600,
-            cursor: canContinue ? 'pointer' : 'not-allowed',
-            pointerEvents: 'auto',
-            letterSpacing: '0.01em',
-          }}
-        >
-          {continueLabel || 'Continue'}
-        </motion.button>
+            height: '54px',
+            background: SURGE,
+            borderRadius: '27px',
+            opacity: 0.4,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <span style={{
+              fontFamily: '"Hanken Grotesk", sans-serif',
+              fontSize: '15px',
+              fontWeight: 700,
+              color: ABYSS,
+            }}>
+              {continueLabel || 'Continue'}
+            </span>
+          </div>
+        )}
+
+        {/* Active CTA — slides up when first selection made */}
+        <AnimatePresence>
+          {canContinue && (
+            <motion.button
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 10, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 30 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={handleContinue}
+              style={{
+                width: '100%',
+                height: '54px',
+                background: SURGE,
+                border: 'none',
+                borderRadius: '27px',
+                color: ABYSS,
+                fontFamily: '"Hanken Grotesk", sans-serif',
+                fontSize: '15px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                pointerEvents: 'auto',
+                letterSpacing: '0.01em',
+              }}
+            >
+              {continueLabel || 'Continue'}
+            </motion.button>
+          )}
+        </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   )
 }

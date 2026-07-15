@@ -1,5 +1,5 @@
 # FLOWSTACY — Claude Code Context
-Last updated: July 2026 | Last session: 2026-07-14 — Inserted 3 new 21-day curricula into Supabase; updated SUBTRACK_IDS/NAMES in curriculum.js
+Last updated: July 2026 | Last session: 2026-07-14 (session 2) — Onboarding flow visual redesign
 
 ---
 
@@ -70,10 +70,18 @@ A 21-day habit formation PWA. Users answer discovery questions, pick a track and
 ---
 
 ## WHAT TO BUILD THIS SESSION
-TBD next session.
+Onboarding flow visual redesign — UI layer only.
+- Onboarding.jsx (life stage question)
+- Bridge.jsx (guided vs direct choice)
+- Discovery.jsx (5 discovery questions + scoring)
+- New questions and scoring logic to be provided by user this session
+Do NOT touch: routing, Supabase calls, state management, localStorage keys, QuestionScreen component logic.
 
 ## DEFINITION OF DONE
-TBD next session.
+- All onboarding screens use V2 design constants (ABYSS, FATHOM, SURGE, GLACIAL, PLASMA, ARC_LIGHT)
+- New questions and scoring logic are wired into Discovery.jsx
+- Visual redesign feels emotionally designed and premium
+- No regressions in routing or data flow
 
 ## SUBTRACK REGISTRY (as of 2026-07-14)
 | Key | UUID | Path |
