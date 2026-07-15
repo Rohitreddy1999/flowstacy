@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { supabase } from '../lib/supabase'
 
 const ABYSS = '#07090D'
 const FATHOM = '#0F141A'
@@ -18,9 +19,26 @@ export default function Onboarding() {
   const navigate = useNavigate()
   const [selected, setSelected] = useState(null)
 
-  const handleContinue = () => {
+  async function saveLifeStage(value) {
+    localStorage.setItem('flowstacy_life_stage', value)
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session) {
+      supabase
+        .from('profiles')
+        .update({ life_stage: value, updated_at: new Date().toISOString() })
+        .eq('id', session.user.id)
+        .then(() => {})
+    }
+  }
+
+  const handleContinue = async () => {
     if (!selected) return
-    localStorage.setItem('flowstacy_life_stage', selected)
+    await saveLifeStage(selected)
+    navigate('/bridge')
+  }
+
+  const handleSkip = async () => {
+    await saveLifeStage('skipped')
     navigate('/bridge')
   }
 
@@ -294,10 +312,7 @@ export default function Onboarding() {
         </AnimatePresence>
 
         <button
-          onClick={() => {
-            localStorage.setItem('flowstacy_life_stage', 'skipped')
-            navigate('/bridge')
-          }}
+          onClick={handleSkip}
           style={{
             width: '100%',
             background: 'none',

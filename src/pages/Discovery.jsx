@@ -125,10 +125,8 @@ export default function Discovery() {
       }
     } else if (q.openText) {
       const openAnswer = selected
-      localStorage.setItem('flowstacy_scores', JSON.stringify(trackScores))
-      localStorage.setItem('flowstacy_open_answer', openAnswer)
       saveDiscoveryToSupabase(updatedAnswers, trackScores, openAnswer)
-      navigate('/recommendation')
+      navigate('/recommendation', { state: { scores: trackScores } })
     }
   }
 

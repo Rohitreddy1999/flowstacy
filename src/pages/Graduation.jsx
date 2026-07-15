@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { SUBTRACK_IDS, SUBTRACK_NAMES } from '../lib/curriculum'
+import { useJourneyStore } from '../lib/journeyStore'
 
 const ABYSS    = '#07090D'
 const SURGE    = '#3DF5A6'
@@ -86,15 +87,19 @@ export default function AwakeningScreen() {
   const [hoveredRow, setHoveredRow] = useState(null)
 
   // ── Data reads ───────────────────────────────────────────────────────────────
-  const _rawDays      = JSON.parse(localStorage.getItem('flowstacy_completed_days') || '[]')
-  const completedDays = _rawDays.map(d =>
-    typeof d === 'number' ? { day: d, completedAt: 0, dayOfWeek: 0 } : d
-  )
-  const _rawRefl    = JSON.parse(localStorage.getItem('flowstacy_reflections') || '{}')
-  const reflections = Array.isArray(_rawRefl)
-    ? _rawRefl.reduce((acc, r) => ({ ...acc, [r.day]: r }), {})
-    : (_rawRefl || {})
-  const subtrackKey = localStorage.getItem('flowstacy_selected_subtrack')
+  const { journey, completedDays: rawCompletedDays } = useJourneyStore()
+  // Graduation expects {day, completedAt, dayOfWeek} shape; store holds plain integers.
+  // completedAt and dayOfWeek are unavailable without a schema addition — default to 0.
+  const completedDays = rawCompletedDays.map(d => ({ day: d, completedAt: 0, dayOfWeek: 0 }))
+
+  // PLACEHOLDER: fallback copy — replace in Phase 4
+  // Progress screen rework with real dynamic strings
+  const [reflections, setReflections] = useState({})
+
+  const subtractId  = journey?.subtrack_id ?? null
+  const subtrackKey = subtractId
+    ? (Object.keys(SUBTRACK_IDS).find(k => SUBTRACK_IDS[k] === subtractId) ?? null)
+    : null
 
   const hasAnyReflections    = Object.keys(reflections).filter(k => k !== 'journey').length > 0
   const hasJourneyReflection = reflections['journey'] !== undefined
@@ -128,6 +133,17 @@ export default function AwakeningScreen() {
       .order('day_number', { ascending: true })
       .then(({ data }) => { if (data) setAllDays(data) })
   }, []) // eslint-disable-line
+
+  // ── Fetch journey-level reflection from user_journeys.reflections ─────────────
+  useEffect(() => {
+    if (!journey?.id) return
+    supabase
+      .from('user_journeys')
+      .select('reflections')
+      .eq('id', journey.id)
+      .single()
+      .then(({ data }) => { if (data?.reflections) setReflections(data.reflections) })
+  }, [journey?.id])
 
   // ── Background particle canvas ───────────────────────────────────────────────
   useEffect(() => {
@@ -291,12 +307,16 @@ export default function AwakeningScreen() {
       if (progress < 1) {
         holdRafRef.current = requestAnimationFrame(tick)
       } else {
-        const raw    = JSON.parse(localStorage.getItem('flowstacy_reflections') || '{}')
-        const normed = Array.isArray(raw) ? raw.reduce((a, r) => ({ ...a, [r.day]: r }), {}) : (raw || {})
-        localStorage.setItem('flowstacy_reflections', JSON.stringify({
-          ...normed,
-          journey: { feeling: selectedFeeling, note: journeyNoteRef.current, savedAt: Date.now() },
-        }))
+        const journeyReflection = { feeling: selectedFeeling, note: journeyNoteRef.current, savedAt: Date.now() }
+        const updated = { ...reflections, journey: journeyReflection }
+        if (journey?.id) {
+          supabase
+            .from('user_journeys')
+            .update({ reflections: updated })
+            .eq('id', journey.id)
+            .then(() => {})
+        }
+        setReflections(updated)
         setStage(3)
       }
     }

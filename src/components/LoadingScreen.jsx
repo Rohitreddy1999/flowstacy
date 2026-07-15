@@ -2,10 +2,57 @@
 import { useNavigate } from 'react-router-dom'
 import { motion, useAnimationControls } from 'framer-motion'
 import { supabase } from '../lib/supabase'
+import { useJourneyStore } from '../lib/journeyStore'
+
+const SURGE = '#3DF5A6'
+const ABYSS = '#07090D'
+const HK    = '"Hanken Grotesk", sans-serif'
+
+function WelcomeBackOverlay() {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+      style={{
+        position: 'absolute', inset: 0, zIndex: 20,
+        background: ABYSS,
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', gap: 12,
+      }}
+    >
+      <div style={{ fontFamily: HK, fontWeight: 700, fontSize: 22, color: 'rgba(255,255,255,0.95)', letterSpacing: '-0.01em' }}>
+        Welcome back 👋
+      </div>
+      <div style={{ fontFamily: HK, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
+        Continuing your journey...
+      </div>
+      <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+        {[0, 1, 2].map(i => (
+          <motion.div
+            key={i}
+            animate={{ opacity: [0.3, 1, 0.3] }}
+            transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.15, ease: 'easeInOut' }}
+            style={{ width: 6, height: 6, borderRadius: '50%', background: SURGE }}
+          />
+        ))}
+      </div>
+    </motion.div>
+  )
+}
 
 export default function LoadingScreen() {
   const navigate = useNavigate()
-  const [taglineVisible, setTaglineVisible] = useState(false)
+  const [taglineVisible,   setTaglineVisible]   = useState(false)
+  const [showWelcomeBack,  setShowWelcomeBack]  = useState(false)
+  const { isLoading } = useJourneyStore()
+
+  // Navigate to /home once the store confirms journey data is loaded
+  useEffect(() => {
+    if (showWelcomeBack && !isLoading) {
+      navigate('/home', { replace: true })
+    }
+  }, [showWelcomeBack, isLoading, navigate])
 
   const wordmarkControls = useAnimationControls()
   const boltControls = useAnimationControls()
@@ -21,11 +68,20 @@ export default function LoadingScreen() {
       }
       const { data: journey } = await supabase
         .from('user_journeys')
-        .select('id, subtrack_id, is_active')
+        .select('id, subtrack_id, current_day, is_active')
         .eq('user_id', session.user.id)
         .eq('is_active', true)
         .single()
-      navigate(journey?.subtrack_id ? '/home' : '/bridge', { replace: true })
+      if (!journey?.subtrack_id) {
+        navigate('/bridge', { replace: true })
+        return
+      }
+      if ((journey.current_day ?? 1) > 1) {
+        setShowWelcomeBack(true)
+        // Navigation fires in the isLoading watcher above once the store is ready
+      } else {
+        navigate('/home', { replace: true })
+      }
     }, 3000)
 
     async function runSequence() {
@@ -98,6 +154,7 @@ export default function LoadingScreen() {
         zIndex: 999,
       }}
     >
+      {showWelcomeBack && <WelcomeBackOverlay />}
       {/* Base Surge glow — ambient, blooms on mount */}
       <motion.div
         initial={{ opacity: 0, scale: 0.75 }}

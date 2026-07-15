@@ -93,11 +93,9 @@ export default function Progress() {
   const { journey, currentDay, streak, completedDays } = useJourneyStore()
   const subtractId = journey?.subtrack_id ?? null
 
-  // Normalize reflections — Home stores as array, we key by day number
-  const _reflRaw   = JSON.parse(localStorage.getItem('flowstacy_reflections') || '[]')
-  const reflections = Array.isArray(_reflRaw)
-    ? _reflRaw.reduce((acc, r) => ({ ...acc, [r.day]: r }), {})
-    : (_reflRaw || {})
+  // PLACEHOLDER: fallback copy — replace in Phase 4
+  // Progress screen rework with real dynamic strings
+  const [reflections, setReflections] = useState({})
 
   // ── State ────────────────────────────────────────────────────────────────────
   const [curriculumDays, setCurriculumDays] = useState([])
@@ -133,6 +131,21 @@ export default function Progress() {
         setLoading(false)
       })
   }, [subtractId])
+
+  // ── Fetch per-day reflections from daily_completions ─────────────────────────
+  useEffect(() => {
+    if (!journey?.id) return
+    supabase
+      .from('daily_completions')
+      .select('day_number, feeling, reflection_note')
+      .eq('journey_id', journey.id)
+      .then(({ data }) => {
+        if (!data) return
+        const map = {}
+        data.forEach(r => { map[r.day_number] = { feeling: r.feeling, note: r.reflection_note } })
+        setReflections(map)
+      })
+  }, [journey?.id])
 
   // ── Momentum count-up ─────────────────────────────────────────────────────────
   useEffect(() => {

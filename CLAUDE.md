@@ -1,5 +1,5 @@
 # FLOWSTACY — Claude Code Context
-Last updated: July 2026 | Last session: 2026-07-15 (session 3) — Onboarding flow visual redesign (complete)
+Last updated: July 2026 | Last session: 2026-07-15 (session 4) — localStorage migration complete
 
 ---
 
@@ -47,18 +47,34 @@ A 21-day habit formation PWA. Users answer discovery questions, pick a track and
 - Art & Sketching Fundamentals 21-day curriculum in Supabase (Express path)
 - Gratitude & Reflection Practice 21-day curriculum in Supabase (Mindful path)
 - curriculum_days table now has 105 rows total (5 subtracks × 21 days)
-- Supabase as source of truth for journey state (migration complete — localStorage keys removed)
 - src/lib/journeyService.js — getActiveJourney, createJourney, completeDay, calculateStreak
 - src/lib/journeyStore.js — Zustand store: journey, currentDay, streak, completedDays, hydrate, markDayComplete, reset
 - TrackSelectScreen.jsx — new shared component used by both Recommendation.jsx and TrackSelect.jsx; uses local TRACKS config (no Supabase fetch needed for track list)
-- App.jsx hydrates store on login + clears stale localStorage keys on boot (flowstacy_current_day, completed_days, streak, reflections, selected_track, selected_subtrack, scores, open_answer)
+- App.jsx hydrates store on login + clears stale localStorage keys on boot
 - Home.jsx reads from journeyStore, calls completeDay() on hold-to-complete
-- Progress.jsx (The Ascent) reads journey/currentDay/streak/completedDays from journeyStore — phase %, arc dots, DNA ring, and chart all driven by Supabase data
+- Progress.jsx (The Ascent) reads journey/currentDay/streak/completedDays from journeyStore; reflections from daily_completions — all driven by Supabase data
+- LoadingScreen.jsx is the boot router — queries user_journeys directly, shows WelcomeBackOverlay for returning users (current_day > 1), navigates when journeyStore.isLoading clears
+- RootRedirect.jsx deleted (was dead code — LoadingScreen already handled all routing)
+
+## localStorage — SOURCE OF TRUTH AFTER SESSION 4
+- **journeyStore** is source of truth for all active journey state (journey, currentDay, streak, completedDays)
+- **Supabase** is source of truth for all persisted user data
+- **localStorage is now only used for:**
+  - `pwa-install-dismissed` — PWA install banner (keep forever)
+  - `flowstacy_life_stage` — unauthenticated routing cache (written to Supabase profiles.life_stage on auth; localStorage is fallback for pre-auth path only)
+- **STALE_KEYS in App.jsx** still wipes old keys on boot — safe to prune after confirming no regressions: flowstacy_current_day, flowstacy_completed_days, flowstacy_streak, flowstacy_reflections, flowstacy_selected_track, flowstacy_selected_subtrack, flowstacy_scores, flowstacy_open_answer
+
+## SUPABASE SCHEMA ADDITIONS (session 4)
+- `user_journeys.reflections` — JSONB NOT NULL DEFAULT '{}' — stores journey-level graduation reflection: `{ journey: { feeling, note, savedAt } }`
+- `profiles.life_stage` — already existed (text nullable); Onboarding.jsx now writes to it on auth
+- `daily_completions.feeling` + `daily_completions.reflection_note` — already existed; Progress.jsx now reads from these for reflection replay cards
 
 ---
 
 ## WHAT IS INCOMPLETE OR NEEDS WORK
-- Graduation screen — needs progress visualization and emotional moment
+- Graduation screen — three-truths section uses fallback copy (marked PLACEHOLDER in code); per-day reflections (daily_completions) not yet wired into graduation stats — Phase 4
+- Graduation stage 1 animation uses stale closure for nextStage (eslint-disable-line on dep array) — returning user who already submitted a graduation reflection will see stage 2 again instead of jumping to stage 3; fix requires refactoring animation sequence — Phase 4
+- STALE_KEYS in App.jsx — 8 keys still listed but 6 are now safe to prune after confirming no regressions (see localStorage section above)
 - Micro-interactions — Framer Motion underused in the daily Home flow
 - Missed-day handling — no strategy built yet
 - Design system inconsistency — V1 CSS vars remain in Welcome, Login, Signup, Community (migrate to V2)
@@ -96,15 +112,16 @@ A 21-day habit formation PWA. Users answer discovery questions, pick a track and
 
 ## KEY FILES
 - src/App.jsx — all routes
+- src/components/LoadingScreen.jsx — boot router: queries Supabase, shows WelcomeBackOverlay for returning users, navigates on journeyStore.isLoading
 - src/pages/Home.jsx — daily experience, hold-to-complete, task_description parser at line 116
-- src/pages/Graduation.jsx — graduation screen
-- src/pages/Progress.jsx — The Ascent progress screen
-- src/pages/Onboarding.jsx — life stage question (Q1, pre-step, no dots)
+- src/pages/Graduation.jsx — graduation screen; reads completedDays from journeyStore, journey-level reflection from user_journeys.reflections
+- src/pages/Progress.jsx — The Ascent progress screen; reads reflections from daily_completions via useEffect
+- src/pages/Onboarding.jsx — life stage question; writes to localStorage + Supabase profiles.life_stage (if session exists)
 - src/pages/Bridge.jsx — guided vs direct routing (→ /discovery or /track-select)
-- src/pages/Discovery.jsx — Q2–Q6 weighted scoring; trackScores { Move, Calm, Mindful, Express, Rhythm }
+- src/pages/Discovery.jsx — Q2–Q6 weighted scoring; passes trackScores to /recommendation via React Router navigation state
 - src/components/QuestionScreen.jsx — shared question UI: slide+blur, spring cards, shake on max-select, AnimatePresence CTA
 - src/components/TrackSelectScreen.jsx — shared track picker used by Recommendation + TrackSelect; props: recommendedTrack, backTo
-- src/pages/Recommendation.jsx — thin wrapper: reads flowstacy_scores, passes top scorer to TrackSelectScreen
+- src/pages/Recommendation.jsx — thin wrapper: reads scores from useLocation().state.scores, passes top scorer to TrackSelectScreen
 - src/pages/TrackSelect.jsx — thin wrapper: TrackSelectScreen backTo="/bridge"
 - src/pages/SubTrackSelect.jsx — subtrack picker; all Supabase upsert logic lives here
 - src/lib/curriculum.js — getDayContent(), subtrack resolution, SUBTRACK_IDS
