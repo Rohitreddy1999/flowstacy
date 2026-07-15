@@ -1,5 +1,5 @@
 # FLOWSTACY — Claude Code Context
-Last updated: July 2026 | Last session: 2026-07-15 (session 4) — localStorage migration complete
+Last updated: July 2026 | Last session: 2026-07-15 (session 5) — profiles table architecture fixed
 
 ---
 
@@ -68,6 +68,13 @@ A 21-day habit formation PWA. Users answer discovery questions, pick a track and
 - `user_journeys.reflections` — JSONB NOT NULL DEFAULT '{}' — stores journey-level graduation reflection: `{ journey: { feeling, note, savedAt } }`
 - `profiles.life_stage` — already existed (text nullable); Onboarding.jsx now writes to it on auth
 - `daily_completions.feeling` + `daily_completions.reflection_note` — already existed; Progress.jsx now reads from these for reflection replay cards
+
+## DATABASE ARCHITECTURE (session 5)
+- `profiles.id` is UUID PRIMARY KEY that directly references `auth.users(id) ON DELETE CASCADE`
+- Profile rows are auto-created on signup via `on_auth_user_created` trigger (calls `handle_new_user()` SECURITY DEFINER function)
+- No manual profile creation needed anywhere in the codebase
+- The correct join pattern is: `user_journeys.user_id = profiles.id = auth.uid()`
+- RLS is enabled on profiles; policy "Users can manage own profile" uses `USING (auth.uid() = id)`
 
 ---
 
