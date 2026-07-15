@@ -1,5 +1,5 @@
 # FLOWSTACY — Claude Code Context
-Last updated: July 2026 | Last session: 2026-07-14 (session 2) — Onboarding flow visual redesign
+Last updated: July 2026 | Last session: 2026-07-15 (session 3) — Onboarding flow visual redesign (complete)
 
 ---
 
@@ -27,14 +27,14 @@ A 21-day habit formation PWA. Users answer discovery questions, pick a track and
 - State: Zustand 5
 - PWA: vite-plugin-pwa
 - Deploy: Vercel → master branch auto-deploy
-- Fonts: Space Grotesk (headings) + Hanken Grotesk (body)
+- Fonts: Hanken Grotesk throughout (Space Grotesk retired from new work)
 
 ---
 
 ## WHAT IS BUILT AND WORKING
 - Auth flow: login, signup, protected routes via ProtectedRoute.jsx
-- Onboarding + Discovery + Recommendation flow
-- Track select + Subtrack select
+- Onboarding + Discovery + Recommendation flow — V2 redesign complete (slide+blur transitions, spring cards, AnimatePresence CTAs, weighted scoring Q2–Q6)
+- Track select + Subtrack select — V2 redesign complete; shared via TrackSelectScreen.jsx
 - Home page with hold-to-complete interaction and daily curriculum content
 - Progress page (The Ascent)
 - Graduation page (structure exists, needs emotional polish)
@@ -50,7 +50,7 @@ A 21-day habit formation PWA. Users answer discovery questions, pick a track and
 - Supabase as source of truth for journey state (migration complete — localStorage keys removed)
 - src/lib/journeyService.js — getActiveJourney, createJourney, completeDay, calculateStreak
 - src/lib/journeyStore.js — Zustand store: journey, currentDay, streak, completedDays, hydrate, markDayComplete, reset
-- TrackSelect and SubTrackSelect fetch data from Supabase (tracks/subtracks tables)
+- TrackSelectScreen.jsx — new shared component used by both Recommendation.jsx and TrackSelect.jsx; uses local TRACKS config (no Supabase fetch needed for track list)
 - App.jsx hydrates store on login + clears stale localStorage keys on boot (flowstacy_current_day, completed_days, streak, reflections, selected_track, selected_subtrack, scores, open_answer)
 - Home.jsx reads from journeyStore, calls completeDay() on hold-to-complete
 - Progress.jsx (The Ascent) reads journey/currentDay/streak/completedDays from journeyStore — phase %, arc dots, DNA ring, and chart all driven by Supabase data
@@ -58,30 +58,15 @@ A 21-day habit formation PWA. Users answer discovery questions, pick a track and
 ---
 
 ## WHAT IS INCOMPLETE OR NEEDS WORK
-- Onboarding uncomfortable questions — not yet emotionally designed
 - Graduation screen — needs progress visualization and emotional moment
-- Micro-interactions — Framer Motion underused across the daily flow
+- Micro-interactions — Framer Motion underused in the daily Home flow
 - Missed-day handling — no strategy built yet
-- Design system inconsistency — V1 CSS vars and V2 inline constants coexist (migrate to V2)
+- Design system inconsistency — V1 CSS vars remain in Welcome, Login, Signup, Community (migrate to V2)
 - No subscription or paywall mechanism
 - No cross-track user profile architecture
 - React Query installed but not yet used widely
 
 ---
-
-## WHAT TO BUILD THIS SESSION
-Onboarding flow visual redesign — UI layer only.
-- Onboarding.jsx (life stage question)
-- Bridge.jsx (guided vs direct choice)
-- Discovery.jsx (5 discovery questions + scoring)
-- New questions and scoring logic to be provided by user this session
-Do NOT touch: routing, Supabase calls, state management, localStorage keys, QuestionScreen component logic.
-
-## DEFINITION OF DONE
-- All onboarding screens use V2 design constants (ABYSS, FATHOM, SURGE, GLACIAL, PLASMA, ARC_LIGHT)
-- New questions and scoring logic are wired into Discovery.jsx
-- Visual redesign feels emotionally designed and premium
-- No regressions in routing or data flow
 
 ## SUBTRACK REGISTRY (as of 2026-07-14)
 | Key | UUID | Path |
@@ -96,10 +81,10 @@ Do NOT touch: routing, Supabase calls, state management, localStorage keys, Ques
 
 ## DESIGN SYSTEM
 
-**V1 — CSS variables** (src/styles/flowstacy.css) — Welcome, Login, Signup, Onboarding, Bridge, Community, Experts, TrackDetail
+**V1 — CSS variables** (src/styles/flowstacy.css) — Welcome, Login, Signup, Community, Experts, TrackDetail (remaining V1 pages)
 - Background: #0A0812 | Card: rgba(255,255,255,0.05) | Purple: #534AB7 / #9D92F8 | Teal: #1D9E75
 
-**V2 — inline constants** — Home, Progress, Graduation, BottomNav
+**V2 — inline constants** — Home, Progress, Graduation, BottomNav, Onboarding, Bridge, Discovery, Recommendation, TrackSelect, SubTrackSelect, QuestionScreen, TrackSelectScreen
 - ABYSS #07090D | FATHOM #0F141A | SURGE #3DF5A6 | GLACIAL #82D4FF | PLASMA #FF4FD8 | ARC_LIGHT #EAFFF5
 
 **Phase colors:**
@@ -114,10 +99,26 @@ Do NOT touch: routing, Supabase calls, state management, localStorage keys, Ques
 - src/pages/Home.jsx — daily experience, hold-to-complete, task_description parser at line 116
 - src/pages/Graduation.jsx — graduation screen
 - src/pages/Progress.jsx — The Ascent progress screen
-- src/pages/Onboarding.jsx — discovery questions
+- src/pages/Onboarding.jsx — life stage question (Q1, pre-step, no dots)
+- src/pages/Bridge.jsx — guided vs direct routing (→ /discovery or /track-select)
+- src/pages/Discovery.jsx — Q2–Q6 weighted scoring; trackScores { Move, Calm, Mindful, Express, Rhythm }
+- src/components/QuestionScreen.jsx — shared question UI: slide+blur, spring cards, shake on max-select, AnimatePresence CTA
+- src/components/TrackSelectScreen.jsx — shared track picker used by Recommendation + TrackSelect; props: recommendedTrack, backTo
+- src/pages/Recommendation.jsx — thin wrapper: reads flowstacy_scores, passes top scorer to TrackSelectScreen
+- src/pages/TrackSelect.jsx — thin wrapper: TrackSelectScreen backTo="/bridge"
+- src/pages/SubTrackSelect.jsx — subtrack picker; all Supabase upsert logic lives here
 - src/lib/curriculum.js — getDayContent(), subtrack resolution, SUBTRACK_IDS
-- src/lib/tracks.jsx — TRACKS array, canonical track/subtrack structure
+- src/lib/tracks.jsx — TRACKS array, canonical track/subtrack structure (do not touch)
 - src/styles/flowstacy.css — V1 CSS variables
+
+## ANIMATION PATTERNS (V2)
+- Screen transition: `x: '100%'→0→'-100%'`, `filter: 'blur(6px)'→0→'blur(6px)'`, spring stiffness 280 damping 28
+- Card entry stagger: scale 0.96→1, y 16→0, 80ms delay per card, spring stiffness 320 damping 26
+- Checkmark: spring stiffness 520 damping 20
+- Progress pill dots: spring stiffness 300 damping 30
+- CTA slide-up: AnimatePresence, y 20→0, spring stiffness 420 damping 30
+- Shake on max-select: `x: [0,-9,9,-7,7,-4,4,0]`, 500ms, then reset
+- Ghost background number: 200px Hanken Grotesk, opacity 0.15, 5s drift up (y 0→-30)
 
 ---
 
